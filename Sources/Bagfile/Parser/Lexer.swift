@@ -28,7 +28,7 @@ struct Token {
 class Lexer {
     private let reader: any Reader
     private var tokenQueue = [Token]()
-    private var isEOF = false
+    private(set) var isEOF = false
     
     init(reader: any Reader) {
         self.reader = reader
