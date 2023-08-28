@@ -1,0 +1,8 @@
+binding.gyp
+bindings/node
+bindings/rust
+Cargo.toml
+./node_modules
+package-lock.json
+src/grammar.json
+src/node-types.json

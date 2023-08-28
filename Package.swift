@@ -10,10 +10,12 @@ let package = Package(
         .library(
             name: "Bagfile",
             targets: ["Bagfile"]),
+        .executable(name: "Example", targets: ["Example"]),
+        .library(name: "TreeSitterBagfile", targets: ["TreeSitterBagfile"]),
+
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+        .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", from: "0.7.2"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -21,8 +23,34 @@ let package = Package(
         .target(
             name: "Bagfile",
             dependencies: []),
+        .executableTarget(
+            name: "Example",
+            dependencies: ["SwiftTreeSitter",
+                           "TreeSitterBagfile",]),
         .testTarget(
             name: "BagfileTests",
             dependencies: ["Bagfile"]),
+        .target(name: "TreeSitterBagfile",
+                path: "tree-sitter-bagfile",
+                exclude: [
+                    "binding.gyp",
+                    "bindings",
+                    "Cargo.toml",
+                    "corpus",
+                    "grammar.js",
+                    "package.json",
+                    "package-lock.json",
+                    "node_modules",
+                    "src/grammar.json",
+                    "src/node-types.json",
+                ],
+                sources: [
+                    "src/parser.c",
+                ],
+                resources: [
+                    .copy("queries")
+                ],
+                publicHeadersPath: "bindings/swift",
+                cSettings: [.headerSearchPath("src")])
     ]
 )
