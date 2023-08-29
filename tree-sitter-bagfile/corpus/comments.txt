@@ -1,0 +1,44 @@
+=====>>
+Full line comments
+=====>>
+
+---
+---
+
+% this is a comment
+"xr" |
+% this is also a comment
+
+----->>
+
+(file (tune
+  (header)
+  (comment)
+  (body
+    (measure
+      (string) (barline))))
+  (comment))
+
+
+
+=====>>
+Trailing comments
+=====>>
+
+---
+---
+
+"xr" | % "xb"
+"xr" |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (measure
+      (string) (barline))
+    (comment)
+    (measure
+      (string) (barline)))))
+

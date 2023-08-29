@@ -1,0 +1,34 @@
+=====>>
+Basic header
+=====>>
+
+---
+title: tune name
+---
+
+----->>
+
+(file (tune
+  (header
+    (field
+      (label)
+      (value)))))
+
+
+=====>>
+Multiple fields
+=====>>
+
+---
+title: tune name
+style: 2/4 March
+tags: foo, bar, baz
+---
+
+----->>
+
+(file (tune
+  (header
+    (field (label) (value))
+    (field (label) (value))
+    (field (label) (value)))))

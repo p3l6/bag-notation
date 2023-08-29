@@ -1,0 +1,18 @@
+=====>>
+Strings parse as strings
+=====>>
+
+---
+---
+
+"first string" | "second string" |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (measure
+      (string) (barline))
+    (measure
+      (string) (barline)))))
