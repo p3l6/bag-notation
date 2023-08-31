@@ -11,10 +11,11 @@ module.exports = grammar({
 
     //// Header and fields
     header: $ => seq("---\n", repeat(seq($.field, "\n")), "---\n"),
-    field: $ => seq($.label, $.value),
     inline_field: $ => seq("(", $.field, ")"),
-    label: $ => seq(/[ a-zA-Z]+/, ":"),
-    value: $ => /[ a-zA-Z0-9\/,]+/,
+    field: $ => choice(
+                       field("value", $.field_element),
+                       seq(field("label", $.field_element), ":", field("value", $.field_element))),
+    field_element: $ =>  /[ a-zA-Z0-9\/,]+/, // Consider renaming this
 
     //// Measures
     measure: $ => seq(repeat($._measure_element), $.barline),

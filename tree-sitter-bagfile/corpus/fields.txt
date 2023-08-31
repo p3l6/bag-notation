@@ -1,0 +1,68 @@
+=====>>
+Inline field
+=====>>
+
+---
+---
+
+"xr" (meter: 6/8) "xc" |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (measure
+      (string)
+      (inline_field
+        (field label: (field_element) value: (field_element)))
+      (string)
+      (barline)))))
+
+
+=====>>
+Field without label
+=====>>
+
+---
+---
+
+"xr" (triplet) "xc" |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (measure
+      (string)
+      (inline_field
+        (field value: (field_element)))
+      (string)
+      (barline)))))
+
+
+
+
+=====>>
+Field labels and values with spaces
+=====>>
+
+---
+some label: long value
+---
+
+"xr" (labelless value) "xc" (space label: value words) |
+
+----->>
+
+(file (tune
+  (header
+    (field label: (field_element) value: (field_element)))
+  (body
+    (measure
+      (string)
+      (inline_field (field value: (field_element)))
+      (string)
+      (inline_field (field label: (field_element) value: (field_element)))
+      (barline)))))
