@@ -11,7 +11,7 @@ q r b c d e f g a |
 
 (file (tune
   (header)
-  (body
+  (body (line
     (measure
       (note_cluster (note (pitch)))
       (note_cluster (note (pitch)))
@@ -22,7 +22,7 @@ q r b c d e f g a |
       (note_cluster (note (pitch)))
       (note_cluster (note (pitch)))
       (note_cluster (note (pitch)))
-      (barline)))))
+      (barline))))))
 
 
 =====>>
@@ -38,7 +38,7 @@ qrbc defga |
 
 (file (tune
   (header)
-  (body
+  (body (line
     (measure
       (note_cluster
         (note (pitch))
@@ -51,7 +51,7 @@ qrbc defga |
         (note (pitch))
         (note (pitch))
         (note (pitch)))
-      (barline)))))
+      (barline))))))
 
 
 =====>>
@@ -67,7 +67,7 @@ xrxc vvbd |
 
 (file (tune
   (header)
-  (body
+  (body (line
     (measure
       (note_cluster
         (note (embellishment) (pitch))
@@ -75,7 +75,7 @@ xrxc vvbd |
       (note_cluster
         (note (embellishment) (pitch))
         (note (pitch)))
-      (barline)))))
+      (barline))))))
 
 
 =====>>
@@ -85,13 +85,13 @@ Durations
 ---
 ---
 
-g2 f,e r.b c3/2 d |
+g2 f,e r.b c3/2 d- |
 
 ----->>
 
 (file (tune
   (header)
-  (body
+  (body (line
     (measure
       (note_cluster
         (note (pitch) (duration)))
@@ -103,4 +103,6 @@ g2 f,e r.b c3/2 d |
         (note (pitch)))
       (note_cluster
         (note (pitch) (duration)))
-      (barline)))))
+      (note_cluster
+        (note (pitch) (duration)))
+      (barline))))))

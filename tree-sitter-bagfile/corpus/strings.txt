@@ -11,8 +11,8 @@ Strings parse as strings
 
 (file (tune
   (header)
-  (body
+  (body (line
     (measure
       (string) (barline))
     (measure
-      (string) (barline)))))
+      (string) (barline))))))

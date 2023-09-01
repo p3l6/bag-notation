@@ -11,13 +11,13 @@ Inline field
 
 (file (tune
   (header)
-  (body
+  (body (line
     (measure
       (string)
       (inline_field
         (field label: (field_element) value: (field_element)))
       (string)
-      (barline)))))
+      (barline))))))
 
 
 =====>>
@@ -33,13 +33,13 @@ Field without label
 
 (file (tune
   (header)
-  (body
+  (body (line
     (measure
       (string)
       (inline_field
         (field value: (field_element)))
       (string)
-      (barline)))))
+      (barline))))))
 
 
 
@@ -59,10 +59,10 @@ some label: long value
 (file (tune
   (header
     (field label: (field_element) value: (field_element)))
-  (body
+  (body (line
     (measure
       (string)
       (inline_field (field value: (field_element)))
       (string)
       (inline_field (field label: (field_element) value: (field_element)))
-      (barline)))))
+      (barline))))))

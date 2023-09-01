@@ -1,0 +1,30 @@
+=====>>
+Barlines
+=====>>
+
+---
+---
+
+[| a | b || c |: d :| e |]
+["2 of 2" f ]
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (line
+      (barline)
+      (measure (note_cluster (note (pitch))) (barline))
+      (measure (note_cluster (note (pitch))) (barline))
+      (measure (note_cluster (note (pitch))) (barline))
+      (measure (note_cluster (note (pitch))) (barline))
+      (measure (note_cluster (note (pitch))) (barline)))
+    (line
+      (barline)
+      (measure
+        (string)
+        (note_cluster (note (pitch))) (barline))))))
+
+
+

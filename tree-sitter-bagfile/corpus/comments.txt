@@ -13,11 +13,12 @@ Full line comments
 
 (file (tune
   (header)
-  (comment)
   (body
-    (measure
-      (string) (barline))))
-  (comment))
+    (comment)
+    (line
+      (measure
+        (string) (barline)))
+    (comment))))
 
 
 
@@ -36,9 +37,11 @@ Trailing comments
 (file (tune
   (header)
   (body
-    (measure
-      (string) (barline))
-    (comment)
-    (measure
-      (string) (barline)))))
+    (line
+      (measure
+        (string) (barline))
+      (tail_comment))
+    (line
+      (measure
+        (string) (barline))))))
 
