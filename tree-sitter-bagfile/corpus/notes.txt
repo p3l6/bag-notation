@@ -106,3 +106,27 @@ g2 f,e r.b c3/2 d- |
       (note_cluster
         (note (pitch) (duration)))
       (barline))))))
+
+
+=====>>
+Embellishment literals
+=====>>
+
+---
+---
+
+xr{bdb}c {qrqgf}bd |
+
+----->>
+
+(file (tune
+  (header)
+  (body (line
+    (measure
+      (note_cluster
+        (note (embellishment) (pitch))
+        (note (literal_embellishment (pitch) (pitch) (pitch)) (pitch)))
+      (note_cluster
+        (note (literal_embellishment (pitch) (pitch) (pitch) (pitch) (pitch)) (pitch))
+        (note (pitch)))
+      (barline))))))

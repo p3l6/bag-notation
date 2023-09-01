@@ -23,17 +23,19 @@ module.exports = grammar({
                     field("label", $.field_content),
                     ":",
                     field("value", $.field_content))),
-    field_content: $ =>  /[ a-zA-Z0-9\/,]+/,
+    field_content: $ => /[ a-zA-Z0-9\/,]+/,
 
     //// Measures
-    measure: $ => seq(repeat($._measure_element), prec(-1, $.barline)),
-    barline: $ => /[\[\]|:]+/,
-    _measure_element: $ => choice($.string, prec(-1, $.inline_field), $.note_cluster),
+    measure: $ => seq(repeat($._measure_content), prec(-1, $.barline)),
+    barline: $ => /[\[\]|:]+/, // TODO: optional trailing number or range(-,) or string. no space.
+    _measure_content: $ => choice($.string, prec(-1, $.inline_field), $.note_cluster),
 
-    //// Note groups
-    note_cluster: $ => seq(repeat1($.note), /\s+/),
-    note: $ => seq(optional($.embellishment), $.pitch, optional($.duration)),
-    embellishment: $ => /[phluxtvwzkn]+/,
+    //// Notes and clusters
+    note_cluster: $ => seq(repeat1($.note), /[ \t]/),
+    note: $ => seq(optional($._embellishment), $.pitch, optional($.duration)),
+    _embellishment: $ => choice($.embellishment, $.literal_embellishment),
+    embellishment: $ => /[phluxtvwzkn]+/, // TODO: custom embellishment in {}
+    literal_embellishment: $ => seq("{", repeat1($.pitch), "}"),
     pitch: $ => /[qrbcdefga]/,
     duration: $ => /[0-9,.\/-]+/,
 
