@@ -66,3 +66,33 @@ some label: long value
       (string)
       (inline_field (field label: (field_content) value: (field_content)))
       (barline))))))
+
+
+=====>>
+Leading inline field
+=====>>
+
+---
+---
+
+(h) xr xc |
+(h) | xr xc |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (line
+      (measure
+        (inline_field (field value: (field_content)))
+        (note_cluster (note (embellishment) (pitch)))
+        (note_cluster (note (embellishment) (pitch)))
+        (barline)))
+    (line
+      (inline_field (field value: (field_content)))
+      (barline)
+      (measure
+        (note_cluster (note (embellishment) (pitch)))
+        (note_cluster (note (embellishment) (pitch)))
+        (barline))))))

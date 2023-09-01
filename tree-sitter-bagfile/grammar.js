@@ -9,8 +9,7 @@ module.exports = grammar({
     tune: $ => seq($.header, optional($.body)),
     body: $ => repeat1(choice($._blank_line, $.line)),
     line: $ => seq(
-                 optional($.inline_field),
-                 optional($.barline),
+                 optional(seq(optional($.inline_field), $.barline)),
                  repeat1($.measure),
                  optional($.tail_comment),
                  "\n"),
@@ -29,7 +28,7 @@ module.exports = grammar({
     //// Measures
     measure: $ => seq(repeat($._measure_element), prec(-1, $.barline)),
     barline: $ => /[\[\]|:]+/,
-    _measure_element: $ => choice($.string, prec(1, $.inline_field), $.note_cluster),
+    _measure_element: $ => choice($.string, prec(-1, $.inline_field), $.note_cluster),
 
     //// Note groups
     note_cluster: $ => seq(repeat1($.note), /\s+/),
