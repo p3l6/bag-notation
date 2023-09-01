@@ -1,0 +1,106 @@
+=====>>
+Scale
+=====>>
+
+---
+---
+
+q r b c d e f g a |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (measure
+      (note_cluster (note (pitch)))
+      (note_cluster (note (pitch)))
+      (note_cluster (note (pitch)))
+      (note_cluster (note (pitch)))
+      (note_cluster (note (pitch)))
+      (note_cluster (note (pitch)))
+      (note_cluster (note (pitch)))
+      (note_cluster (note (pitch)))
+      (note_cluster (note (pitch)))
+      (barline)))))
+
+
+=====>>
+Note clusters
+=====>>
+
+---
+---
+
+qrbc defga |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (measure
+      (note_cluster
+        (note (pitch))
+        (note (pitch))
+        (note (pitch))
+        (note (pitch)))
+      (note_cluster
+        (note (pitch))
+        (note (pitch))
+        (note (pitch))
+        (note (pitch))
+        (note (pitch)))
+      (barline)))))
+
+
+=====>>
+Embellishments
+=====>>
+
+---
+---
+
+xrxc vvbd |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (measure
+      (note_cluster
+        (note (embellishment) (pitch))
+        (note (embellishment) (pitch)))
+      (note_cluster
+        (note (embellishment) (pitch))
+        (note (pitch)))
+      (barline)))))
+
+
+=====>>
+Durations
+=====>>
+
+---
+---
+
+g2 f,e r.b c3/2 d |
+
+----->>
+
+(file (tune
+  (header)
+  (body
+    (measure
+      (note_cluster
+        (note (pitch) (duration)))
+      (note_cluster
+        (note (pitch) (duration))
+        (note (pitch)))
+      (note_cluster
+        (note (pitch) (duration))
+        (note (pitch)))
+      (note_cluster
+        (note (pitch) (duration)))
+      (barline)))))

@@ -24,8 +24,8 @@ module.exports = grammar({
 
     //// Note groups
     note_cluster: $ => seq(repeat1($.note), /\s+/),
-    note: $ => seq(optional($.embellisment), $.pitch, optional($.duration)),
-    embellisment: $ => seq(optional(/[phlxu]/), /[xtvwzkn]{1-2}/),
+    note: $ => seq(optional($.embellishment), $.pitch, optional($.duration)),
+    embellishment: $ => /[phluxtvwzkn]+/,
     pitch: $ => /[qrbcdefga]/,
     duration: $ => /[0-9,.\/]+/,
 
