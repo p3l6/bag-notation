@@ -11,8 +11,8 @@ title: tune name
 (file (tune
   (header
     (field
-      label: (field_element)
-      value: (field_element)))))
+      label: (field_content)
+      value: (field_content)))))
 
 
 =====>>
@@ -29,6 +29,6 @@ tags: foo, bar, baz
 
 (file (tune
   (header
-    (field label: (field_element) value: (field_element))
-    (field label: (field_element) value: (field_element))
-    (field label: (field_element) value: (field_element)))))
+    (field label: (field_content) value: (field_content))
+    (field label: (field_content) value: (field_content))
+    (field label: (field_content) value: (field_content)))))

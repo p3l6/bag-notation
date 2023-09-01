@@ -19,12 +19,12 @@ module.exports = grammar({
     header: $ => seq("---\n", repeat(seq($.field, "\n")), "---\n"),
     inline_field: $ => seq("(", $.field, ")"),
     field: $ => choice(
-                  field("value", $.field_element),
+                  field("value", $.field_content),
                   seq(
-                    field("label", $.field_element),
+                    field("label", $.field_content),
                     ":",
-                    field("value", $.field_element))),
-    field_element: $ =>  /[ a-zA-Z0-9\/,]+/, // TODO: Consider renaming this
+                    field("value", $.field_content))),
+    field_content: $ =>  /[ a-zA-Z0-9\/,]+/,
 
     //// Measures
     measure: $ => seq(repeat($._measure_element), prec(-1, $.barline)),

@@ -15,7 +15,7 @@ Inline field
     (measure
       (string)
       (inline_field
-        (field label: (field_element) value: (field_element)))
+        (field label: (field_content) value: (field_content)))
       (string)
       (barline))))))
 
@@ -37,7 +37,7 @@ Field without label
     (measure
       (string)
       (inline_field
-        (field value: (field_element)))
+        (field value: (field_content)))
       (string)
       (barline))))))
 
@@ -58,11 +58,11 @@ some label: long value
 
 (file (tune
   (header
-    (field label: (field_element) value: (field_element)))
+    (field label: (field_content) value: (field_content)))
   (body (line
     (measure
       (string)
-      (inline_field (field value: (field_element)))
+      (inline_field (field value: (field_content)))
       (string)
-      (inline_field (field label: (field_element) value: (field_element)))
+      (inline_field (field label: (field_content) value: (field_content)))
       (barline))))))
