@@ -1,0 +1,24 @@
+# Options
+
+--closingparen same-line
+--commas inline
+--decimalgrouping 3,5
+--exponentcase lowercase
+--header \n {file}\n Bag Notation\n
+--ifdef outdent
+--indentstrings true
+--semicolons inline
+--typeattributes prev-line
+--wrapenumcases with-values
+
+# Rules
+
+--disable andOperator
+--enable blankLineAfterImports
+--enable blankLinesBetweenImports
+--disable hoistAwait
+--disable hoistTry
+--enable isEmpty
+--enable wrapEnumCases
+--disable wrapMultilineStatementBraces
+

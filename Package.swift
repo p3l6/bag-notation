@@ -11,11 +11,11 @@ let package = Package(
             name: "BagNotation",
             targets: ["BagNotation"]),
         .executable(name: "Example", targets: ["Example"]),
-        .library(name: "TreeSitterBagNotation", targets: ["TreeSitterBagNotation"]),
+        .library(name: "TreeSitterBagNotation", targets: ["TreeSitterBagNotation"])
 
     ],
     dependencies: [
-        .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", from: "0.7.2"),
+        .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", from: "0.7.2")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -26,7 +26,7 @@ let package = Package(
         .executableTarget(
             name: "Example",
             dependencies: ["SwiftTreeSitter",
-                           "TreeSitterBagNotation",]),
+                           "TreeSitterBagNotation"]),
         .testTarget(
             name: "BagNotationTests",
             dependencies: ["BagNotation"]),
@@ -42,15 +42,14 @@ let package = Package(
                     "package-lock.json",
                     "node_modules",
                     "src/grammar.json",
-                    "src/node-types.json",
+                    "src/node-types.json"
                 ],
                 sources: [
-                    "src/parser.c",
+                    "src/parser.c"
                 ],
                 resources: [
                     .copy("queries")
                 ],
                 publicHeadersPath: "bindings/swift",
                 cSettings: [.headerSearchPath("src")])
-    ]
-)
+    ])

@@ -1,8 +1,6 @@
 //
 //  Note.swift
-//  
-//
-//  Created by Paul Landers on 6/25/23.
+//  Bag Notation
 //
 
 import Foundation
