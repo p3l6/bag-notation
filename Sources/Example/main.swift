@@ -7,10 +7,10 @@
 
 import Foundation
 import SwiftTreeSitter
-import TreeSitterBagfile
+import TreeSitterBagNotation
 
 
-let language = Language(language: tree_sitter_bagfile())
+let language = Language(language: tree_sitter_bag_notation())
 
 let parser = Parser()
 try? parser.setLanguage(language)

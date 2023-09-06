@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "Bagfile",
+    name: "Bag Notation",
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "Bagfile",
-            targets: ["Bagfile"]),
+            name: "BagNotation",
+            targets: ["BagNotation"]),
         .executable(name: "Example", targets: ["Example"]),
-        .library(name: "TreeSitterBagfile", targets: ["TreeSitterBagfile"]),
+        .library(name: "TreeSitterBagNotation", targets: ["TreeSitterBagNotation"]),
 
     ],
     dependencies: [
@@ -21,17 +21,17 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
-            name: "Bagfile",
+            name: "BagNotation",
             dependencies: []),
         .executableTarget(
             name: "Example",
             dependencies: ["SwiftTreeSitter",
-                           "TreeSitterBagfile",]),
+                           "TreeSitterBagNotation",]),
         .testTarget(
-            name: "BagfileTests",
-            dependencies: ["Bagfile"]),
-        .target(name: "TreeSitterBagfile",
-                path: "tree-sitter-bagfile",
+            name: "BagNotationTests",
+            dependencies: ["BagNotation"]),
+        .target(name: "TreeSitterBagNotation",
+                path: "tree-sitter-bag-notation",
                 exclude: [
                     "binding.gyp",
                     "bindings",

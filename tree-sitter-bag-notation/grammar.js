@@ -1,5 +1,5 @@
 module.exports = grammar({
-  name: 'bagfile',
+  name: 'BagNotation',
 
   extras: $ => [ /[ \t]+/ ],
 
