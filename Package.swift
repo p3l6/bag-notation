@@ -10,7 +10,6 @@ let package = Package(
         .library(
             name: "BagNotation",
             targets: ["BagNotation"]),
-        .executable(name: "Example", targets: ["Example"]),
         .library(name: "TreeSitterBagNotation", targets: ["TreeSitterBagNotation"])
 
     ],
@@ -22,9 +21,6 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "BagNotation",
-            dependencies: []),
-        .executableTarget(
-            name: "Example",
             dependencies: ["SwiftTreeSitter",
                            "TreeSitterBagNotation"]),
         .testTarget(

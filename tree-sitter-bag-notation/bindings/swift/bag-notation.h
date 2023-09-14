@@ -7,7 +7,7 @@ typedef struct TSLanguage TSLanguage;
 extern "C" {
 #endif
 
-extern TSLanguage *tree_sitter_bag_notation();
+extern TSLanguage *tree_sitter_BagNotation();
 
 #ifdef __cplusplus
 }
