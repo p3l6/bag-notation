@@ -21,10 +21,16 @@ final class FileStructure: XCTestCase {
             |: xrbd xb2tr  | xrbd xb2tr | xfata faf | xefe xedb |
                xrbd xb2tr  | xrbd xb2tr | xfaf xedb | zd3 kd3  :|
             """
-        let tree = makeTree(source: source)
-        let doc = makeModel(from: tree)
+        let builder = ModelBuilder(source)
+        let doc = builder.makeModel()
 
         XCTAssertEqual(doc.tunes.count, 1)
+        XCTAssertEqual(doc.tunes[0].lines.count, 4)
+        XCTAssertEqual(doc.tunes[0].lines[0].bars.count, 4)
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes.count, 5)
+
+        let firstNote = doc.tunes.first?.lines.first?.bars.first?.notes.first
+        XCTAssertEqual(firstNote?.pitch, .lowA)
     }
 
     // TODO: Can we make a tree from a fragment? and not have to have extra layers?
