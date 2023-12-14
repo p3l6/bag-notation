@@ -86,13 +86,13 @@ Leading inline field
     (line
       (measure
         (inline_field (field value: (field_content)))
-        (note_cluster (note (embellishment) (pitch)))
-        (note_cluster (note (embellishment) (pitch)))
+        (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
+        (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
         (barline)))
     (line
       (inline_field (field value: (field_content)))
       (barline)
       (measure
-        (note_cluster (note (embellishment) (pitch)))
-        (note_cluster (note (embellishment) (pitch)))
+        (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
+        (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
         (barline))))))

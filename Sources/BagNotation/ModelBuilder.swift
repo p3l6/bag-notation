@@ -8,10 +8,12 @@ import SwiftTreeSitter
 import TreeSitterBagNotation
 
 // TODO: names and organization
-// keep all the tree sitter stuff out of the model dir. could split this out into separate files still?
 
 class ModelBuilder {
     let source: String
+    private var cursor: TreeCursor!
+//    var context: SomeActiveProps like harmony, tempo, meter etc
+
     init(_ source: String) { self.source = source}
 
     lazy var tree: Tree = {
@@ -22,7 +24,7 @@ class ModelBuilder {
         return tree!
     }()
 
-    func modelDebug(from node: Node) {
+    private func modelDebug(from node: Node) {
         let cur = node.treeCursor
         var indent = ""
         while let currentNode = cur.currentNode {
@@ -47,56 +49,67 @@ class ModelBuilder {
 
     func makeModel() -> Doc {
 //        modelDebug(from: tree.rootNode!)
-        return newDoc(treeNode: tree.rootNode!)
+
+        cursor = tree.rootNode!.treeCursor
+        return docAtCursor()
     }
 
-    func text(at range: TSRange) -> String {
+    private func text(at range: TSRange) -> String {
         let buf: [UInt16] = Array(source.utf16)
         let hmm = buf[Int(range.bytes.lowerBound/2)..<Int(range.bytes.upperBound/2)]
         return String(utf16CodeUnits: Array(hmm), count: hmm.count)
     }
 
-    func text(of node: Node) -> String {
+    private func text(of node: Node) -> String {
         text(at: node.tsRange)
     }
 
-    func expect(node: Node, is type: String) {
+    private func childrenOfCursor() -> NodeChildren {
+        var childs = NodeChildren()
+
+        cursor.goToFirstChild()
+        repeat {
+            switch cursor.currentNode!.nodeType {
+            case "tune": childs.tunes.append(tuneAtCursor())
+            case "line": childs.lines.append(lineAtCursor())
+            case "header": childs.header = headerAtCursor()
+            case "body": childs.lines.append(contentsOf: bodyAtCursor())
+            case "measure": childs.bars.append(barAtCursor())
+            case "note_cluster": childs.notes.append(contentsOf: clusterAtCursor())
+            case "note": childs.notes.append(noteAtCursor())
+            default: break // TODO: throw
+            }
+        } while cursor.gotoNextSibling()
+        cursor.gotoParent()
+
+        return childs
+    }
+
+    private func expectCursor(is type: String) {
         // TODO: should throw
-        guard node.nodeType == type else {
+        guard let node = cursor.currentNode, node.nodeType == type else {
             // TODO: is logger available?
-            print("Incorrect node type: have \(node.nodeType ?? "nil") expected \(type)")
+            print("Incorrect node type: have \(cursor.currentNode?.nodeType ?? "nil") expected \(type)")
             exit(2)
         }
     }
 
+    // MARK: Nodes at cursor
 
-    func newDoc(treeNode node: Node) -> Doc {
-        expect(node: node, is: "file")
-        return Doc(
-            // TODO: all of these should guard on the node type, and throw
-            tunes: node.allChildren().map { newTune(treeNode: $0) }
-        )
+    private func docAtCursor() -> Doc {
+        expectCursor(is: "file")
+        return Doc(tunes: childrenOfCursor().tunes)
     }
 
-    func newTune(treeNode node: Node) -> Tune {
-        expect(node: node, is: "tune")
-        //        let cur = node.treeCursor
-        //        let children = cur.
-        return Tune(
-            header: newHeader(treeNode: node.child(byFieldName:  "header")!),
-            // TODO: helper for this:  `childrenbytype: [string: [node]]`
-            lines: node.child(byFieldName: "body")!.allChildren().filter { $0.nodeType == "line" }.map { newLine(treeNode: $0) }
-
-        )
+    private func tuneAtCursor() -> Tune {
+        expectCursor(is: "tune")
+        let children = childrenOfCursor()
+        return Tune(header: children.header!,
+                    lines: children.lines)
     }
 
-    // TODO: make an enum thingy for field name strings
-    //    uint32_t ts_language_field_count(const TSLanguage *);
-    //    const char *ts_language_field_name_for_id(const TSLanguage *, TSFieldId);
-    //    TSFieldId ts_language_field_id_for_name(const TSLanguage *, const char *, uint32_t);
-
-    func newHeader(treeNode node: Node) -> Header {
-        expect(node: node, is: "header")
+    private func headerAtCursor() -> Header {
+        expectCursor(is: "header")
         return Header(
             title : "",
             style : "",
@@ -105,76 +118,52 @@ class ModelBuilder {
             timeSignature: "", tags : [])
     }
 
-    func newLine(treeNode node: Node) -> Line {
-        expect(node: node, is: "line")
-        
-        // TODO: keep converting these methods from newThing to thingAtCursor
-        cursor = node.treeCursor
-
-        var bars = [Bar]()
-
-        cursor.traverseImmediateChilds { child in
-            switch child.nodeType {
-            case "measure":
-                bars.append(barAtCursor())
-            default: break
-            }
-        } 
-
-        return Line(bars: bars)
+    private func bodyAtCursor() -> [Line] {
+        expectCursor(is: "body")
+        return childrenOfCursor().lines
     }
 
-    func barAtCursor() -> Bar {
-        let node = cursor.currentNode!
-        // TODO: also enum the node types
-        expect(node: node, is: "measure")
+    // TODO: probably don't need the new field names for most grammer elements
+    // TODO: make an enum thingy for field name strings
+    // TODO: also enum the node types (or static string constants)
+    //    uint32_t ts_language_field_count(const TSLanguage *);
+    //    const char *ts_language_field_name_for_id(const TSLanguage *, TSFieldId);
+    //    TSFieldId ts_language_field_id_for_name(const TSLanguage *, const char *, uint32_t);
 
-        var notes = [Note]()
-
-        cursor.traverseImmediateChilds { child in
-            switch child.nodeType {
-            case "note_cluster":
-                cursor.traverseImmediateChilds { subchild in
-                    notes.append(noteAtCursor())
-                }
-            default: break
-            }
-        } 
-
-        return Bar(notes: notes)
+    private func lineAtCursor() -> Line {
+        expectCursor(is: "line")
+        return Line(bars: childrenOfCursor().bars)
     }
 
-    var cursor: TreeCursor!
-//    var context: SomeActiveProps like harmony, tempo, meter etc
+    private func barAtCursor() -> Bar {
+        expectCursor(is: "measure")
+        return Bar(notes: childrenOfCursor().notes)
+    }
 
-    func noteAtCursor() -> Note {
+    private func clusterAtCursor() -> [Note] {
+        expectCursor(is: "note_cluster")
+        return childrenOfCursor().notes
+    }
+
+    private func noteAtCursor() -> Note {
         let node = cursor.currentNode!
-        expect(node: node, is: "note")
+        expectCursor(is: "note")
         // TODO: consider custom node wrappers? or a node extension for these fields properties.
         let pitchNode = node.child(byFieldName: "pitch")!
         let embellismentNode = node.child(byFieldName: "embellishment")
         let emb: Embellishment? = if let embellismentNode { Embellishment.from(string: text(of: embellismentNode)) } else {nil}
         return Note(pitch: .from(string: text(of: pitchNode))!,
                     embellishment: emb,
-                    duration: "",
-                    extras: "")
+                    duration: "")
     }
 }
 
-extension TreeCursor {
-    func traverseImmediateChilds(block: (Node) throws -> Void) rethrows {
-        self.goToFirstChild()
-        repeat {
-            try block(self.currentNode!)
-        } while self.gotoNextSibling()
-        self.gotoParent()
-    }
-}
-
-extension Node {
-    func allChildren() -> [Node] {
-        (0 ..< childCount).compactMap(child(at:))
-    }
+private struct NodeChildren {
+    var tunes = [Tune]()
+    var lines = [Line]()
+    var header: Header?
+    var bars = [Bar]()
+    var notes = [Note]()
 }
 
 // TODO: special operator ?!

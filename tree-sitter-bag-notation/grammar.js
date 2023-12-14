@@ -6,13 +6,12 @@ module.exports = grammar({
   rules: {
     //// File structure
     file: $ => seq(optional(repeat($._blank_line)), repeat1($.tune)),
-    tune: $ => seq(field('header', $.header),
-                   field('body', optional($.body))),
+    tune: $ => seq($.header, optional($.body)),
     body: $ => repeat1(choice($._blank_line, $.line)),
     line: $ => seq(
-                 field('leading', optional(seq(optional($.inline_field), $.barline))),
+                 optional(seq(optional($.inline_field), $.barline)),
                  repeat1($.measure),
-                 field('tail_comment', optional($.tail_comment)),
+                 optional($.tail_comment),
                  "\n"),
 
     //// Header and fields

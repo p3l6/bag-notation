@@ -340,9 +340,8 @@ enum Embellishment: CaseIterable {
 }
 
 struct Note {
-    let pitch: Pitch // enum
+    let pitch: Pitch
     let embellishment: Embellishment?
     let duration: String
-    let extras: String // extra characters we don't understand? need to elaborate on this.
 }
 
