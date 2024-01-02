@@ -174,11 +174,16 @@ class ModelBuilder {
         let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
         try expectCursor(is: "note")
         let pitchNode = try node.child(byFieldName: "pitch") ?! ModelParseError.nodeMissingField
-        let embellismentNode = node.child(byFieldName: "embellishment")
-        let emb: Embellishment? = if let embellismentNode { try Embellishment.from(string: text(of: embellismentNode)) } else { nil }
+        let pitch = try Pitch.from(string: text(of: pitchNode))
+        var embellishment: Embellishment? = nil
+        if let embellismentNode = node.child(byFieldName: "embellishment") {
+            embellishment = try Embellishment.from(string: text(of: embellismentNode))
+            _ = try pitch.gracenotes(for: embellishment!)
+        }
+
         return Note(context: context,
-                    pitch: try .from(string: text(of: pitchNode)),
-                    embellishment: emb,
+                    pitch: pitch,
+                    embellishment: embellishment,
                     duration: "")
     }
 }
@@ -190,7 +195,8 @@ enum ModelParseError: Error {
     case cursorAtInvalidNode
     case nodeMissingField
     case unexpectedNodeType
-    
+    case invalidEmbellishment
+
     case tuneMissingTitle
     case tuneMissingComposer
     case tuneMissingStyle

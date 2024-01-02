@@ -14,6 +14,13 @@
 
 import Foundation
 
+struct Note {
+    let context: Context
+    let pitch: Pitch
+    let embellishment: Embellishment?
+    let duration: String
+}
+
 enum Pitch {
     case highA
     case highG
@@ -25,31 +32,9 @@ enum Pitch {
     case lowA
     case lowG
 
-    static func from(string: String) throws -> Pitch {
-        switch string {
-        case "a": .highA
-        case "g": .highG
-        case "f": .f
-        case "e": .e
-        case "d": .d
-        case "c": .c
-        case "b": .b
-        case "r": .lowA
-        case "q": .lowG
-        default: throw NoteParseError.unknownPitch
-        }
+    func gracenotes(for embellishment: Embellishment) throws -> [Pitch] {
+        return try embellishmentTable[embellishment]?[self] ?! ModelParseError.invalidEmbellishment
     }
-}
-
-func ... (lower: Pitch, upper: Pitch) -> Set<Pitch> {
-    let all: [Pitch] = [.lowG, .lowA, .b, .c, .d, .e, .f, .highG, .highA]
-    let indexes: [Pitch: Int] = Dictionary(uniqueKeysWithValues: all.enumerated().map { i, v in (v, i) })
-    return Set(all[indexes[lower]! ... indexes[upper]!])
-}
-
-enum NoteParseError: Error {
-    case unknownPitch
-    case unknownEmbellishment
 }
 
 enum Embellishment: CaseIterable {
@@ -98,207 +83,33 @@ enum Embellishment: CaseIterable {
     case cadenceWithHighAGracenote
     case halfCadence
     case halfCadenceWithHighAGracenote
+}
 
-    func isAllowedOn(_ pitch: Pitch) -> Bool {
-        switch self {
-        case .gGracenote: pitch != .highA && pitch != .highG
-            // TODO: the rest
-        default: true
+enum NoteParseError: Error {
+    case unknownPitch
+    case unknownEmbellishment
+}
+
+// MARK: Create from strings
+
+extension Pitch {
+    static func from(string: String) throws -> Pitch {
+        switch string {
+        case "a": .highA
+        case "g": .highG
+        case "f": .f
+        case "e": .e
+        case "d": .d
+        case "c": .c
+        case "b": .b
+        case "r": .lowA
+        case "q": .lowG
+        default: throw NoteParseError.unknownPitch
         }
     }
+}
 
-    func gracenotes(for pitch: Pitch) -> [Pitch]? {
-        // TODO: move outside enum, fileprivate, with a wrapper here and in pitch
-        // same with allowedOn
-
-        // build a static lookup table at startup
-        // use it for this and the allowedOn method
-        // this should throw
-
-        var lookupTable = [Embellishment: PitchMap]()
-
-        struct PitchMap {
-            let highA: [Pitch]?
-            let highG: [Pitch]?
-            let f: [Pitch]?
-            let e: [Pitch]?
-            let d: [Pitch]?
-            let c: [Pitch]?
-            let b: [Pitch]?
-            let lowA: [Pitch]?
-            let lowG: [Pitch]?
-
-            init(highA: [Pitch]? = nil, highG: [Pitch]? = nil, f: [Pitch]? = nil, e: [Pitch]? = nil, d: [Pitch]? = nil, c: [Pitch]? = nil, b: [Pitch]? = nil, lowA: [Pitch]? = nil, lowG: [Pitch]? = nil) {
-                self.highA = highA
-                self.highG = highG
-                self.f = f
-                self.e = e
-                self.d = d
-                self.c = c
-                self.b = b
-                self.lowA = lowA
-                self.lowG = lowG
-            }
-
-            init(base: PitchMap? = nil, setting: [Pitch], for pitches: Set<Pitch>) {
-                highA = pitches.contains(.highA) ? setting : base?.highA
-                highG = pitches.contains(.highG) ? setting : base?.highG
-                f = pitches.contains(.f) ? setting : base?.f
-                e = pitches.contains(.e) ? setting : base?.e
-                d = pitches.contains(.d) ? setting : base?.d
-                c = pitches.contains(.c) ? setting : base?.c
-                b = pitches.contains(.b) ? setting : base?.b
-                lowA = pitches.contains(.lowA) ? setting : base?.lowA
-                lowG = pitches.contains(.lowG) ? setting : base?.lowG
-            }
-
-            init(base: PitchMap? = nil, setting: [Pitch], for pitch: Pitch) {
-                self.init(base: base, setting: setting, for: Set([pitch]))
-            }
-
-            func setting(_ setting: [Pitch], for pitches: Set<Pitch>) -> PitchMap {
-                PitchMap(base: self, setting: setting, for: pitches)
-            }
-
-            func setting(_ setting: [Pitch], for pitch: Pitch) -> PitchMap {
-                PitchMap(base: self, setting: setting, for: pitch)
-            }
-
-            static func empty() -> PitchMap {
-                PitchMap(base: nil, setting: [], for: Set())
-            }
-
-            subscript(p: Pitch) -> [Pitch]? {
-                switch p {
-                case .highA: highA
-                case .highG: highG
-                case .f: f
-                case .e: e
-                case .d: d
-                case .c: c
-                case .b: b
-                case .lowA: lowA
-                case .lowG: lowG
-                }
-            }
-        }
-
-        let all = Set<Pitch>([.highA, .highG, .f, .e, .d, .c, .b, .lowA, .lowG])
-
-        for emb in Embellishment.allCases {
-            lookupTable[emb] = switch emb {
-            case .highAGracenote: PitchMap(setting: [.highA], for: .lowG ... .highG)
-            case .fGracenote: PitchMap(setting: [.f], for: .lowG ... .e)
-            case .gGracenote: PitchMap(setting: [.highG], for: .lowG ... .f)
-            case .eGracenote: PitchMap(setting: [.e], for: .lowG ... .d)
-            case .dGracenote: PitchMap(setting: [.d], for: .lowG ... .c)
-            case .tap: PitchMap(
-                    highA: [.highG],
-                    highG: [.f],
-                    f: [.e],
-                    e: [.lowA],
-                    d: [.lowG],
-                    c: [.lowG],
-                    b: [.lowG],
-                    lowA: [.lowG])
-            case .lightTap: PitchMap(
-                    highG: [.e],
-                    d: [.c],
-                    c: [.b],
-                    b: [.lowA])
-            case .tapWithGGracenote: PitchMap(
-                    d: [.highG, .c],
-                    c: [.highG, .b],
-                    b: [.highG, .lowA],
-                    lowA: [.highG, .lowG])
-            case .doubling: PitchMap(
-                    highA: [.highA, .highG],
-                    highG: [.highG, .f],
-                    f: [.highG, .f, .highG],
-                    e: [.highG, .e, .f],
-                    d: [.highG, .d, .e],
-                    c: [.highG, .c, .d],
-                    b: [.highG, .b, .d],
-                    lowA: [.highG, .lowA, .d],
-                    lowG: [.highG, .lowG, .d])
-            case .halfDoubling: PitchMap(
-                    highG: [.highG, .highA],
-                    f: [.f, .highG],
-                    e: [.e, .f],
-                    d: [.d, .e],
-                    c: [.c, .d],
-                    b: [.b, .d],
-                    lowA: [.lowA, .d],
-                    lowG: [.lowG, .d])
-            case .doublingWithHighAGracenote: PitchMap(
-                    f: [.highA, .f, .highG],
-                    e: [.highA, .e, .f],
-                    d: [.highA, .d, .e],
-                    c: [.highA, .c, .d],
-                    b: [.highA, .b, .d],
-                    lowA: [.highA, .lowA, .d],
-                    lowG: [.highA, .lowG, .d])
-            case .grip: PitchMap(setting: [.lowG, .d, .lowG], for: all).setting([.lowG, .e, .lowG], for: .d)
-            case .rodin: PitchMap(
-                    e: [.lowG, .b, .lowG],
-                    lowA: [.lowG, .b, .lowG])
-            case .odro: PitchMap(
-                    d: [.d, .lowG, .e, .lowG],
-                    c: [.c, .lowG, .d, .lowG],
-                    b: [.b, .lowG, .d, .lowG])
-            case .odroWithGGracenote: PitchMap(
-                    d: [.highG, .d, .lowG, .e, .lowG],
-                    c: [.highG, .c, .lowG, .d, .lowG],
-                    b: [.highG, .b, .lowG, .d, .lowG])
-            case .odroWithHighAGracenote: PitchMap(
-                    d: [.highA, .d, .lowG, .e, .lowG],
-                    c: [.highA, .c, .lowG, .d, .lowG],
-                    b: [.highA, .b, .lowG, .d, .lowG])
-            case .taorluath: PitchMap(setting: [.lowG, .d, .lowG, .e], for: .lowA ... .d)
-            case .taorluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e], for: .d)
-            case .crunluath: PitchMap(setting: [.lowG, .d, .lowG, .e, .lowA, .f, .lowA], for: .e)
-            case .crunluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e, .lowA, .f, .lowA], for: .e)
-            case .special: PitchMap(
-                    highG: [.e, .lowA, .f, .lowA],
-                    f: [.f, .e, .highG, .e],
-                    e: [.e, .lowA, .f, .lowA],
-                    d: [.lowG, .d, .c],
-                    b: [.lowG, .d, .lowG, .c, .lowG])
-            case .lightSpecial: PitchMap(
-                    highG: [.e, .lowG, .f, .lowG],
-                    d: [.d, .c])
-            case .wideSpecial: PitchMap(setting: [.f, .e, .highG, .e, .f, .e], for: .highG)
-            case .lightWideSpecial: PitchMap(setting: [.e, .highG, .e, .f, .e], for: .highG)
-            case .strike: PitchMap(
-                    f: [.highG, .f, .e],
-                    e: [.highG, .e, .lowA],
-                    d: [.highG, .d, .lowG],
-                    c: [.highG, .c, .lowG],
-                    b: [.highG, .b, .lowG],
-                    lowA: [.highG, .lowA, .lowG])
-            case .lightStrike: PitchMap(
-                    e: [.e, .lowA],
-                    d: [.highG, .d, .c],
-                    b: [.b, .lowG])
-            case .pelay: PitchMap(
-                    d: [.highG, .d, .e, .d, .lowG],
-                    c: [.highG, .c, .e, .c, .lowG],
-                    b: [.highG, .b, .e, .b, .lowG])
-            case .birl: PitchMap(setting: [.lowA, .lowG, .lowA, .lowG], for: .lowA)
-            case .birlWithHighAGracenote: PitchMap(setting: [.highA, .lowA, .lowG, .lowA, .lowG], for: .lowA)
-            case .birlWithHighGGracenote: PitchMap(setting: [.highG, .lowA, .lowG, .lowA, .lowG], for: .lowA)
-            case .birlWithoutInitialA: PitchMap(setting: [.lowG, .lowA, .lowG], for: .lowA)
-            case .birlWithDGracenote: PitchMap(setting: [.d, .lowA, .lowG, .lowA, .lowG], for: .lowA)
-            // TODO: cadences should be `e4` timing
-            case .cadence: PitchMap(setting: [.highG, .e, .d], for: .lowA ... .c)
-            case .cadenceWithHighAGracenote: PitchMap(setting: [.highA, .e, .d], for: .lowA ... .c)
-            case .halfCadence: PitchMap(setting: [.highG, .e], for: .lowG ... .d)
-            case .halfCadenceWithHighAGracenote: PitchMap(setting: [.highA, .e], for: .lowG ... .d)
-            }
-        }
-        return lookupTable[self]?[pitch]
-    }
-
+extension Embellishment {
     static func from(string: String) throws -> Embellishment {
         switch string {
         case "x": .gGracenote
@@ -343,9 +154,193 @@ enum Embellishment: CaseIterable {
     }
 }
 
-struct Note {
-    let context: Context
-    let pitch: Pitch
-    let embellishment: Embellishment?
-    let duration: String
+// MARK: Embellishment Table
+
+private func ... (lower: Pitch, upper: Pitch) -> Set<Pitch> {
+    let all: [Pitch] = [.lowG, .lowA, .b, .c, .d, .e, .f, .highG, .highA]
+    let indexes: [Pitch: Int] = Dictionary(uniqueKeysWithValues: all.enumerated().map { i, v in (v, i) })
+    return Set(all[indexes[lower]! ... indexes[upper]!])
 }
+
+/// Stores the gracenotes of a single embellishement, for each pitch
+private struct PitchMap {
+    let highA: [Pitch]?
+    let highG: [Pitch]?
+    let f: [Pitch]?
+    let e: [Pitch]?
+    let d: [Pitch]?
+    let c: [Pitch]?
+    let b: [Pitch]?
+    let lowA: [Pitch]?
+    let lowG: [Pitch]?
+
+    init(highA: [Pitch]? = nil, highG: [Pitch]? = nil, f: [Pitch]? = nil, e: [Pitch]? = nil, d: [Pitch]? = nil, c: [Pitch]? = nil, b: [Pitch]? = nil, lowA: [Pitch]? = nil, lowG: [Pitch]? = nil) {
+        self.highA = highA
+        self.highG = highG
+        self.f = f
+        self.e = e
+        self.d = d
+        self.c = c
+        self.b = b
+        self.lowA = lowA
+        self.lowG = lowG
+    }
+
+    init(base: PitchMap? = nil, setting: [Pitch], for pitches: Set<Pitch>) {
+        highA = pitches.contains(.highA) ? setting : base?.highA
+        highG = pitches.contains(.highG) ? setting : base?.highG
+        f = pitches.contains(.f) ? setting : base?.f
+        e = pitches.contains(.e) ? setting : base?.e
+        d = pitches.contains(.d) ? setting : base?.d
+        c = pitches.contains(.c) ? setting : base?.c
+        b = pitches.contains(.b) ? setting : base?.b
+        lowA = pitches.contains(.lowA) ? setting : base?.lowA
+        lowG = pitches.contains(.lowG) ? setting : base?.lowG
+    }
+
+    init(base: PitchMap? = nil, setting: [Pitch], for pitch: Pitch) {
+        self.init(base: base, setting: setting, for: Set([pitch]))
+    }
+
+    func setting(_ setting: [Pitch], for pitches: Set<Pitch>) -> PitchMap {
+        PitchMap(base: self, setting: setting, for: pitches)
+    }
+
+    func setting(_ setting: [Pitch], for pitch: Pitch) -> PitchMap {
+        PitchMap(base: self, setting: setting, for: pitch)
+    }
+
+    static func empty() -> PitchMap {
+        PitchMap(base: nil, setting: [], for: Set())
+    }
+
+    subscript(p: Pitch) -> [Pitch]? {
+        switch p {
+        case .highA: highA
+        case .highG: highG
+        case .f: f
+        case .e: e
+        case .d: d
+        case .c: c
+        case .b: b
+        case .lowA: lowA
+        case .lowG: lowG
+        }
+    }
+}
+
+private extension Set<Pitch> {
+    static let all = Set<Pitch>([.highA, .highG, .f, .e, .d, .c, .b, .lowA, .lowG])
+}
+
+private var embellishmentTable: [Embellishment: PitchMap] =  [
+    .highAGracenote: PitchMap(setting: [.highA], for: .lowG ... .highG),
+    .fGracenote: PitchMap(setting: [.f], for: .lowG ... .e),
+    .gGracenote: PitchMap(setting: [.highG], for: .lowG ... .f),
+    .eGracenote: PitchMap(setting: [.e], for: .lowG ... .d),
+    .dGracenote: PitchMap(setting: [.d], for: .lowG ... .c),
+    .tap: PitchMap(
+        highA: [.highG],
+        highG: [.f],
+        f: [.e],
+        e: [.lowA],
+        d: [.lowG],
+        c: [.lowG],
+        b: [.lowG],
+        lowA: [.lowG]),
+    .lightTap: PitchMap(
+        highG: [.e],
+        d: [.c],
+        c: [.b],
+        b: [.lowA]),
+    .tapWithGGracenote: PitchMap(
+        d: [.highG, .c],
+        c: [.highG, .b],
+        b: [.highG, .lowA],
+        lowA: [.highG, .lowG]),
+    .doubling: PitchMap(
+        highA: [.highA, .highG],
+        highG: [.highG, .f],
+        f: [.highG, .f, .highG],
+        e: [.highG, .e, .f],
+        d: [.highG, .d, .e],
+        c: [.highG, .c, .d],
+        b: [.highG, .b, .d],
+        lowA: [.highG, .lowA, .d],
+        lowG: [.highG, .lowG, .d]),
+    .halfDoubling: PitchMap(
+        highG: [.highG, .highA],
+        f: [.f, .highG],
+        e: [.e, .f],
+        d: [.d, .e],
+        c: [.c, .d],
+        b: [.b, .d],
+        lowA: [.lowA, .d],
+        lowG: [.lowG, .d]),
+    .doublingWithHighAGracenote: PitchMap(
+        f: [.highA, .f, .highG],
+        e: [.highA, .e, .f],
+        d: [.highA, .d, .e],
+        c: [.highA, .c, .d],
+        b: [.highA, .b, .d],
+        lowA: [.highA, .lowA, .d],
+        lowG: [.highA, .lowG, .d]),
+    .grip: 
+        PitchMap(setting: [.lowG, .d, .lowG], for: .all)
+        .setting([.lowG, .e, .lowG], for: .d),
+    .rodin: PitchMap(
+        e: [.lowG, .b, .lowG],
+        lowA: [.lowG, .b, .lowG]),
+    .odro: PitchMap(
+        d: [.d, .lowG, .e, .lowG],
+        c: [.c, .lowG, .d, .lowG],
+        b: [.b, .lowG, .d, .lowG]),
+    .odroWithGGracenote: PitchMap(
+        d: [.highG, .d, .lowG, .e, .lowG],
+        c: [.highG, .c, .lowG, .d, .lowG],
+        b: [.highG, .b, .lowG, .d, .lowG]),
+    .odroWithHighAGracenote: PitchMap(
+        d: [.highA, .d, .lowG, .e, .lowG],
+        c: [.highA, .c, .lowG, .d, .lowG],
+        b: [.highA, .b, .lowG, .d, .lowG]),
+    .taorluath: PitchMap(setting: [.lowG, .d, .lowG, .e], for: .lowA ... .d),
+    .taorluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e], for: .d),
+    .crunluath: PitchMap(setting: [.lowG, .d, .lowG, .e, .lowA, .f, .lowA], for: .e),
+    .crunluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e, .lowA, .f, .lowA], for: .e),
+    .special: PitchMap(
+        highG: [.e, .lowA, .f, .lowA],
+        f: [.f, .e, .highG, .e],
+        e: [.e, .lowA, .f, .lowA],
+        d: [.lowG, .d, .c],
+        b: [.lowG, .d, .lowG, .c, .lowG]),
+    .lightSpecial: PitchMap(
+        highG: [.e, .lowG, .f, .lowG],
+        d: [.d, .c]),
+    .wideSpecial: PitchMap(setting: [.f, .e, .highG, .e, .f, .e], for: .highG),
+    .lightWideSpecial: PitchMap(setting: [.e, .highG, .e, .f, .e], for: .highG),
+    .strike: PitchMap(
+        f: [.highG, .f, .e],
+        e: [.highG, .e, .lowA],
+        d: [.highG, .d, .lowG],
+        c: [.highG, .c, .lowG],
+        b: [.highG, .b, .lowG],
+        lowA: [.highG, .lowA, .lowG]),
+    .lightStrike: PitchMap(
+        e: [.e, .lowA],
+        d: [.highG, .d, .c],
+        b: [.b, .lowG]),
+    .pelay: PitchMap(
+        d: [.highG, .d, .e, .d, .lowG],
+        c: [.highG, .c, .e, .c, .lowG],
+        b: [.highG, .b, .e, .b, .lowG]),
+    .birl: PitchMap(setting: [.lowA, .lowG, .lowA, .lowG], for: .lowA),
+    .birlWithHighAGracenote: PitchMap(setting: [.highA, .lowA, .lowG, .lowA, .lowG], for: .lowA),
+    .birlWithHighGGracenote: PitchMap(setting: [.highG, .lowA, .lowG, .lowA, .lowG], for: .lowA),
+    .birlWithoutInitialA: PitchMap(setting: [.lowG, .lowA, .lowG], for: .lowA),
+    .birlWithDGracenote: PitchMap(setting: [.d, .lowA, .lowG, .lowA, .lowG], for: .lowA),
+    // TODO: cadences should be `e4` timing
+    .cadence: PitchMap(setting: [.highG, .e, .d], for: .lowA ... .c),
+    .cadenceWithHighAGracenote: PitchMap(setting: [.highA, .e, .d], for: .lowA ... .c),
+    .halfCadence: PitchMap(setting: [.highG, .e], for: .lowG ... .d),
+    .halfCadenceWithHighAGracenote: PitchMap(setting: [.highA, .e], for: .lowG ... .d)
+]
