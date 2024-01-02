@@ -41,9 +41,9 @@ enum Pitch {
     }
 }
 
-func ...(lower: Pitch, upper: Pitch) -> Set<Pitch> {
+func ... (lower: Pitch, upper: Pitch) -> Set<Pitch> {
     let all: [Pitch] = [.lowG, .lowA, .b, .c, .d, .e, .f, .highG, .highA]
-    let indexes: [Pitch: Int] = Dictionary(uniqueKeysWithValues: all.enumerated().map {(i,v) in (v,i) })
+    let indexes: [Pitch: Int] = Dictionary(uniqueKeysWithValues: all.enumerated().map { i, v in (v, i) })
     return Set(all[indexes[lower]! ... indexes[upper]!])
 }
 
@@ -58,7 +58,7 @@ enum Embellishment: CaseIterable {
     case gGracenote
     case eGracenote
     case dGracenote
-    
+
     case tap
     case lightTap
     case tapWithGGracenote
@@ -101,8 +101,9 @@ enum Embellishment: CaseIterable {
 
     func isAllowedOn(_ pitch: Pitch) -> Bool {
         switch self {
-        case .gGracenote: return pitch != .highA && pitch != .highG
-        default: return true
+        case .gGracenote: pitch != .highA && pitch != .highG
+            // TODO: the rest
+        default: true
         }
     }
 
@@ -156,30 +157,30 @@ enum Embellishment: CaseIterable {
             }
 
             func setting(_ setting: [Pitch], for pitches: Set<Pitch>) -> PitchMap {
-                return PitchMap(base: self, setting: setting, for: pitches)
+                PitchMap(base: self, setting: setting, for: pitches)
             }
+
             func setting(_ setting: [Pitch], for pitch: Pitch) -> PitchMap {
-                return PitchMap(base: self, setting: setting, for: pitch)
+                PitchMap(base: self, setting: setting, for: pitch)
             }
 
             static func empty() -> PitchMap {
-                return PitchMap(base: nil, setting: [], for: Set())
+                PitchMap(base: nil, setting: [], for: Set())
             }
 
             subscript(p: Pitch) -> [Pitch]? {
                 switch p {
                 case .highA: highA
                 case .highG: highG
-                case .f:     f
-                case .e:     e
-                case .d:     d
-                case .c:     c
-                case .b:     b
-                case .lowA:  lowA
+                case .f: f
+                case .e: e
+                case .d: d
+                case .c: c
+                case .b: b
+                case .lowA: lowA
                 case .lowG: lowG
                 }
             }
-
         }
 
         let all = Set<Pitch>([.highA, .highG, .f, .e, .d, .c, .b, .lowA, .lowG])
@@ -192,103 +193,103 @@ enum Embellishment: CaseIterable {
             case .eGracenote: PitchMap(setting: [.e], for: .lowG ... .d)
             case .dGracenote: PitchMap(setting: [.d], for: .lowG ... .c)
             case .tap: PitchMap(
-                highA: [.highG],
-                highG: [.f],
-                f: [.e],
-                e: [.lowA],
-                d: [.lowG],
-                c: [.lowG],
-                b: [.lowG],
-                lowA: [.lowG])
+                    highA: [.highG],
+                    highG: [.f],
+                    f: [.e],
+                    e: [.lowA],
+                    d: [.lowG],
+                    c: [.lowG],
+                    b: [.lowG],
+                    lowA: [.lowG])
             case .lightTap: PitchMap(
-                highG: [.e],
-                d: [.c],
-                c: [.b],
-                b: [.lowA])
+                    highG: [.e],
+                    d: [.c],
+                    c: [.b],
+                    b: [.lowA])
             case .tapWithGGracenote: PitchMap(
-                d: [.highG, .c],
-                c: [.highG, .b],
-                b: [.highG, .lowA],
-                lowA: [.highG, .lowG])
-            case .doubling:  PitchMap(
-                highA: [.highA, .highG],
-                highG: [.highG, .f],
-                f: [.highG, .f, .highG],
-                e: [.highG, .e, .f],
-                d: [.highG, .d, .e],
-                c: [.highG, .c, .d],
-                b: [.highG, .b, .d],
-                lowA: [.highG, .lowA, .d],
-                lowG: [.highG, .lowG, .d])
+                    d: [.highG, .c],
+                    c: [.highG, .b],
+                    b: [.highG, .lowA],
+                    lowA: [.highG, .lowG])
+            case .doubling: PitchMap(
+                    highA: [.highA, .highG],
+                    highG: [.highG, .f],
+                    f: [.highG, .f, .highG],
+                    e: [.highG, .e, .f],
+                    d: [.highG, .d, .e],
+                    c: [.highG, .c, .d],
+                    b: [.highG, .b, .d],
+                    lowA: [.highG, .lowA, .d],
+                    lowG: [.highG, .lowG, .d])
             case .halfDoubling: PitchMap(
-                highG: [.highG, .highA],
-                f: [.f, .highG],
-                e: [.e, .f],
-                d: [.d, .e],
-                c: [.c, .d],
-                b: [.b, .d],
-                lowA: [.lowA, .d],
-                lowG: [.lowG, .d])
+                    highG: [.highG, .highA],
+                    f: [.f, .highG],
+                    e: [.e, .f],
+                    d: [.d, .e],
+                    c: [.c, .d],
+                    b: [.b, .d],
+                    lowA: [.lowA, .d],
+                    lowG: [.lowG, .d])
             case .doublingWithHighAGracenote: PitchMap(
-                f: [.highA, .f, .highG],
-                e: [.highA, .e, .f],
-                d: [.highA, .d, .e],
-                c: [.highA, .c, .d],
-                b: [.highA, .b, .d],
-                lowA: [.highA, .lowA, .d],
-                lowG: [.highA, .lowG, .d])
+                    f: [.highA, .f, .highG],
+                    e: [.highA, .e, .f],
+                    d: [.highA, .d, .e],
+                    c: [.highA, .c, .d],
+                    b: [.highA, .b, .d],
+                    lowA: [.highA, .lowA, .d],
+                    lowG: [.highA, .lowG, .d])
             case .grip: PitchMap(setting: [.lowG, .d, .lowG], for: all).setting([.lowG, .e, .lowG], for: .d)
             case .rodin: PitchMap(
-                e: [.lowG, .b, .lowG],
-                lowA: [.lowG, .b, .lowG])
+                    e: [.lowG, .b, .lowG],
+                    lowA: [.lowG, .b, .lowG])
             case .odro: PitchMap(
-                d: [.d, .lowG, .e, .lowG],
-                c: [.c, .lowG, .d, .lowG],
-                b: [.b, .lowG, .d, .lowG])
+                    d: [.d, .lowG, .e, .lowG],
+                    c: [.c, .lowG, .d, .lowG],
+                    b: [.b, .lowG, .d, .lowG])
             case .odroWithGGracenote: PitchMap(
-                d: [.highG, .d, .lowG, .e, .lowG],
-                c: [.highG, .c, .lowG, .d, .lowG],
-                b: [.highG, .b, .lowG, .d, .lowG])
+                    d: [.highG, .d, .lowG, .e, .lowG],
+                    c: [.highG, .c, .lowG, .d, .lowG],
+                    b: [.highG, .b, .lowG, .d, .lowG])
             case .odroWithHighAGracenote: PitchMap(
-                d: [.highA, .d, .lowG, .e, .lowG],
-                c: [.highA, .c, .lowG, .d, .lowG],
-                b: [.highA, .b, .lowG, .d, .lowG])
+                    d: [.highA, .d, .lowG, .e, .lowG],
+                    c: [.highA, .c, .lowG, .d, .lowG],
+                    b: [.highA, .b, .lowG, .d, .lowG])
             case .taorluath: PitchMap(setting: [.lowG, .d, .lowG, .e], for: .lowA ... .d)
             case .taorluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e], for: .d)
             case .crunluath: PitchMap(setting: [.lowG, .d, .lowG, .e, .lowA, .f, .lowA], for: .e)
             case .crunluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e, .lowA, .f, .lowA], for: .e)
             case .special: PitchMap(
-                highG: [.e, .lowA, .f, .lowA],
-                f: [.f, .e, .highG, .e],
-                e: [.e, .lowA, .f, .lowA],
-                d: [.lowG, .d, .c],
-                b: [.lowG, .d, .lowG, .c, .lowG])
+                    highG: [.e, .lowA, .f, .lowA],
+                    f: [.f, .e, .highG, .e],
+                    e: [.e, .lowA, .f, .lowA],
+                    d: [.lowG, .d, .c],
+                    b: [.lowG, .d, .lowG, .c, .lowG])
             case .lightSpecial: PitchMap(
-                highG: [.e, .lowG, .f, .lowG],
-                d: [.d, .c])
+                    highG: [.e, .lowG, .f, .lowG],
+                    d: [.d, .c])
             case .wideSpecial: PitchMap(setting: [.f, .e, .highG, .e, .f, .e], for: .highG)
             case .lightWideSpecial: PitchMap(setting: [.e, .highG, .e, .f, .e], for: .highG)
             case .strike: PitchMap(
-                f: [.highG, .f, .e],
-                e: [.highG, .e, .lowA],
-                d: [.highG, .d, .lowG],
-                c: [.highG, .c, .lowG],
-                b: [.highG, .b, .lowG],
-                lowA: [.highG, .lowA, .lowG])
+                    f: [.highG, .f, .e],
+                    e: [.highG, .e, .lowA],
+                    d: [.highG, .d, .lowG],
+                    c: [.highG, .c, .lowG],
+                    b: [.highG, .b, .lowG],
+                    lowA: [.highG, .lowA, .lowG])
             case .lightStrike: PitchMap(
-                e: [.e, .lowA],
-                d: [.highG, .d, .c],
-                b: [.b, .lowG])
+                    e: [.e, .lowA],
+                    d: [.highG, .d, .c],
+                    b: [.b, .lowG])
             case .pelay: PitchMap(
-                d: [.highG, .d, .e, .d, .lowG],
-                c: [.highG, .c, .e, .c, .lowG],
-                b: [.highG, .b, .e, .b, .lowG])
+                    d: [.highG, .d, .e, .d, .lowG],
+                    c: [.highG, .c, .e, .c, .lowG],
+                    b: [.highG, .b, .e, .b, .lowG])
             case .birl: PitchMap(setting: [.lowA, .lowG, .lowA, .lowG], for: .lowA)
             case .birlWithHighAGracenote: PitchMap(setting: [.highA, .lowA, .lowG, .lowA, .lowG], for: .lowA)
             case .birlWithHighGGracenote: PitchMap(setting: [.highG, .lowA, .lowG, .lowA, .lowG], for: .lowA)
             case .birlWithoutInitialA: PitchMap(setting: [.lowG, .lowA, .lowG], for: .lowA)
             case .birlWithDGracenote: PitchMap(setting: [.d, .lowA, .lowG, .lowA, .lowG], for: .lowA)
-                // TODO: cadences should be `e4` timing
+            // TODO: cadences should be `e4` timing
             case .cadence: PitchMap(setting: [.highG, .e, .d], for: .lowA ... .c)
             case .cadenceWithHighAGracenote: PitchMap(setting: [.highA, .e, .d], for: .lowA ... .c)
             case .halfCadence: PitchMap(setting: [.highG, .e], for: .lowG ... .d)
@@ -348,4 +349,3 @@ struct Note {
     let embellishment: Embellishment?
     let duration: String
 }
-

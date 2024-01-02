@@ -4,15 +4,16 @@
 //
 
 import Foundation
+import os
 import SwiftTreeSitter
 import TreeSitterBagNotation
 
-// TODO: names and organization
+let logger = Logger(subsystem: "BagNotation", category: "ModelBuilder")
 
 class ModelBuilder {
     let source: String
     private var cursor: TreeCursor!
-    var context: Context = Context()
+    var context = Context()
 
     init(_ source: String) { self.source = source }
 
@@ -44,7 +45,7 @@ class ModelBuilder {
                     }
                 }
             }
-        } 
+        }
     }
 
     func makeModel() throws -> Doc {
@@ -56,7 +57,7 @@ class ModelBuilder {
 
     private func text(at range: TSRange) -> String {
         let buf: [UInt16] = Array(source.utf16)
-        let hmm = buf[Int(range.bytes.lowerBound/2)..<Int(range.bytes.upperBound/2)]
+        let hmm = buf[Int(range.bytes.lowerBound / 2) ..< Int(range.bytes.upperBound / 2)]
         return String(utf16CodeUnits: Array(hmm), count: hmm.count)
     }
 
@@ -88,8 +89,7 @@ class ModelBuilder {
 
     private func expectCursor(is type: String) throws {
         guard let node = cursor.currentNode, node.nodeType == type else {
-            // TODO: is logger available?
-            print("Incorrect node type: have \(cursor.currentNode?.nodeType ?? "nil") expected \(type)")
+            logger.error("Incorrect node type: have \(self.cursor.currentNode?.nodeType ?? "nil") expected \(type)")
             throw ModelParseError.unexpectedNodeType
         }
     }
@@ -115,11 +115,11 @@ class ModelBuilder {
         try expectCursor(is: "header")
         // TODO: set header fields, and context
         return Header(
-            title : "",
-            style : "",
-            composer : "",
+            title: "",
+            style: "",
+            composer: "",
             noteLength: "",
-            timeSignature: "", tags : [])
+            timeSignature: "", tags: [])
     }
 
     private func bodyAtCursor() throws -> [Line] {
