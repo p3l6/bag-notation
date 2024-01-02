@@ -6,6 +6,6 @@
 import Foundation
 
 struct Line {
-//    let props: Properties
+    let context: Context
     let bars: [Bar]
 }

@@ -12,9 +12,9 @@ import TreeSitterBagNotation
 class ModelBuilder {
     let source: String
     private var cursor: TreeCursor!
-//    var context: SomeActiveProps like harmony, tempo, meter etc
+    var context: Context = Context()
 
-    init(_ source: String) { self.source = source}
+    init(_ source: String) { self.source = source }
 
     lazy var tree: Tree = {
         let language = Language(language: tree_sitter_BagNotation())
@@ -47,11 +47,11 @@ class ModelBuilder {
         } 
     }
 
-    func makeModel() -> Doc {
+    func makeModel() throws -> Doc {
 //        modelDebug(from: tree.rootNode!)
 
         cursor = tree.rootNode!.treeCursor
-        return docAtCursor()
+        return try docAtCursor()
     }
 
     private func text(at range: TSRange) -> String {
@@ -64,52 +64,56 @@ class ModelBuilder {
         text(at: node.tsRange)
     }
 
-    private func childrenOfCursor() -> NodeChildren {
+    private func childrenOfCursor() throws -> NodeChildren {
         var childs = NodeChildren()
 
-        cursor.goToFirstChild()
+        guard cursor.goToFirstChild() else { throw ModelParseError.nodeHasNoChildren }
         repeat {
-            switch cursor.currentNode!.nodeType {
-            case "tune": childs.tunes.append(tuneAtCursor())
-            case "line": childs.lines.append(lineAtCursor())
-            case "header": childs.header = headerAtCursor()
-            case "body": childs.lines.append(contentsOf: bodyAtCursor())
-            case "measure": childs.bars.append(barAtCursor())
-            case "note_cluster": childs.notes.append(contentsOf: clusterAtCursor())
-            case "note": childs.notes.append(noteAtCursor())
-            default: break // TODO: throw
+            guard let currentNode = cursor.currentNode else { throw ModelParseError.cursorAtInvalidNode }
+            switch currentNode.nodeType {
+            case "tune": childs.tunes.append(try tuneAtCursor())
+            case "line": childs.lines.append(try lineAtCursor())
+            case "header": childs.header = try headerAtCursor()
+            case "body": childs.lines.append(contentsOf: try bodyAtCursor())
+            case "measure": childs.bars.append(try barAtCursor())
+            case "note_cluster": childs.notes.append(contentsOf: try clusterAtCursor())
+            case "note": childs.notes.append(try noteAtCursor())
+            default: throw ModelParseError.unknownNodeType
             }
         } while cursor.gotoNextSibling()
-        cursor.gotoParent()
+        guard cursor.gotoParent() else { throw ModelParseError.cursorFailedToReturnToParent }
 
         return childs
     }
 
-    private func expectCursor(is type: String) {
-        // TODO: should throw
+    private func expectCursor(is type: String) throws {
         guard let node = cursor.currentNode, node.nodeType == type else {
             // TODO: is logger available?
             print("Incorrect node type: have \(cursor.currentNode?.nodeType ?? "nil") expected \(type)")
-            exit(2)
+            throw ModelParseError.unexpectedNodeType
         }
     }
 
     // MARK: Nodes at cursor
 
-    private func docAtCursor() -> Doc {
-        expectCursor(is: "file")
-        return Doc(tunes: childrenOfCursor().tunes)
+    private func docAtCursor() throws -> Doc {
+        try expectCursor(is: "file")
+        return Doc(tunes: try childrenOfCursor().tunes)
     }
 
-    private func tuneAtCursor() -> Tune {
-        expectCursor(is: "tune")
-        let children = childrenOfCursor()
+    private func tuneAtCursor() throws -> Tune {
+        try expectCursor(is: "tune")
+        context.tuneNumber += 1
+        context.lineNumberInTune = 0
+        // modify/read context before calling children
+        let children = try childrenOfCursor()
         return Tune(header: children.header!,
                     lines: children.lines)
     }
 
-    private func headerAtCursor() -> Header {
-        expectCursor(is: "header")
+    private func headerAtCursor() throws -> Header {
+        try expectCursor(is: "header")
+        // TODO: set header fields, and context
         return Header(
             title : "",
             style : "",
@@ -118,44 +122,49 @@ class ModelBuilder {
             timeSignature: "", tags : [])
     }
 
-    private func bodyAtCursor() -> [Line] {
-        expectCursor(is: "body")
-        return childrenOfCursor().lines
+    private func bodyAtCursor() throws -> [Line] {
+        try expectCursor(is: "body")
+        return try childrenOfCursor().lines
     }
 
-    // TODO: probably don't need the new field names for most grammer elements
-    // TODO: make an enum thingy for field name strings
-    // TODO: also enum the node types (or static string constants)
-    //    uint32_t ts_language_field_count(const TSLanguage *);
-    //    const char *ts_language_field_name_for_id(const TSLanguage *, TSFieldId);
-    //    TSFieldId ts_language_field_id_for_name(const TSLanguage *, const char *, uint32_t);
-
-    private func lineAtCursor() -> Line {
-        expectCursor(is: "line")
-        return Line(bars: childrenOfCursor().bars)
+    private func lineAtCursor() throws -> Line {
+        try expectCursor(is: "line")
+        context.lineNumberInTune += 1
+        context.barNumberInLine = 0
+        return Line(context: context, bars: try childrenOfCursor().bars)
     }
 
-    private func barAtCursor() -> Bar {
-        expectCursor(is: "measure")
-        return Bar(notes: childrenOfCursor().notes)
+    private func barAtCursor() throws -> Bar {
+        try expectCursor(is: "measure")
+        context.barNumberInLine += 1
+        return Bar(context: context, notes: try childrenOfCursor().notes)
     }
 
-    private func clusterAtCursor() -> [Note] {
-        expectCursor(is: "note_cluster")
-        return childrenOfCursor().notes
+    private func clusterAtCursor() throws -> [Note] {
+        try expectCursor(is: "note_cluster")
+        return try childrenOfCursor().notes
     }
 
-    private func noteAtCursor() -> Note {
-        let node = cursor.currentNode!
-        expectCursor(is: "note")
-        // TODO: consider custom node wrappers? or a node extension for these fields properties.
-        let pitchNode = node.child(byFieldName: "pitch")!
+    private func noteAtCursor() throws -> Note {
+        let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
+        try expectCursor(is: "note")
+        let pitchNode = try node.child(byFieldName: "pitch") ?! ModelParseError.nodeMissingField
         let embellismentNode = node.child(byFieldName: "embellishment")
-        let emb: Embellishment? = if let embellismentNode { Embellishment.from(string: text(of: embellismentNode)) } else {nil}
-        return Note(pitch: .from(string: text(of: pitchNode))!,
+        let emb: Embellishment? = if let embellismentNode { try Embellishment.from(string: text(of: embellismentNode)) } else { nil }
+        return Note(context: context,
+                    pitch: try .from(string: text(of: pitchNode)),
                     embellishment: emb,
                     duration: "")
     }
+}
+
+enum ModelParseError: Error {
+    case unknownNodeType
+    case nodeHasNoChildren
+    case cursorFailedToReturnToParent
+    case cursorAtInvalidNode
+    case nodeMissingField
+    case unexpectedNodeType
 }
 
 private struct NodeChildren {
@@ -165,5 +174,3 @@ private struct NodeChildren {
     var bars = [Bar]()
     var notes = [Note]()
 }
-
-// TODO: special operator ?!

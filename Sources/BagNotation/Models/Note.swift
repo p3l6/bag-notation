@@ -3,8 +3,6 @@
 //  Bag Notation
 //
 
-// TODO: upgrade to 5.9 for formatter
-
 // Future embellishments:
 // uxxd: e{fde}d ? No. 24, 63
 // ttg: g{ege}g ? No. 64 (double tap on the piob high g)
@@ -27,7 +25,7 @@ enum Pitch {
     case lowA
     case lowG
 
-    static func from(string: String) -> Pitch? {
+    static func from(string: String) throws -> Pitch {
         switch string {
         case "a": .highA
         case "g": .highG
@@ -38,14 +36,24 @@ enum Pitch {
         case "b": .b
         case "r": .lowA
         case "q": .lowG
-        default: nil
+        default: throw NoteParseError.unknownPitch
         }
     }
+}
 
+func ...(lower: Pitch, upper: Pitch) -> Set<Pitch> {
+    let all: [Pitch] = [.lowG, .lowA, .b, .c, .d, .e, .f, .highG, .highA]
+    let indexes: [Pitch: Int] = Dictionary(uniqueKeysWithValues: all.enumerated().map {(i,v) in (v,i) })
+    return Set(all[indexes[lower]! ... indexes[upper]!])
+}
+
+enum NoteParseError: Error {
+    case unknownPitch
+    case unknownEmbellishment
 }
 
 enum Embellishment: CaseIterable {
-    case highAGracenote // or this could take a pitch arg? hmm, lots simpler?
+    case highAGracenote
     case fGracenote
     case gGracenote
     case eGracenote
@@ -99,7 +107,7 @@ enum Embellishment: CaseIterable {
     }
 
     func gracenotes(for pitch: Pitch) -> [Pitch]? {
-        // move outside enum, fileprivate, with a wrapper here and in pitch
+        // TODO: move outside enum, fileprivate, with a wrapper here and in pitch
         // same with allowedOn
 
         // build a static lookup table at startup
@@ -174,20 +182,15 @@ enum Embellishment: CaseIterable {
 
         }
 
-        func pitchRange(from: Pitch, to: Pitch) -> Set<Pitch> {
-            // TODO: this, but with the range operator instead. custom struct. init with range operator, or single or all or list
-            return Set([.highA])
-        }
-
         let all = Set<Pitch>([.highA, .highG, .f, .e, .d, .c, .b, .lowA, .lowG])
 
         for emb in Embellishment.allCases {
             lookupTable[emb] = switch emb {
-            case .highAGracenote: PitchMap(setting: [.highA], for: pitchRange(from: .lowG, to: .highG))
-            case .fGracenote: PitchMap(setting: [.f], for: pitchRange(from: .lowG, to: .e))
-            case .gGracenote: PitchMap(setting: [.highG], for: pitchRange(from: .lowG, to: .f))
-            case .eGracenote: PitchMap(setting: [.e], for: pitchRange(from: .lowG, to: .d))
-            case .dGracenote: PitchMap(setting: [.d], for: pitchRange(from: .lowG, to: .c))
+            case .highAGracenote: PitchMap(setting: [.highA], for: .lowG ... .highG)
+            case .fGracenote: PitchMap(setting: [.f], for: .lowG ... .e)
+            case .gGracenote: PitchMap(setting: [.highG], for: .lowG ... .f)
+            case .eGracenote: PitchMap(setting: [.e], for: .lowG ... .d)
+            case .dGracenote: PitchMap(setting: [.d], for: .lowG ... .c)
             case .tap: PitchMap(
                 highA: [.highG],
                 highG: [.f],
@@ -250,7 +253,7 @@ enum Embellishment: CaseIterable {
                 d: [.highA, .d, .lowG, .e, .lowG],
                 c: [.highA, .c, .lowG, .d, .lowG],
                 b: [.highA, .b, .lowG, .d, .lowG])
-            case .taorluath: PitchMap(setting: [.lowG, .d, .lowG, .e], for: pitchRange(from: .lowA, to: .d))
+            case .taorluath: PitchMap(setting: [.lowG, .d, .lowG, .e], for: .lowA ... .d)
             case .taorluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e], for: .d)
             case .crunluath: PitchMap(setting: [.lowG, .d, .lowG, .e, .lowA, .f, .lowA], for: .e)
             case .crunluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e, .lowA, .f, .lowA], for: .e)
@@ -286,16 +289,16 @@ enum Embellishment: CaseIterable {
             case .birlWithoutInitialA: PitchMap(setting: [.lowG, .lowA, .lowG], for: .lowA)
             case .birlWithDGracenote: PitchMap(setting: [.d, .lowA, .lowG, .lowA, .lowG], for: .lowA)
                 // TODO: cadences should be `e4` timing
-            case .cadence: PitchMap(setting: [.highG, .e, .d], for: pitchRange(from: .lowA, to: .c))
-            case .cadenceWithHighAGracenote: PitchMap(setting: [.highA, .e, .d], for: pitchRange(from: .lowA, to: .c))
-            case .halfCadence: PitchMap(setting: [.highG, .e], for: pitchRange(from: .lowG, to: .d))
-            case .halfCadenceWithHighAGracenote: PitchMap(setting: [.highA, .e], for: pitchRange(from: .lowG, to: .d))
+            case .cadence: PitchMap(setting: [.highG, .e, .d], for: .lowA ... .c)
+            case .cadenceWithHighAGracenote: PitchMap(setting: [.highA, .e, .d], for: .lowA ... .c)
+            case .halfCadence: PitchMap(setting: [.highG, .e], for: .lowG ... .d)
+            case .halfCadenceWithHighAGracenote: PitchMap(setting: [.highA, .e], for: .lowG ... .d)
             }
         }
         return lookupTable[self]?[pitch]
     }
 
-    static func from(string: String) -> Embellishment? {
+    static func from(string: String) throws -> Embellishment {
         switch string {
         case "x": .gGracenote
         case "px": .dGracenote
@@ -334,12 +337,13 @@ enum Embellishment: CaseIterable {
         case "ln": .halfCadence
         case "un": .halfCadenceWithHighAGracenote
 
-        default: nil
+        default: throw NoteParseError.unknownEmbellishment
         }
     }
 }
 
 struct Note {
+    let context: Context
     let pitch: Pitch
     let embellishment: Embellishment?
     let duration: String

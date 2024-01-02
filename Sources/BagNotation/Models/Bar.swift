@@ -6,5 +6,6 @@
 import Foundation
 
 struct Bar {
+    let context: Context
     let notes: [Note]
 }

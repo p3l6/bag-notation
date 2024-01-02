@@ -22,7 +22,7 @@ final class FileStructure: XCTestCase {
                xrbd xb2tr  | xrbd xb2tr | xfaf xedb | zd3 kd3  :|
             """
         let builder = ModelBuilder(source)
-        let doc = builder.makeModel()
+        let doc = try builder.makeModel()
 
         XCTAssertEqual(doc.tunes.count, 1)
         XCTAssertEqual(doc.tunes[0].lines.count, 4)
