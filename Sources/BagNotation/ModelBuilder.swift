@@ -49,7 +49,7 @@ class ModelBuilder {
     }
 
     func makeModel() throws -> Doc {
-//        modelDebug(from: tree.rootNode!)
+        //        modelDebug(from: tree.rootNode!)
 
         cursor = tree.rootNode!.treeCursor
         return try docAtCursor()
@@ -75,6 +75,13 @@ class ModelBuilder {
             case "tune": childs.tunes.append(try tuneAtCursor())
             case "line": childs.lines.append(try lineAtCursor())
             case "header": childs.header = try headerAtCursor()
+            case "field": 
+                let field = try fieldAtCursor()
+                if let label = field.label {
+                    childs.labeledFields[label] = field.value
+                } else {
+                    childs.unlabeledFields.append(field.value)
+                }
             case "body": childs.lines.append(contentsOf: try bodyAtCursor())
             case "measure": childs.bars.append(try barAtCursor())
             case "note_cluster": childs.notes.append(contentsOf: try clusterAtCursor())
@@ -105,7 +112,6 @@ class ModelBuilder {
         try expectCursor(is: "tune")
         context.tuneNumber += 1
         context.lineNumberInTune = 0
-        // modify/read context before calling children
         let children = try childrenOfCursor()
         return Tune(header: children.header!,
                     lines: children.lines)
@@ -113,13 +119,32 @@ class ModelBuilder {
 
     private func headerAtCursor() throws -> Header {
         try expectCursor(is: "header")
-        // TODO: set header fields, and context
+
+        let fields = try childrenOfCursor().labeledFields
+
+        let titleLine = try fields["title"] ?! ModelParseError.tuneMissingTitle
+        let titleParts = titleLine.split(separator: " by ").map(String.init)
+        let byline: String? = titleParts.count > 1 ? titleParts[1] : nil
+
+        let style = try fields["style"] ?! ModelParseError.tuneMissingStyle
+        let timeSignature = try fields["time"] ?? impliedTimeSignature(for: style) ?! ModelParseError.tuneMissingTimeSignature
+        let noteLength = fields["duration"] ?? "1/8"
+
+        context.timeSignature = timeSignature
+        context.noteLength = noteLength
+
         return Header(
-            title: "",
-            style: "",
-            composer: "",
-            noteLength: "",
-            timeSignature: "", tags: [])
+            title: titleParts[0],
+            style: style,
+            composer: try fields["composer"] ?? byline ?! ModelParseError.tuneMissingComposer,
+            noteLength: noteLength,
+            timeSignature: timeSignature
+        )
+    }
+
+    private func fieldAtCursor() throws -> (label: String?, value: String) {
+        //        each having a vaue and opt label.
+        return ("label", "val")
     }
 
     private func bodyAtCursor() throws -> [Line] {
@@ -165,12 +190,19 @@ enum ModelParseError: Error {
     case cursorAtInvalidNode
     case nodeMissingField
     case unexpectedNodeType
+    
+    case tuneMissingTitle
+    case tuneMissingComposer
+    case tuneMissingStyle
+    case tuneMissingTimeSignature
 }
 
 private struct NodeChildren {
     var tunes = [Tune]()
     var lines = [Line]()
     var header: Header?
+    var labeledFields = [String: String]()
+    var unlabeledFields = [String]()
     var bars = [Bar]()
     var notes = [Note]()
 }
