@@ -24,8 +24,6 @@ final class TuneStructure: XCTestCase {
 
         let doc = try file(from: source)
         XCTAssertEqual(doc.tunes.count, 2)
-        // TODO: multiple blank lines between tunes
-        // TODO: blank lines inside tunes
     }
 
     func testBlankLines() throws {

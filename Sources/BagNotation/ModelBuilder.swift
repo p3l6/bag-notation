@@ -30,9 +30,9 @@ class ModelBuilder {
         var indent = ""
         while let currentNode = cur.currentNode {
             if currentNode.childCount == 0 {
-                print("\(indent)\(currentNode.nodeType!.trimmingCharacters(in: .whitespacesAndNewlines)) \(currentNode.range.byteRange) \(text(of: currentNode).trimmingCharacters(in: .whitespacesAndNewlines))")
+                print("\(indent)\(currentNode.nodeType!.trimmingCharacters(in: .whitespacesAndNewlines)) \(currentNode.pointRange) \(text(of: currentNode).trimmingCharacters(in: .whitespacesAndNewlines))")
             } else {
-                print("\(indent)\(currentNode.nodeType!) \(currentNode.range.byteRange)")
+                print("\(indent)\(currentNode.nodeType!) \(currentNode.pointRange)")
             }
             if cur.goToFirstChild() {
                 indent += " "
@@ -87,6 +87,7 @@ class ModelBuilder {
             case "barline": childs.barlines.append(try barlineAtCursor())
             case "note_cluster": childs.notes.append(contentsOf: try clusterAtCursor())
             case "note": childs.notes.append(try noteAtCursor())
+            case "comment", "tail_comment": break
             default:
                 logger.error("Unknown node type encountered: \(currentNode.nodeType!)")
                 throw ModelParseError.unknownNodeType
