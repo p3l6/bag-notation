@@ -71,11 +71,12 @@ class ModelBuilder {
         guard cursor.goToFirstChild() else { throw ModelParseError.nodeHasNoChildren }
         repeat {
             guard let currentNode = cursor.currentNode else { throw ModelParseError.cursorAtInvalidNode }
+            guard currentNode.isNamed else { continue }
             switch currentNode.nodeType {
             case "tune": childs.tunes.append(try tuneAtCursor())
             case "line": childs.lines.append(try lineAtCursor())
             case "header": childs.header = try headerAtCursor()
-            case "field": 
+            case "field":
                 let field = try fieldAtCursor()
                 if let label = field.label {
                     childs.labeledFields[label] = field.value
@@ -84,9 +85,12 @@ class ModelBuilder {
                 }
             case "body": childs.lines.append(contentsOf: try bodyAtCursor())
             case "measure": childs.bars.append(try barAtCursor())
+            case "barline": childs.barlines.append(try barlineAtCursor())
             case "note_cluster": childs.notes.append(contentsOf: try clusterAtCursor())
             case "note": childs.notes.append(try noteAtCursor())
-            default: throw ModelParseError.unknownNodeType
+            default:
+                logger.error("Unknown node type encountered: \(currentNode.nodeType!)")
+                throw ModelParseError.unknownNodeType
             }
         } while cursor.gotoNextSibling()
         guard cursor.gotoParent() else { throw ModelParseError.cursorFailedToReturnToParent }
@@ -96,7 +100,7 @@ class ModelBuilder {
 
     private func expectCursor(is type: String) throws {
         guard let node = cursor.currentNode, node.nodeType == type else {
-            logger.error("Incorrect node type: have \(self.cursor.currentNode?.nodeType ?? "nil") expected \(type)")
+            logger.error("Incorrect node type: have \(cursor.currentNode?.nodeType ?? "nil") expected \(type)")
             throw ModelParseError.unexpectedNodeType
         }
     }
@@ -138,13 +142,16 @@ class ModelBuilder {
             style: style,
             composer: try fields["composer"] ?? byline ?! ModelParseError.tuneMissingComposer,
             noteLength: noteLength,
-            timeSignature: timeSignature
-        )
+            timeSignature: timeSignature)
     }
 
     private func fieldAtCursor() throws -> (label: String?, value: String) {
-        //        each having a vaue and opt label.
-        return ("label", "val")
+        let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
+        let labelNode = node.child(byFieldName: "label")
+        let valueNode = try node.child(byFieldName: "value") ?! ModelParseError.nodeMissingField
+        let label: String? = if let labelNode { text(of: labelNode) } else { nil }
+        return (label,
+                text(of: valueNode))
     }
 
     private func bodyAtCursor() throws -> [Line] {
@@ -162,12 +169,22 @@ class ModelBuilder {
     private func barAtCursor() throws -> Bar {
         try expectCursor(is: "measure")
         context.barNumberInLine += 1
-        return Bar(context: context, notes: try childrenOfCursor().notes)
+        let children = try childrenOfCursor()
+        let barline = try children.barlines.first ?! ModelParseError.missingBarline
+        return Bar(context: context, notes: children.notes, trailingBarline: barline)
+    }
+
+    private func barlineAtCursor() throws -> String {
+        // TODO: this function could be reused for leaf nodes without other context to extract
+        try expectCursor(is: "barline")
+        let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
+        return text(of: node)
     }
 
     private func clusterAtCursor() throws -> [Note] {
         try expectCursor(is: "note_cluster")
         return try childrenOfCursor().notes
+        // TODO: Model has no way to re-create clusters yet.
     }
 
     private func noteAtCursor() throws -> Note {
@@ -196,6 +213,7 @@ enum ModelParseError: Error {
     case nodeMissingField
     case unexpectedNodeType
     case invalidEmbellishment
+    case missingBarline
 
     case tuneMissingTitle
     case tuneMissingComposer
@@ -210,5 +228,6 @@ private struct NodeChildren {
     var labeledFields = [String: String]()
     var unlabeledFields = [String]()
     var bars = [Bar]()
+    var barlines = [String]()
     var notes = [Note]()
 }

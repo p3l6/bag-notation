@@ -33,7 +33,7 @@ enum Pitch {
     case lowG
 
     func gracenotes(for embellishment: Embellishment) throws -> [Pitch] {
-        return try embellishmentTable[embellishment]?[self] ?! ModelParseError.invalidEmbellishment
+        try embellishmentTable[embellishment]?[self] ?! ModelParseError.invalidEmbellishment
     }
 }
 
@@ -233,7 +233,7 @@ private extension Set<Pitch> {
     static let all = Set<Pitch>([.highA, .highG, .f, .e, .d, .c, .b, .lowA, .lowG])
 }
 
-private var embellishmentTable: [Embellishment: PitchMap] =  [
+private var embellishmentTable: [Embellishment: PitchMap] = [
     .highAGracenote: PitchMap(setting: [.highA], for: .lowG ... .highG),
     .fGracenote: PitchMap(setting: [.f], for: .lowG ... .e),
     .gGracenote: PitchMap(setting: [.highG], for: .lowG ... .f),
@@ -285,7 +285,7 @@ private var embellishmentTable: [Embellishment: PitchMap] =  [
         b: [.highA, .b, .d],
         lowA: [.highA, .lowA, .d],
         lowG: [.highA, .lowG, .d]),
-    .grip: 
+    .grip:
         PitchMap(setting: [.lowG, .d, .lowG], for: .all)
         .setting([.lowG, .e, .lowG], for: .d),
     .rodin: PitchMap(

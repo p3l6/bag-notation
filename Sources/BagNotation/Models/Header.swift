@@ -14,9 +14,13 @@ struct Header {
 }
 
 func impliedTimeSignature(for style: String) -> String? {
-    switch style {
+    switch style.trimmingCharacters(in: .whitespaces) {
     case "jig": "6/8"
-    // TODO:  the rest
+    case "6/8 March": "6/8"
+    // TODO: lower vs upper case?
+    // TODO: enum for sigs?
+    // TODO: enum for known styles?
+    // TODO: the rest
     default: nil
     }
 }
