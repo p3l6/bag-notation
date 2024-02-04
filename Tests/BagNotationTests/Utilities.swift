@@ -6,7 +6,10 @@
 @testable import BagNotation
 
 func file(from source: String) throws -> Doc {
-    try ModelBuilder(source).makeModel()
+    // Swift multiline strings do not end in a newline
+    // This is easier than making sure they exist in every test path.
+    let withFinalNewline = source + "\n"
+    return try ModelBuilder(withFinalNewline).makeModel()
 }
 
 func header(from fragment: String) throws -> Header {

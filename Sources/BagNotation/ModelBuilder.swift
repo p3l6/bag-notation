@@ -49,8 +49,7 @@ class ModelBuilder {
     }
 
     func makeModel() throws -> Doc {
-        //        modelDebug(from: tree.rootNode!)
-
+        // modelDebug(from: tree.rootNode!)
         cursor = tree.rootNode!.treeCursor
         return try docAtCursor()
     }
@@ -100,7 +99,7 @@ class ModelBuilder {
 
     private func expectCursor(is type: String) throws {
         guard let node = cursor.currentNode, node.nodeType == type else {
-            logger.error("Incorrect node type: have \(cursor.currentNode?.nodeType ?? "nil") expected \(type)")
+            logger.error("Incorrect node type: have \(self.cursor.currentNode?.nodeType ?? "nil") expected \(type)")
             throw ModelParseError.unexpectedNodeType
         }
     }
