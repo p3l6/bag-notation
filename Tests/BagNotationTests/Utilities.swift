@@ -14,7 +14,9 @@ func file(from source: String) throws -> Doc {
 
 func header(from fragment: String) throws -> Header {
     try file(from: """
+        ---
         \(fragment)
+        ---
         | abcd |
         """)
     .tunes[0]

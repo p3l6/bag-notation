@@ -150,8 +150,8 @@ class ModelBuilder {
         let labelNode = node.child(byFieldName: "label")
         let valueNode = try node.child(byFieldName: "value") ?! ModelParseError.nodeMissingField
         let label: String? = if let labelNode { text(of: labelNode) } else { nil }
-        return (label,
-                text(of: valueNode))
+        let value = text(of: valueNode).trimmingCharacters(in: .whitespaces)
+        return (label, value)
     }
 
     private func bodyAtCursor() throws -> [Line] {
