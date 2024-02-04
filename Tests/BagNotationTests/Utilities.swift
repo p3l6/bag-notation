@@ -5,15 +5,15 @@
 
 @testable import BagNotation
 
-func file(from source: String) throws -> Doc {
+func makeFile(from source: String) throws -> Doc {
     // Swift multiline strings do not end in a newline
     // This is easier than making sure they exist in every test path.
     let withFinalNewline = source + "\n"
     return try ModelBuilder(withFinalNewline).makeModel()
 }
 
-func header(from fragment: String) throws -> Header {
-    try file(from: """
+func makeHeader(from fragment: String) throws -> Header {
+    try makeFile(from: """
         ---
         \(fragment)
         ---
@@ -23,8 +23,8 @@ func header(from fragment: String) throws -> Header {
     .header
 }
 
-func line(from fragment: String) throws -> Line {
-    try file(from: """
+func makeLine(from fragment: String) throws -> Line {
+    try makeFile(from: """
         ---
         title: test by test
         style: 4/4 March
@@ -35,8 +35,8 @@ func line(from fragment: String) throws -> Line {
     .lines[0]
 }
 
-func bar(from fragment: String) throws -> Bar {
-    try file(from: """
+func makeBar(from fragment: String) throws -> Bar {
+    try makeFile(from: """
         ---
         title: test by test
         style: 4/4 March
@@ -48,8 +48,8 @@ func bar(from fragment: String) throws -> Bar {
     .bars[1]
 }
 
-func noteCluster(from fragment: String) throws -> [Note] {
-    try file(from: """
+func makeNoteCluster(from fragment: String) throws -> [Note] {
+    try makeFile(from: """
         ---
         title: test by test
         style: 4/4 March

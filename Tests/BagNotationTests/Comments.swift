@@ -20,7 +20,7 @@ final class Comments: XCTestCase {
             % end of file comment
             """
 
-        let doc = try file(from: source)
+        let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes.count, 1)
         XCTAssertEqual(doc.tunes[0].lines.count, 1)
 
@@ -39,7 +39,7 @@ final class Comments: XCTestCase {
 
             """
 
-        let doc = try file(from: source)
+        let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes.count, 1)
         XCTAssertEqual(doc.tunes[0].lines.count, 2)
     }
@@ -55,7 +55,7 @@ final class Comments: XCTestCase {
 
             """
 
-        let doc = try file(from: source)
+        let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes.count, 1)
         XCTAssertEqual(doc.tunes[0].lines.count, 2)
     }
@@ -83,7 +83,7 @@ final class Comments: XCTestCase {
 
             """
 
-        let doc = try file(from: source)
+        let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes.count, 2)
         XCTAssertEqual(doc.tunes[0].lines.count, 2)
     }

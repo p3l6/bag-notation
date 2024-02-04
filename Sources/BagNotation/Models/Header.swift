@@ -17,6 +17,7 @@ func impliedTimeSignature(for style: String) -> String? {
     switch style.trimmingCharacters(in: .whitespaces) {
     case "jig": "6/8"
     case "6/8 March": "6/8"
+    case "4/4 March": "4/4"
     // TODO: lower vs upper case?
     // TODO: enum for sigs?
     // TODO: enum for known styles?

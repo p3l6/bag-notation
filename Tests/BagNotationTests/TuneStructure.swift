@@ -22,7 +22,7 @@ final class TuneStructure: XCTestCase {
             [| abc def |]
             """
 
-        let doc = try file(from: source)
+        let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes.count, 2)
     }
 
@@ -45,7 +45,7 @@ final class TuneStructure: XCTestCase {
             |: abc def :|
             """
 
-        let doc = try file(from: source)
+        let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes.count, 1)
         XCTAssertEqual(doc.tunes[0].lines.count, 4)
 
@@ -60,7 +60,7 @@ final class TuneStructure: XCTestCase {
             ---
             """
 
-        let doc = try file(from: source)
+        let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes.count, 1)
         XCTAssertEqual(doc.tunes[0].lines.count, 0)
     }

@@ -14,7 +14,7 @@ final class Headers: XCTestCase {
              style: jig
              """
 
-         let header = try header(from: source)
+         let header = try makeHeader(from: source)
          XCTAssertEqual(header.title, "First tune")
     }
 
@@ -25,7 +25,7 @@ final class Headers: XCTestCase {
              style: jig
              """
 
-        let header = try header(from: source)
+        let header = try makeHeader(from: source)
         XCTAssertEqual(header.composer, "trad")
     }
 
@@ -35,7 +35,7 @@ final class Headers: XCTestCase {
              style: jig
              """
 
-        let header = try header(from: source)
+        let header = try makeHeader(from: source)
         XCTAssertEqual(header.title, "First tune")
         XCTAssertEqual(header.composer, "trad")
     }
@@ -48,7 +48,7 @@ final class Headers: XCTestCase {
              time: 4/4
              """
 
-        let header = try header(from: source)
+        let header = try makeHeader(from: source)
         XCTAssertEqual(header.timeSignature, "4/4")
     }
     
@@ -59,7 +59,7 @@ final class Headers: XCTestCase {
              style: jig
              """
 
-        let header = try header(from: source)
+        let header = try makeHeader(from: source)
         XCTAssertEqual(header.timeSignature, "6/8")
 
 //    TODO: test the rest. let knownTypes = [..:..] ; for known: assertEqual
@@ -71,7 +71,7 @@ final class Headers: XCTestCase {
              style: jig
              """
 
-        XCTAssertThrowsError(try header(from: source))
+        XCTAssertThrowsError(try makeHeader(from: source))
     }
 
     func testMissingComposer() throws {
@@ -80,7 +80,7 @@ final class Headers: XCTestCase {
              style: jig
              """
 
-        XCTAssertThrowsError(try header(from: source))
+        XCTAssertThrowsError(try makeHeader(from: source))
     }
 
     func testMissingStyle() throws {
@@ -89,7 +89,7 @@ final class Headers: XCTestCase {
              time: 4/4
              """
 
-        XCTAssertThrowsError(try header(from: source))
+        XCTAssertThrowsError(try makeHeader(from: source))
     }
 
     func testMissingTimeSignature() throws {
@@ -99,6 +99,6 @@ final class Headers: XCTestCase {
              style: style_without_inferred_time
              """
 
-        XCTAssertThrowsError(try header(from: source))
+        XCTAssertThrowsError(try makeHeader(from: source))
     }
 }
