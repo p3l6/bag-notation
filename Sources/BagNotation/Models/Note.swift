@@ -304,7 +304,7 @@ private var embellishmentTable: [Embellishment: PitchMap] = [
         c: [.highA, .c, .lowG, .d, .lowG],
         b: [.highA, .b, .lowG, .d, .lowG]),
     .taorluath: PitchMap(setting: [.lowG, .d, .lowG, .e], for: .lowA ... .d),
-    .taorluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e], for: .d),
+    .taorluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e], for: .lowA),
     .crunluath: PitchMap(setting: [.lowG, .d, .lowG, .e, .lowA, .f, .lowA], for: .e),
     .crunluathFromD: PitchMap(setting: [.lowG, .b, .lowG, .e, .lowA, .f, .lowA], for: .e),
     .special: PitchMap(

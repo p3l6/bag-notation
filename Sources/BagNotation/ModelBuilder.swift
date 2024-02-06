@@ -197,11 +197,15 @@ class ModelBuilder {
             embellishment = try Embellishment.from(string: text(of: embellismentNode))
             _ = try pitch.gracenotes(for: embellishment!)
         }
+        var duration = ""
+        if let durationNode = node.child(byFieldName: "duration") {
+            duration = text(of: durationNode)
+        }
 
         return Note(context: context,
                     pitch: pitch,
                     embellishment: embellishment,
-                    duration: "")
+                    duration: duration)
     }
 }
 
