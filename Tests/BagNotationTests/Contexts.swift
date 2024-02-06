@@ -7,13 +7,68 @@
 import XCTest
 
 final class Contexts: XCTestCase {
-    func testTuneNumber() throws { XCTFail() }
-    func testLineNumber() throws { XCTFail() }
-    func testBarNumber() throws { XCTFail() }
+    let source = """
+        ---
+        title: First by trad
+        style: jig
+        ---
+        |: abc def | (note: 1/4) abc def | abc def  |
+           abc def | (time: 4/4) abc def | abc def :|
+        [| abc def | abc def | abc def |]
+
+        ---
+        title: Second by trad
+        style: 6/8 March
+        ---
+            [| abc def | abc def | abc def |
+        (h) [| ecd agb | def abc | def abc |
+               abc def | abc def | abc def |]
+        (h)    abc def | abc def | abc def |]
+            [| abc def | abc def | abc def |
+        (h) [| ecd agb | def abc | def abc |
+        (h) [| ecd agb | def abc | def abc |
+               abc def | abc def | abc def |]
+        (h)    abc def | abc def | abc def |]
+        (h)    abc def | abc def | abc def |]
+        """
+
+    func testTuneNumber() throws {
+        let doc = try makeFile(from: source)
+        XCTAssertEqual(doc.tunes[0].lines[0].context.tuneNumber, 1)
+        XCTAssertEqual(doc.tunes[1].lines[0].context.tuneNumber, 2)
+    }
+
+    func testLineNumber() throws {
+        let doc = try makeFile(from: source)
+        XCTAssertEqual(doc.tunes[0].lines[0].context.lineNumberInTune, 1)
+        XCTAssertEqual(doc.tunes[0].lines[1].context.lineNumberInTune, 2)
+        XCTAssertEqual(doc.tunes[1].lines[0].context.lineNumberInTune, 1)
+    }
     
-    func testTimeSignature() throws { XCTFail() }
-    func testNoteLenth() throws { XCTFail() }
+    func testBarNumber() throws {  
+        let doc = try makeFile(from: source)
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].context.barNumberInLine, 1)
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[2].context.barNumberInLine, 3)
+        XCTAssertEqual(doc.tunes[0].lines[1].bars[2].context.barNumberInLine, 3)
+    }
+
+    func testTimeSignature() throws {
+        let doc = try makeFile(from: source)
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.timeSignature, "6/8")
+        XCTAssertEqual(doc.tunes[0].lines[1].bars[1].notes[0].context.timeSignature, "4/4")
+        XCTAssertEqual(doc.tunes[0].lines[2].bars[0].notes[0].context.timeSignature, "4/4")
+        XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.timeSignature, "6/8")
+    }
     
+    func testNoteLenth() throws {
+        let doc = try makeFile(from: source)
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.noteLength, "1/8")
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[1].notes[0].context.noteLength, "1/4")
+        XCTAssertEqual(doc.tunes[0].lines[1].bars[0].notes[0].context.noteLength, "1/4")
+        XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.noteLength, "1/8")
+    }
+
     func testVariation() throws { XCTFail() }
+    
     func testVoice() throws { XCTFail() }
 }

@@ -9,14 +9,14 @@ module.exports = grammar({
     tune: $ => seq($.header, optional($.body)),
     body: $ => repeat1(choice($._blank_line, $.line)),
     line: $ => seq(
-                 optional(seq(optional($.inline_field), $.barline)),
+                 optional(seq(optional($._inline_field), $.barline)),
                  repeat1($.measure),
                  optional($.tail_comment),
                  "\n"),
 
     //// Header and fields
     header: $ => seq("---\n", repeat(seq($.field, "\n")), "---\n"),
-    inline_field: $ => seq("(", $.field, ")"),
+    _inline_field: $ => seq("(", $.field, ")"),
     field: $ => choice(
                   field("value", $.field_content),
                   seq(
@@ -28,7 +28,7 @@ module.exports = grammar({
     //// Measures
     measure: $ => seq(repeat($._measure_content), prec(-1, $.barline)),
     barline: $ => /[\[\]|:]+/, // TODO: optional trailing number or range(-,) or string. no space.
-    _measure_content: $ => choice($.string, prec(-1, $.inline_field), $.note_cluster),
+    _measure_content: $ => choice($.string, prec(-1, $._inline_field), $.note_cluster),
 
     //// Notes and clusters
     note_cluster: $ => seq(repeat1($.note), /[ \t]/),

@@ -75,7 +75,7 @@ class ModelBuilder {
             case "tune": childs.tunes.append(try tuneAtCursor())
             case "line": childs.lines.append(try lineAtCursor())
             case "header": childs.header = try headerAtCursor()
-            case "field":
+            case "field", "inline_field":
                 let field = try fieldAtCursor()
                 if let label = field.label {
                     childs.labeledFields[label] = field.value
@@ -132,7 +132,7 @@ class ModelBuilder {
 
         let style = try fields["style"] ?! ModelParseError.tuneMissingStyle
         let timeSignature = try fields["time"] ?? impliedTimeSignature(for: style) ?! ModelParseError.tuneMissingTimeSignature
-        let noteLength = fields["duration"] ?? "1/8"
+        let noteLength = fields["note"] ?? "1/8"
 
         context.timeSignature = timeSignature
         context.noteLength = noteLength
@@ -151,6 +151,17 @@ class ModelBuilder {
         let valueNode = try node.child(byFieldName: "value") ?! ModelParseError.nodeMissingField
         let label: String? = if let labelNode { text(of: labelNode) } else { nil }
         let value = text(of: valueNode).trimmingCharacters(in: .whitespaces)
+
+        if let label {
+            switch label {
+            case "time": context.timeSignature = value
+            case "note": context.noteLength = value
+            default: break
+            }
+        } else if value == "h" {
+//            context.
+        }
+
         return (label, value)
     }
 

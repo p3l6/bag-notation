@@ -26,6 +26,12 @@ final class LineStructure: XCTestCase {
         XCTAssertEqual(line.bars[0].isPickup, true)
         XCTAssertEqual(line.bars[1].isPickup, false)
         XCTAssertEqual(line.bars[2].isPickup, false)
+
+        line = try makeLine(from: "ef ab cd ad | abc def abc def | ff |")
+        XCTAssertEqual(line.bars.count, 3)
+        XCTAssertEqual(line.bars[0].isPickup, false)
+        XCTAssertEqual(line.bars[1].isPickup, false)
+        XCTAssertEqual(line.bars[2].isPickup, false)
     }
 
     func testBarlineTypes() throws {

@@ -14,8 +14,7 @@ Inline field
   (body (line
     (measure
       (string)
-      (inline_field
-        (field label: (field_content) value: (field_content)))
+      (field label: (field_content) value: (field_content))
       (string)
       (barline))))))
 
@@ -36,8 +35,7 @@ Field without label
   (body (line
     (measure
       (string)
-      (inline_field
-        (field value: (field_content)))
+      (field value: (field_content))
       (string)
       (barline))))))
 
@@ -62,9 +60,9 @@ some label: long value
   (body (line
     (measure
       (string)
-      (inline_field (field value: (field_content)))
+      (field value: (field_content))
       (string)
-      (inline_field (field label: (field_content) value: (field_content)))
+      (field label: (field_content) value: (field_content))
       (barline))))))
 
 
@@ -85,12 +83,12 @@ Leading inline field
   (body
     (line
       (measure
-        (inline_field (field value: (field_content)))
+        (field value: (field_content))
         (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
         (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
         (barline)))
     (line
-      (inline_field (field value: (field_content)))
+      (field value: (field_content))
       (barline)
       (measure
         (note_cluster (note embellishment: (embellishment) pitch: (pitch)))

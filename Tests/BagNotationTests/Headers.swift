@@ -51,7 +51,19 @@ final class Headers: XCTestCase {
         let header = try makeHeader(from: source)
         XCTAssertEqual(header.timeSignature, "4/4")
     }
-    
+
+    func testNoteLength() throws {
+        let source = """
+             title: First
+             composer: trad
+             style: jig
+             time: 4/4
+             note: 1/4
+             """
+        let header = try makeHeader(from: source)
+        XCTAssertEqual(header.noteLength, "1/4")
+    }
+
     func testImpliedTimeSignature() throws {
         let source = """
              title: First
