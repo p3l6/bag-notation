@@ -15,10 +15,21 @@ final class LineStructure: XCTestCase {
         XCTAssertEqual(line.bars.count, 3)
     }
 
-    func testPickupBars() throws { XCTFail() }
-    
+    func testPickupBars() throws {
+        var line = try makeLine(from: "| ab cd ef gg | cc dd cc ff | aa bc de f |")
+        XCTAssertEqual(line.bars[0].isPickup, false)
+        XCTAssertEqual(line.bars[1].isPickup, false)
+        XCTAssertEqual(line.bars[2].isPickup, false)
+
+        line = try makeLine(from: "ef | abc def abc def | ff |")
+        XCTAssertEqual(line.bars.count, 3)
+        XCTAssertEqual(line.bars[0].isPickup, true)
+        XCTAssertEqual(line.bars[1].isPickup, false)
+        XCTAssertEqual(line.bars[2].isPickup, false)
+    }
+
     func testBarlineTypes() throws {
-        var line = try makeLine(from: "[| abc def |: abc def | abc def :| abc def || abc def |]")
+        let line = try makeLine(from: "[| abc def |: abc def | abc def :| abc def || abc def |]")
 //TODO:         XCTAssertEqual(line.leadingBarline, "[|")
         XCTAssertEqual(line.bars[0].trailingBarline, "|:")
         XCTAssertEqual(line.bars[1].trailingBarline, "|")
@@ -27,12 +38,14 @@ final class LineStructure: XCTestCase {
         XCTAssertEqual(line.bars[4].trailingBarline, "|]")
     }
 
-    func testNoteClusters() throws { XCTFail() }
-    func testInlineField() throws { XCTFail() }
-    func testLeadingInlineField() throws { XCTFail() }
+    func testNoteClusters() throws {
+        let line = try makeLine(from: "| abc def | abcdef | ab cd ef |")
+        XCTAssertEqual(line.bars[0].noteClusters.count, 2)
+        XCTAssertEqual(line.bars[1].noteClusters.count, 1)
+        XCTAssertEqual(line.bars[2].noteClusters.count, 3)
+    }
+    
     func testAnnotations() throws { XCTFail() }
-    func testVoices() throws { XCTFail() }
-    func testVariations() throws { XCTFail() }
 
     func testMissingTrailingBarline() throws {
         XCTAssertThrowsError(try makeLine(from: "| abc def | abc def | abc def"))

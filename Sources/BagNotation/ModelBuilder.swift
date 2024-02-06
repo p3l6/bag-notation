@@ -85,7 +85,7 @@ class ModelBuilder {
             case "body": childs.lines.append(contentsOf: try bodyAtCursor())
             case "measure": childs.bars.append(try barAtCursor())
             case "barline": childs.barlines.append(try barlineAtCursor())
-            case "note_cluster": childs.notes.append(contentsOf: try clusterAtCursor())
+            case "note_cluster": childs.noteClusters.append(try clusterAtCursor())
             case "note": childs.notes.append(try noteAtCursor())
             case "comment", "tail_comment": break
             default:
@@ -171,7 +171,7 @@ class ModelBuilder {
         context.barNumberInLine += 1
         let children = try childrenOfCursor()
         let barline = try children.barlines.first ?! ModelParseError.missingBarline
-        return Bar(context: context, notes: children.notes, trailingBarline: barline)
+        return Bar(context: context, noteClusters: children.noteClusters, trailingBarline: barline)
     }
 
     private func barlineAtCursor() throws -> String {
@@ -229,5 +229,6 @@ private struct NodeChildren {
     var unlabeledFields = [String]()
     var bars = [Bar]()
     var barlines = [String]()
+    var noteClusters = [[Note]]()
     var notes = [Note]()
 }

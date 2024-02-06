@@ -59,5 +59,5 @@ func makeNoteCluster(from fragment: String) throws -> [Note] {
     .tunes[0]
     .lines[0]
     .bars[0]
-    .notes
+    .noteClusters[0]
 }
