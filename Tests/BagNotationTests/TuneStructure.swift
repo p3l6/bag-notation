@@ -48,8 +48,6 @@ final class TuneStructure: XCTestCase {
         let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes.count, 1)
         XCTAssertEqual(doc.tunes[0].lines.count, 4)
-
-        // TODO: note in readme: Header may not contain blank lines
     }
 
     func testTunesWithoutNotes() throws {

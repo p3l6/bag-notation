@@ -49,7 +49,7 @@ final class Headers: XCTestCase {
              """
 
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.timeSignature, "4/4")
+        XCTAssertEqual(header.timeSignature, .time44)
     }
 
     func testNoteLength() throws {
@@ -72,7 +72,7 @@ final class Headers: XCTestCase {
              """
 
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.timeSignature, "6/8")
+        XCTAssertEqual(header.timeSignature, .time68)
 
 //    TODO: test the rest. let knownTypes = [..:..] ; for known: assertEqual
     }

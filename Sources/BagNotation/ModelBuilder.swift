@@ -130,16 +130,24 @@ class ModelBuilder {
         let titleParts = titleLine.split(separator: " by ").map(String.init)
         let byline: String? = titleParts.count > 1 ? titleParts[1] : nil
 
-        let style = try fields["style"] ?! ModelParseError.tuneMissingStyle
-        let timeSignature = try fields["time"] ?? impliedTimeSignature(for: style) ?! ModelParseError.tuneMissingTimeSignature
         let noteLength = fields["note"] ?? "1/8"
+        let style = try fields["style"] ?! ModelParseError.tuneMissingStyle
+        let tuneStyle = try TuneStyle(rawValue: style.lowercased()) ?! ModelParseError.invalidStyle
+        
+        var timeSignature: TimeSignature!
+        if let time = fields["time"] {
+            timeSignature = try TimeSignature(rawValue: time) ?! ModelParseError.invalidTimeSignature
+        } else {
+            timeSignature = try tuneStyle.impliedTimeSignature ?! ModelParseError.tuneMissingTimeSignature
+
+        }
 
         context.timeSignature = timeSignature
         context.noteLength = noteLength
 
         return Header(
             title: titleParts[0],
-            style: style,
+            style: tuneStyle,
             composer: try fields["composer"] ?? byline ?! ModelParseError.tuneMissingComposer,
             noteLength: noteLength,
             timeSignature: timeSignature)
@@ -154,7 +162,7 @@ class ModelBuilder {
 
         if let label {
             switch label {
-            case "time": context.timeSignature = value
+            case "time": context.timeSignature = try TimeSignature(rawValue: value) ?! ModelParseError.invalidTimeSignature
             case "note": context.noteLength = value
             default: break
             }
@@ -189,7 +197,8 @@ class ModelBuilder {
         try expectCursor(is: "measure")
         context.barNumberInLine += 1
         let children = try childrenOfCursor()
-        let barline = try children.barlines.first ?! ModelParseError.missingBarline
+        let barlineString = try children.barlines.first ?! ModelParseError.missingBarline
+        let barline = try Barline(rawValue: barlineString) ?! ModelParseError.invalidBarline
         return Bar(context: context, noteClusters: children.noteClusters, trailingBarline: barline)
     }
 
@@ -203,7 +212,6 @@ class ModelBuilder {
     private func clusterAtCursor() throws -> [Note] {
         try expectCursor(is: "note_cluster")
         return try childrenOfCursor().notes
-        // TODO: Model has no way to re-create clusters yet.
     }
 
     private func noteAtCursor() throws -> Note {
@@ -235,13 +243,17 @@ enum ModelParseError: Error {
     case cursorAtInvalidNode
     case nodeMissingField
     case unexpectedNodeType
-    case invalidEmbellishment
     case missingBarline
 
     case tuneMissingTitle
     case tuneMissingComposer
     case tuneMissingStyle
     case tuneMissingTimeSignature
+
+    case invalidEmbellishment
+    case invalidStyle
+    case invalidTimeSignature
+    case invalidBarline
 }
 
 private struct NodeChildren {

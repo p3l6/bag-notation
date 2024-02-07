@@ -7,21 +7,55 @@ import Foundation
 
 struct Header {
     let title: String
-    let style: String
+    let style: TuneStyle
     let composer: String
     let noteLength: String
-    let timeSignature: String
+    let timeSignature: TimeSignature
 }
 
-func impliedTimeSignature(for style: String) -> String? {
-    switch style.trimmingCharacters(in: .whitespaces) {
-    case "jig": "6/8"
-    case "6/8 March": "6/8"
-    case "4/4 March": "4/4"
-    // TODO: lower vs upper case?
-    // TODO: enum for sigs?
-    // TODO: enum for known styles?
-    // TODO: the rest
-    default: nil
+enum TimeSignature: String {
+    case time22 = "2/2"
+    case time24 = "2/4"
+    case time34 = "3/4"
+    case time44 = "4/4"
+    case time54 = "5/4"
+    case time68 = "6/8"
+    case time98 = "9/8"
+    case time128 = "12/8"
+}
+
+// TODO: This should be title case in output
+enum TuneStyle: String {
+    case march = "march"
+    case march24 = "2/4 march"
+    case march34 = "3/4 march"
+    case march44 = "4/4 march"
+    case march54 = "5/4 march"
+    case march68 = "6/8 march"
+    case march98 = "9/8 march"
+    case march128 = "12/8 march"
+
+    case strathspey = "strathspey"
+    case reel = "reel"
+    case hornpipe = "hornpipe"
+    case jig = "jig"
+    case jig98 = "9/8 jig"
+    case jig128 = "12/8 jig"
+
+    case slowAir = "slow air"
+    case slowMarch = "slow march"
+    case piob = "piobaireachd"
+
+    var impliedTimeSignature: TimeSignature? {
+        switch self {
+        case .reel: .time22
+        case .march24, .hornpipe: .time24
+        case .march34: .time34
+        case .march44, .strathspey: .time44
+        case .march68, .jig: .time68
+        case .march98, .jig98: .time98
+        case .march128, .jig128: .time128
+        default: nil
+        }
     }
 }

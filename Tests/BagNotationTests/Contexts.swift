@@ -54,10 +54,10 @@ final class Contexts: XCTestCase {
 
     func testTimeSignature() throws {
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.timeSignature, "6/8")
-        XCTAssertEqual(doc.tunes[0].lines[1].bars[1].notes[0].context.timeSignature, "4/4")
-        XCTAssertEqual(doc.tunes[0].lines[2].bars[0].notes[0].context.timeSignature, "4/4")
-        XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.timeSignature, "6/8")
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.timeSignature, .time68)
+        XCTAssertEqual(doc.tunes[0].lines[1].bars[1].notes[0].context.timeSignature, .time44)
+        XCTAssertEqual(doc.tunes[0].lines[2].bars[0].notes[0].context.timeSignature, .time44)
+        XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.timeSignature, .time68)
     }
     
     func testNoteLenth() throws {

@@ -13,8 +13,8 @@ struct Context {
     var voiceNumber: Int = 0 // melody voice is 0
 //    var variation: Int
 
-    var timeSignature: String = "4/4"
-    var noteLength: String = "1/8"
+    var timeSignature: TimeSignature = .time44 // placeholder will be overwritten
+    var noteLength: String = "1/8" // default note length
 
 //    var filePosition: (line: Int, col: Int, length: Int)
 }

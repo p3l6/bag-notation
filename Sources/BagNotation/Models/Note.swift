@@ -18,6 +18,9 @@ struct Note {
     let context: Context
     let pitch: Pitch
     let embellishment: Embellishment?
+    // TODO: mathematicalize this
+    // maybe fixed point? in 64ths? or 128ths?
+    // use same in context
     let duration: String
 }
 
