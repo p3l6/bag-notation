@@ -68,7 +68,16 @@ final class Contexts: XCTestCase {
         XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.noteLength, "1/8")
     }
 
-    func testVariation() throws { XCTFail() }
-    
-    func testVoice() throws { XCTFail() }
+    func testVariation() throws {
+        XCTFail()
+    }
+
+    func testVoice() throws {
+        let doc = try makeFile(from: source)
+        XCTAssertEqual(doc.tunes[1].lines[0].context.voiceNumber, 0)
+        XCTAssertEqual(doc.tunes[1].lines[1].context.voiceNumber, 1)
+        XCTAssertEqual(doc.tunes[1].lines[2].context.voiceNumber, 0)
+        XCTAssertEqual(doc.tunes[1].lines[3].context.voiceNumber, 1)
+        XCTAssertEqual(doc.tunes[1].lines[6].context.voiceNumber, 2)
+    }
 }

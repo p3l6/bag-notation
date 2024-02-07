@@ -82,8 +82,8 @@ Leading inline field
   (header)
   (body
     (line
+      (field value: (field_content))
       (measure
-        (field value: (field_content))
         (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
         (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
         (barline)))

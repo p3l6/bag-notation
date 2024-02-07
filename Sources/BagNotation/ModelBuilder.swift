@@ -158,8 +158,6 @@ class ModelBuilder {
             case "note": context.noteLength = value
             default: break
             }
-        } else if value == "h" {
-//            context.
         }
 
         return (label, value)
@@ -172,9 +170,19 @@ class ModelBuilder {
 
     private func lineAtCursor() throws -> Line {
         try expectCursor(is: "line")
+        
+        let children = try childrenOfCursor()
+
         context.lineNumberInTune += 1
         context.barNumberInLine = 0
-        return Line(context: context, bars: try childrenOfCursor().bars)
+        if let leadingField = children.unlabeledFields.first,
+           leadingField == "h" {
+            context.voiceNumber += 1
+        } else {
+            context.voiceNumber = 0
+        }
+
+        return Line(context: context, bars: children.bars)
     }
 
     private func barAtCursor() throws -> Bar {

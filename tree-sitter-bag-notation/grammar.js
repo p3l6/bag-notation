@@ -9,7 +9,8 @@ module.exports = grammar({
     tune: $ => seq($.header, optional($.body)),
     body: $ => repeat1(choice($._blank_line, $.line)),
     line: $ => seq(
-                 optional(seq(optional($._inline_field), $.barline)),
+                 optional($._inline_field),
+                 optional($.barline),
                  repeat1($.measure),
                  optional($.tail_comment),
                  "\n"),
