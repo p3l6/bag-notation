@@ -195,23 +195,23 @@ class ModelBuilder {
             context.voiceNumber = 0
         }
 
-        return Line(context: context, bars: children.bars)
+        return Line(context: context, bars: children.bars, leadingBarline: children.barlines.first)
     }
 
     private func barAtCursor() throws -> Bar {
         try expectCursor(is: "measure")
         context.barNumberInLine += 1
         let children = try childrenOfCursor()
-        let barlineString = try children.barlines.first ?! ModelParseError.missingBarline
-        let barline = try Barline(rawValue: barlineString) ?! ModelParseError.invalidBarline
+        let barline = try children.barlines.first ?! ModelParseError.missingBarline
         return Bar(context: context, noteClusters: children.noteClusters, trailingBarline: barline)
     }
 
-    private func barlineAtCursor() throws -> String {
+    private func barlineAtCursor() throws -> Barline {
         // TODO: this function could be reused for leaf nodes without other context to extract
         try expectCursor(is: "barline")
         let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
-        return text(of: node)
+        let barline = try Barline(rawValue: text(of: node)) ?! ModelParseError.invalidBarline
+        return barline
     }
 
     private func clusterAtCursor() throws -> [Note] {
@@ -275,7 +275,7 @@ private struct NodeChildren {
     var labeledFields = [String: String]()
     var unlabeledFields = [String]()
     var bars = [Bar]()
-    var barlines = [String]()
+    var barlines = [Barline]()
     var noteClusters = [[Note]]()
     var notes = [Note]()
 }

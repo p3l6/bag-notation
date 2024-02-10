@@ -36,7 +36,7 @@ final class LineStructure: XCTestCase {
 
     func testBarlineTypes() throws {
         let line = try makeLine(from: "[| abc def |: abc def | abc def :| abc def || abc def |]")
-//TODO:         XCTAssertEqual(line.leadingBarline, .partStart)
+        XCTAssertEqual(line.leadingBarline, .partStart)
         XCTAssertEqual(line.bars[0].trailingBarline, .repeatStart)
         XCTAssertEqual(line.bars[1].trailingBarline, .plain)
         XCTAssertEqual(line.bars[2].trailingBarline, .repeatEnd)
