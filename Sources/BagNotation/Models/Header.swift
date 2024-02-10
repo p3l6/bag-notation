@@ -9,7 +9,7 @@ struct Header {
     let title: String
     let style: TuneStyle
     let composer: String
-    let noteLength: String
+    let noteLength: Duration
     let timeSignature: TimeSignature
 }
 

@@ -14,7 +14,9 @@ struct Context {
 //    var variation: Int
 
     var timeSignature: TimeSignature = .time44 // placeholder will be overwritten
-    var noteLength: String = "1/8" // default note length
+    var noteLength: Duration = .eighth // default note length
 
 //    var filePosition: (line: Int, col: Int, length: Int)
+
+    var rolloverDurationValue = 0 // used to carry dot-cut durations to the following note
 }

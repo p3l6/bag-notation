@@ -18,10 +18,88 @@ struct Note {
     let context: Context
     let pitch: Pitch
     let embellishment: Embellishment?
-    // TODO: mathematicalize this
-    // maybe fixed point? in 64ths? or 128ths?
-    // use same in context
-    let duration: String
+    let duration: Duration
+
+    init(context: Context, pitch: Pitch, embellishment: Embellishment?, duration: Duration) {
+        self.context = context
+        self.pitch = pitch
+        self.embellishment = embellishment
+        self.duration = duration + context.rolloverDurationValue
+    }
+}
+
+struct Duration: Equatable, Comparable {
+    static func < (lhs: Duration, rhs: Duration) -> Bool { lhs.value < rhs.value }
+    static func < (lhs: Duration, rhs: Int) -> Bool { lhs.value < rhs }
+    static func >= (lhs: Duration, rhs: Int) -> Bool { lhs.value >= rhs }
+    static func * (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value * rhs) }
+    static func / (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value / rhs) }
+    static func + (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value + rhs) }
+
+    /// Represented in 192nds of a whole note.
+    ///
+    /// The minimum representable note size is a 64th note.
+    /// It has a the value of 3, so that anything bigger than it
+    /// can also be divided evenly into triplets.
+    let value: Int
+
+    init(value: Int) { self.value = value }
+
+    static func fromString(_ string: String) -> Duration? {
+        switch string {
+        case "1/16": .sixteenth
+        case "1/8": .eighth
+        case "1/4": .quarter
+        case "1/2": .half
+        default: nil
+        }
+    }
+
+    /// Tries to modify this duration by a string such as "2" or "//"
+    func modified(by modifier: String) throws -> (duration:Duration, rollover: Int) {
+        var result = self
+        var rolloverValueNext = 0
+
+        switch modifier {
+        case "2": result = self * 2
+        case "3": result = self * 3
+        case "4": result = self * 4
+        case "5": result = self * 5
+        case "6": result = self * 6
+        case "7": result = self * 7
+        case "8": result = self * 8
+        case "9": result = self * 9
+        case "/": result = self / 2
+        case "//": result = self / 4
+        case "///": result = self / 8
+        case "////": result = self / 16
+        case "3/2": result = self * 3 / 2
+        case ".": 
+            result = self * 3 / 2
+            rolloverValueNext = -(self.value / 2)
+        case ",":
+            result = self / 2
+            rolloverValueNext = self.value / 2
+        case "/.":
+            result = self * 3 / 4
+            rolloverValueNext = -(self.value / 4)
+        case "/,":
+            result = self * 1 / 4
+            rolloverValueNext = self.value * 3 / 4
+        default: throw ModelParseError.invalidNoteLength
+        }
+
+        // TODO: move guard to init? This will have a cascading effect of try.
+        guard result >= 3 else { throw ModelParseError.noteTooShort }
+        return (result, rolloverValueNext)
+    }
+
+    // shorthand constants
+    static let sixteenth = Duration(value: 12)
+    static let eighth = Duration(value: 24)
+    static let quarter = Duration(value: 48)
+    static let half = Duration(value: 96)
+    static let whole = Duration(value: 192)
 }
 
 enum Pitch {

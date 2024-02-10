@@ -62,10 +62,10 @@ final class Contexts: XCTestCase {
     
     func testNoteLenth() throws {
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.noteLength, "1/8")
-        XCTAssertEqual(doc.tunes[0].lines[0].bars[1].notes[0].context.noteLength, "1/4")
-        XCTAssertEqual(doc.tunes[0].lines[1].bars[0].notes[0].context.noteLength, "1/4")
-        XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.noteLength, "1/8")
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.noteLength, .eighth)
+        XCTAssertEqual(doc.tunes[0].lines[0].bars[1].notes[0].context.noteLength, .quarter)
+        XCTAssertEqual(doc.tunes[0].lines[1].bars[0].notes[0].context.noteLength, .quarter)
+        XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.noteLength, .eighth)
     }
 
     func testVariation() throws {

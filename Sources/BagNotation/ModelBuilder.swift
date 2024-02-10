@@ -130,7 +130,6 @@ class ModelBuilder {
         let titleParts = titleLine.split(separator: " by ").map(String.init)
         let byline: String? = titleParts.count > 1 ? titleParts[1] : nil
 
-        let noteLength = fields["note"] ?? "1/8"
         let style = try fields["style"] ?! ModelParseError.tuneMissingStyle
         let tuneStyle = try TuneStyle(rawValue: style.lowercased()) ?! ModelParseError.invalidStyle
         
@@ -139,7 +138,13 @@ class ModelBuilder {
             timeSignature = try TimeSignature(rawValue: time) ?! ModelParseError.invalidTimeSignature
         } else {
             timeSignature = try tuneStyle.impliedTimeSignature ?! ModelParseError.tuneMissingTimeSignature
+        }
 
+        var noteLength: Duration!
+        if let note = fields["note"] {
+            noteLength = try Duration.fromString(note) ?! ModelParseError.invalidNoteLength
+        } else {
+            noteLength = .eighth
         }
 
         context.timeSignature = timeSignature
@@ -163,7 +168,7 @@ class ModelBuilder {
         if let label {
             switch label {
             case "time": context.timeSignature = try TimeSignature(rawValue: value) ?! ModelParseError.invalidTimeSignature
-            case "note": context.noteLength = value
+            case "note": context.noteLength = try Duration.fromString(value) ?! ModelParseError.invalidNoteLength
             default: break
             }
         }
@@ -224,15 +229,20 @@ class ModelBuilder {
             embellishment = try Embellishment.from(string: text(of: embellismentNode))
             _ = try pitch.gracenotes(for: embellishment!)
         }
-        var duration = ""
-        if let durationNode = node.child(byFieldName: "duration") {
-            duration = text(of: durationNode)
+
+        let (duration, rollover) = if let durationNode = node.child(byFieldName: "duration") {
+             try context.noteLength.modified(by: text(of: durationNode))
+        } else {
+            (context.noteLength, 0)
         }
 
-        return Note(context: context,
-                    pitch: pitch,
-                    embellishment: embellishment,
-                    duration: duration)
+        let note =  Note(context: context,
+                         pitch: pitch,
+                         embellishment: embellishment,
+                         duration: duration)
+
+        context.rolloverDurationValue = rollover
+        return note
     }
 }
 
@@ -244,6 +254,7 @@ enum ModelParseError: Error {
     case nodeMissingField
     case unexpectedNodeType
     case missingBarline
+    case noteTooShort
 
     case tuneMissingTitle
     case tuneMissingComposer
@@ -254,6 +265,7 @@ enum ModelParseError: Error {
     case invalidStyle
     case invalidTimeSignature
     case invalidBarline
+    case invalidNoteLength
 }
 
 private struct NodeChildren {

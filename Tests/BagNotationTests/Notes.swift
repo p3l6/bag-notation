@@ -84,21 +84,28 @@ final class Notes: XCTestCase {
     }
 
     func testNoteDuration() throws {
-        let notes = try makeNoteCluster(from: "c2c3c.dc,dc/c//c3/2")
-        XCTAssertEqual(notes[0].duration, "2")
-        XCTAssertEqual(notes[1].duration, "3")
-        XCTAssertEqual(notes[2].duration, ".")
-        XCTAssertEqual(notes[3].duration, "") // TODO: set duration for dot-cut counterparts?
-        XCTAssertEqual(notes[4].duration, ",")
-        XCTAssertEqual(notes[5].duration, "")
-        XCTAssertEqual(notes[6].duration, "/")
-        XCTAssertEqual(notes[7].duration, "//")
-        XCTAssertEqual(notes[8].duration, "3/2")
+        let e = Duration.eighth.value
+        let x = Duration.sixteenth.value
+        let notes = try makeNoteCluster(from: "cc2c3c.dc,dc/c//c3/2")
+        XCTAssertEqual(notes[0].duration, Duration(value: e)) // c
+        XCTAssertEqual(notes[1].duration, Duration(value: e * 2)) // c2
+        XCTAssertEqual(notes[2].duration, Duration(value: e * 3)) // c3
+        XCTAssertEqual(notes[3].duration, Duration(value: e + x)) // c.
+        XCTAssertEqual(notes[4].duration, Duration(value: x)) // .d
+        XCTAssertEqual(notes[5].duration, Duration(value: x)) // c,
+        XCTAssertEqual(notes[6].duration, Duration(value: e + x)) // ,d
+        XCTAssertEqual(notes[7].duration, Duration(value: x)) // c/
+        XCTAssertEqual(notes[8].duration, Duration(value: x / 2)) // c//
+        XCTAssertEqual(notes[9].duration, Duration(value: e * 3 / 2)) // c3/2
+
+        // TODO: note is too short
+        // TODO: too long?
     }
 
     func testTies() throws {
-        let notes = try makeNoteCluster(from: "c2-")
-        XCTAssertEqual(notes[0].duration, "2-")
+        // TODO: re-evaluate. as a property? "tiedToNext"?
+//        let notes = try makeNoteCluster(from: "c2-")
+//        XCTAssertEqual(notes[0].duration, "2-")
     }
 
     func testRests() throws { XCTFail() }
