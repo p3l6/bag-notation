@@ -3,8 +3,6 @@
 //  Bag Notation
 //
 
-import Foundation
-
 struct Context {
     var tuneNumber: Int = 0 // first tune is 1
     var lineNumberInTune: Int = 0 // first line is 1

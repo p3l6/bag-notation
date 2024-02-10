@@ -9,21 +9,21 @@ import XCTest
 final class Headers: XCTestCase {
     func testTitle() throws {
         let source = """
-             title: First tune
-             composer: trad
-             style: jig
-             """
+            title: First tune
+            composer: trad
+            style: jig
+            """
 
-         let header = try makeHeader(from: source)
-         XCTAssertEqual(header.title, "First tune")
+        let header = try makeHeader(from: source)
+        XCTAssertEqual(header.title, "First tune")
     }
 
     func testComposer() throws {
         let source = """
-             title: First
-             composer: trad
-             style: jig
-             """
+            title: First
+            composer: trad
+            style: jig
+            """
 
         let header = try makeHeader(from: source)
         XCTAssertEqual(header.composer, "trad")
@@ -31,9 +31,9 @@ final class Headers: XCTestCase {
 
     func testBylineComposer() throws {
         let source = """
-             title: First tune by trad
-             style: jig
-             """
+            title: First tune by trad
+            style: jig
+            """
 
         let header = try makeHeader(from: source)
         XCTAssertEqual(header.title, "First tune")
@@ -42,11 +42,11 @@ final class Headers: XCTestCase {
 
     func testTimeSignature() throws {
         let source = """
-             title: First
-             composer: trad
-             style: jig
-             time: 4/4
-             """
+            title: First
+            composer: trad
+            style: jig
+            time: 4/4
+            """
 
         let header = try makeHeader(from: source)
         XCTAssertEqual(header.timeSignature, .time44)
@@ -54,22 +54,22 @@ final class Headers: XCTestCase {
 
     func testNoteLength() throws {
         let source = """
-             title: First
-             composer: trad
-             style: jig
-             time: 4/4
-             note: 1/4
-             """
+            title: First
+            composer: trad
+            style: jig
+            time: 4/4
+            note: 1/4
+            """
         let header = try makeHeader(from: source)
         XCTAssertEqual(header.noteLength, .quarter)
     }
 
     func testImpliedTimeSignature() throws {
         let source = """
-             title: First
-             composer: trad
-             style: jig
-             """
+            title: First
+            composer: trad
+            style: jig
+            """
 
         let header = try makeHeader(from: source)
         XCTAssertEqual(header.timeSignature, .time68)
@@ -79,37 +79,37 @@ final class Headers: XCTestCase {
 
     func testMissingTitle() throws {
         let source = """
-             composer: trad
-             style: jig
-             """
+            composer: trad
+            style: jig
+            """
 
         XCTAssertThrowsError(try makeHeader(from: source))
     }
 
     func testMissingComposer() throws {
         let source = """
-             title: First
-             style: jig
-             """
+            title: First
+            style: jig
+            """
 
         XCTAssertThrowsError(try makeHeader(from: source))
     }
 
     func testMissingStyle() throws {
         let source = """
-             title: First
-             time: 4/4
-             """
+            title: First
+            time: 4/4
+            """
 
         XCTAssertThrowsError(try makeHeader(from: source))
     }
 
     func testMissingTimeSignature() throws {
         let source = """
-             title: First
-             composer: trad
-             style: style_without_inferred_time
-             """
+            title: First
+            composer: trad
+            style: style_without_inferred_time
+            """
 
         XCTAssertThrowsError(try makeHeader(from: source))
     }

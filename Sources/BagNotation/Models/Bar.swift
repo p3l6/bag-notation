@@ -3,8 +3,6 @@
 //  Bag Notation
 //
 
-import Foundation
-
 struct Bar {
     let context: Context
     let noteClusters: [[Note]]

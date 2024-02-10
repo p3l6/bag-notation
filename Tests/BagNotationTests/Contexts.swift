@@ -1,5 +1,5 @@
 //
-//  LineStructure.swift
+//  Contexts.swift
 //  Bag Notation
 //
 
@@ -44,8 +44,8 @@ final class Contexts: XCTestCase {
         XCTAssertEqual(doc.tunes[0].lines[1].context.lineNumberInTune, 2)
         XCTAssertEqual(doc.tunes[1].lines[0].context.lineNumberInTune, 1)
     }
-    
-    func testBarNumber() throws {  
+
+    func testBarNumber() throws {
         let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes[0].lines[0].bars[0].context.barNumberInLine, 1)
         XCTAssertEqual(doc.tunes[0].lines[0].bars[2].context.barNumberInLine, 3)
@@ -59,7 +59,7 @@ final class Contexts: XCTestCase {
         XCTAssertEqual(doc.tunes[0].lines[2].bars[0].notes[0].context.timeSignature, .time44)
         XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.timeSignature, .time68)
     }
-    
+
     func testNoteLenth() throws {
         let doc = try makeFile(from: source)
         XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.noteLength, .eighth)

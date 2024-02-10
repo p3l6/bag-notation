@@ -12,8 +12,6 @@
 // ?z: {geAfA}e ?
 // ?z: {afege}f ? in No. 64
 
-import Foundation
-
 struct Note {
     let context: Context
     let pitch: Pitch
@@ -56,7 +54,7 @@ struct Duration: Equatable, Comparable {
     }
 
     /// Tries to modify this duration by a string such as "2" or "//"
-    func modified(by modifier: String) throws -> (duration:Duration, rollover: Int) {
+    func modified(by modifier: String) throws -> (duration: Duration, rollover: Int) {
         var result = self
         var rolloverValueNext = 0
 
@@ -74,18 +72,18 @@ struct Duration: Equatable, Comparable {
         case "///": result = self / 8
         case "////": result = self / 16
         case "3/2": result = self * 3 / 2
-        case ".": 
+        case ".":
             result = self * 3 / 2
-            rolloverValueNext = -(self.value / 2)
+            rolloverValueNext = -(value / 2)
         case ",":
             result = self / 2
-            rolloverValueNext = self.value / 2
+            rolloverValueNext = value / 2
         case "/.":
             result = self * 3 / 4
-            rolloverValueNext = -(self.value / 4)
+            rolloverValueNext = -(value / 4)
         case "/,":
             result = self * 1 / 4
-            rolloverValueNext = self.value * 3 / 4
+            rolloverValueNext = value * 3 / 4
         default: throw ModelParseError.invalidNoteLength
         }
 

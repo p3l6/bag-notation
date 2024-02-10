@@ -50,7 +50,7 @@ final class LineStructure: XCTestCase {
         XCTAssertEqual(line.bars[1].noteClusters.count, 1)
         XCTAssertEqual(line.bars[2].noteClusters.count, 3)
     }
-    
+
     func testAnnotations() throws { XCTFail() }
 
     func testMissingTrailingBarline() throws {

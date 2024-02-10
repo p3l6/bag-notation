@@ -24,7 +24,7 @@ final class Comments: XCTestCase {
         XCTAssertEqual(doc.tunes.count, 1)
         XCTAssertEqual(doc.tunes[0].lines.count, 1)
     }
-    
+
     func testBodyComments() throws {
         let source = """
             ---
@@ -68,7 +68,7 @@ final class Comments: XCTestCase {
             |: abc def :|
 
             % between comment
-            
+
             % another
             % comment
 

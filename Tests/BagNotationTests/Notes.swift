@@ -19,7 +19,7 @@ final class Notes: XCTestCase {
         XCTAssertEqual(notes[7].pitch, .highG)
         XCTAssertEqual(notes[8].pitch, .highA)
     }
-    
+
     func testEmbellishments() throws {
         var notes = try makeNoteCluster(from: "xcpxclxcuxchxc")
         XCTAssertEqual(notes[0].embellishment, .gGracenote)
@@ -109,6 +109,6 @@ final class Notes: XCTestCase {
     }
 
     func testRests() throws { XCTFail() }
-    
+
     func testAccidentals() throws { XCTFail() }
 }

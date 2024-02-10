@@ -3,7 +3,6 @@
 //  Bag Notation
 //
 
-import Foundation
 import os
 import SwiftTreeSitter
 import TreeSitterBagNotation
@@ -132,19 +131,17 @@ class ModelBuilder {
 
         let style = try fields["style"] ?! ModelParseError.tuneMissingStyle
         let tuneStyle = try TuneStyle(rawValue: style.lowercased()) ?! ModelParseError.invalidStyle
-        
-        var timeSignature: TimeSignature!
-        if let time = fields["time"] {
-            timeSignature = try TimeSignature(rawValue: time) ?! ModelParseError.invalidTimeSignature
+
+        var timeSignature: TimeSignature! = if let time = fields["time"] {
+            try TimeSignature(rawValue: time) ?! ModelParseError.invalidTimeSignature
         } else {
-            timeSignature = try tuneStyle.impliedTimeSignature ?! ModelParseError.tuneMissingTimeSignature
+            try tuneStyle.impliedTimeSignature ?! ModelParseError.tuneMissingTimeSignature
         }
 
-        var noteLength: Duration!
-        if let note = fields["note"] {
-            noteLength = try Duration.fromString(note) ?! ModelParseError.invalidNoteLength
+        var noteLength: Duration! = if let note = fields["note"] {
+            try Duration.fromString(note) ?! ModelParseError.invalidNoteLength
         } else {
-            noteLength = .eighth
+            .eighth
         }
 
         context.timeSignature = timeSignature
@@ -183,7 +180,7 @@ class ModelBuilder {
 
     private func lineAtCursor() throws -> Line {
         try expectCursor(is: "line")
-        
+
         let children = try childrenOfCursor()
 
         context.lineNumberInTune += 1
@@ -231,15 +228,15 @@ class ModelBuilder {
         }
 
         let (duration, rollover) = if let durationNode = node.child(byFieldName: "duration") {
-             try context.noteLength.modified(by: text(of: durationNode))
+            try context.noteLength.modified(by: text(of: durationNode))
         } else {
             (context.noteLength, 0)
         }
 
-        let note =  Note(context: context,
-                         pitch: pitch,
-                         embellishment: embellishment,
-                         duration: duration)
+        let note = Note(context: context,
+                        pitch: pitch,
+                        embellishment: embellishment,
+                        duration: duration)
 
         context.rolloverDurationValue = rollover
         return note

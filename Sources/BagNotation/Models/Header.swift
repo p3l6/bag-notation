@@ -3,8 +3,6 @@
 //  Bag Notation
 //
 
-import Foundation
-
 struct Header {
     let title: String
     let style: TuneStyle
@@ -26,7 +24,7 @@ enum TimeSignature: String {
 
 // TODO: This should be title case in output
 enum TuneStyle: String {
-    case march = "march"
+    case march
     case march24 = "2/4 march"
     case march34 = "3/4 march"
     case march44 = "4/4 march"
@@ -35,10 +33,10 @@ enum TuneStyle: String {
     case march98 = "9/8 march"
     case march128 = "12/8 march"
 
-    case strathspey = "strathspey"
-    case reel = "reel"
-    case hornpipe = "hornpipe"
-    case jig = "jig"
+    case strathspey
+    case reel
+    case hornpipe
+    case jig
     case jig98 = "9/8 jig"
     case jig128 = "12/8 jig"
 
