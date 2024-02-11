@@ -3,6 +3,6 @@
 //  Bag Notation
 //
 
-struct Doc {
+public struct Doc {
     let tunes: [Tune]
 }

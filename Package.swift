@@ -14,31 +14,37 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
     ],
     targets: [
-        .executableTarget(name: "Bag", dependencies: [
-            "BagNotation",
-            .product(name: "ArgumentParser", package: "swift-argument-parser")
-        ]),
-        .target(name: "BagNotation", dependencies: [
-            "SwiftTreeSitter",
-            "TreeSitterBagNotation"
-        ]),
+        .executableTarget(
+            name: "bag",
+            dependencies: [
+                "BagNotation",
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ],
+            path: "Sources/Bag"),
+        .target(
+            name: "BagNotation",
+            dependencies: [
+                "SwiftTreeSitter",
+                "TreeSitterBagNotation"
+            ]),
         .testTarget(name: "BagNotationTests", dependencies: ["BagNotation"]),
-        .target(name: "TreeSitterBagNotation",
-                path: "tree-sitter-bag-notation",
-                exclude: [
-                    "binding.gyp",
-                    "bindings",
-                    "Cargo.toml",
-                    "corpus",
-                    "grammar.js",
-                    "package.json",
-                    "package-lock.json",
-                    "node_modules",
-                    "src/grammar.json",
-                    "src/node-types.json"
-                ],
-                sources: ["src/parser.c"],
-                resources: [.copy("queries")],
-                publicHeadersPath: "bindings/swift",
-                cSettings: [.headerSearchPath("src")])
+        .target(
+            name: "TreeSitterBagNotation",
+            path: "tree-sitter-bag-notation",
+            exclude: [
+                "binding.gyp",
+                "bindings",
+                "Cargo.toml",
+                "corpus",
+                "grammar.js",
+                "package.json",
+                "package-lock.json",
+                "node_modules",
+                "src/grammar.json",
+                "src/node-types.json"
+            ],
+            sources: ["src/parser.c"],
+            resources: [.copy("queries")],
+            publicHeadersPath: "bindings/swift",
+            cSettings: [.headerSearchPath("src")])
     ])

@@ -3,7 +3,7 @@
 //  Bag Notation
 //
 
-struct Line {
+public struct Line {
     let context: Context
     let bars: [Bar]
     let leadingBarline: Barline?

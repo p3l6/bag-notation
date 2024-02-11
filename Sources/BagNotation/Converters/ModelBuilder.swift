@@ -7,14 +7,14 @@ import os
 import SwiftTreeSitter
 import TreeSitterBagNotation
 
-let logger = Logger(subsystem: "BagNotation", category: "ModelBuilder")
+private let logger = Logger(subsystem: "BagNotation", category: "ModelBuilder")
 
-class ModelBuilder {
+public class ModelBuilder {
     let source: String
     private var cursor: TreeCursor!
     var context = Context()
 
-    init(_ source: String) { self.source = source }
+    public init(_ source: String) { self.source = source }
 
     lazy var tree: Tree = {
         let language = Language(language: tree_sitter_BagNotation())
@@ -47,7 +47,7 @@ class ModelBuilder {
         }
     }
 
-    func makeModel() throws -> Doc {
+    public func makeModel() throws -> Doc {
         // modelDebug(from: tree.rootNode!)
         cursor = tree.rootNode!.treeCursor
         return try docAtCursor()

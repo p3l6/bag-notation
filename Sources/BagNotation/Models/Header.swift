@@ -3,7 +3,7 @@
 //  Bag Notation
 //
 
-struct Header {
+public struct Header {
     let title: String
     let style: TuneStyle
     let composer: String
@@ -11,7 +11,7 @@ struct Header {
     let timeSignature: TimeSignature
 }
 
-enum TimeSignature: String {
+public enum TimeSignature: String {
     case time22 = "2/2"
     case time24 = "2/4"
     case time34 = "3/4"
@@ -23,7 +23,7 @@ enum TimeSignature: String {
 }
 
 // TODO: This should be title case in output
-enum TuneStyle: String {
+public enum TuneStyle: String {
     case march
     case march24 = "2/4 march"
     case march34 = "3/4 march"

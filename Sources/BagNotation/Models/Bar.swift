@@ -3,7 +3,7 @@
 //  Bag Notation
 //
 
-struct Bar {
+public struct Bar {
     let context: Context
     let noteClusters: [[Note]]
     let trailingBarline: Barline
@@ -14,7 +14,7 @@ struct Bar {
     }
 }
 
-enum Barline: String {
+public enum Barline: String {
     case plain = "|"
     case repeatStart = "|:"
     case repeatEnd = ":|"

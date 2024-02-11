@@ -3,7 +3,7 @@
 //  Bag Notation
 //
 
-struct Tune {
+public struct Tune {
     let header: Header
     let lines: [Line]
 }

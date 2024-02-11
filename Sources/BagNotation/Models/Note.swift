@@ -12,7 +12,7 @@
 // ?z: {geAfA}e ?
 // ?z: {afege}f ? in No. 64
 
-struct Note {
+public struct Note {
     let context: Context
     let pitch: Pitch
     let embellishment: Embellishment?
@@ -26,13 +26,13 @@ struct Note {
     }
 }
 
-struct Duration: Equatable, Comparable {
-    static func < (lhs: Duration, rhs: Duration) -> Bool { lhs.value < rhs.value }
-    static func < (lhs: Duration, rhs: Int) -> Bool { lhs.value < rhs }
-    static func >= (lhs: Duration, rhs: Int) -> Bool { lhs.value >= rhs }
-    static func * (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value * rhs) }
-    static func / (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value / rhs) }
-    static func + (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value + rhs) }
+public struct Duration: Equatable, Comparable {
+    public static func < (lhs: Duration, rhs: Duration) -> Bool { lhs.value < rhs.value }
+    public static func < (lhs: Duration, rhs: Int) -> Bool { lhs.value < rhs }
+    public static func >= (lhs: Duration, rhs: Int) -> Bool { lhs.value >= rhs }
+    public static func * (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value * rhs) }
+    public static func / (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value / rhs) }
+    public static func + (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value + rhs) }
 
     /// Represented in 192nds of a whole note.
     ///
@@ -100,7 +100,7 @@ struct Duration: Equatable, Comparable {
     static let whole = Duration(value: 192)
 }
 
-enum Pitch {
+public enum Pitch {
     case highA
     case highG
     case f
@@ -116,7 +116,7 @@ enum Pitch {
     }
 }
 
-enum Embellishment: CaseIterable {
+public enum Embellishment: CaseIterable {
     case highAGracenote
     case fGracenote
     case gGracenote
@@ -164,7 +164,7 @@ enum Embellishment: CaseIterable {
     case halfCadenceWithHighAGracenote
 }
 
-enum NoteParseError: Error {
+public enum NoteParseError: Error {
     case unknownPitch
     case unknownEmbellishment
 }
