@@ -22,27 +22,28 @@ public struct Note {
         self.context = context
         self.pitch = pitch
         self.embellishment = embellishment
-        self.duration = duration + context.rolloverDurationValue
+        self.duration = duration
     }
 }
 
-public struct Duration: Equatable, Comparable {
-    public static func < (lhs: Duration, rhs: Duration) -> Bool { lhs.value < rhs.value }
-    public static func < (lhs: Duration, rhs: Int) -> Bool { lhs.value < rhs }
-    public static func >= (lhs: Duration, rhs: Int) -> Bool { lhs.value >= rhs }
-    public static func * (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value * rhs) }
-    public static func / (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value / rhs) }
-    public static func + (lhs: Duration, rhs: Int) -> Duration { Duration(value: lhs.value + rhs) }
+public enum Duration: Comparable {
+    // shortest to longest, for auto-comparable conformance
+    case sixtyfourth
+    case sixtyfourthDotted
+    case thirtysecond
+    case thirtysecondDotted
+    case sixteenth
+    case sixteenthDotted
+    case eighth
+    case eighthDotted
+    case quarter
+    case quarterDotted
+    case half
+    case halfDotted
+    case whole
+    case wholeDotted
 
-    /// Represented in 192nds of a whole note.
-    ///
-    /// The minimum representable note size is a 64th note.
-    /// It has a the value of 3, so that anything bigger than it
-    /// can also be divided evenly into triplets.
-    let value: Int
-
-    init(value: Int) { self.value = value }
-
+    // TODO:  rename this, it is specifically for base note durations
     static func fromString(_ string: String) -> Duration? {
         switch string {
         case "1/16": .sixteenth
@@ -53,51 +54,82 @@ public struct Duration: Equatable, Comparable {
         }
     }
 
-    /// Tries to modify this duration by a string such as "2" or "//"
-    func modified(by modifier: String) throws -> (duration: Duration, rollover: Int) {
-        var result = self
-        var rolloverValueNext = 0
-
-        switch modifier {
-        case "2": result = self * 2
-        case "3": result = self * 3
-        case "4": result = self * 4
-        case "5": result = self * 5
-        case "6": result = self * 6
-        case "7": result = self * 7
-        case "8": result = self * 8
-        case "9": result = self * 9
-        case "/": result = self / 2
-        case "//": result = self / 4
-        case "///": result = self / 8
-        case "////": result = self / 16
-        case "3/2": result = self * 3 / 2
-        case ".":
-            result = self * 3 / 2
-            rolloverValueNext = -(value / 2)
-        case ",":
-            result = self / 2
-            rolloverValueNext = value / 2
-        case "/.":
-            result = self * 3 / 4
-            rolloverValueNext = -(value / 4)
-        case "/,":
-            result = self * 1 / 4
-            rolloverValueNext = value * 3 / 4
-        default: throw ModelParseError.invalidNoteLength
+    func doubled() throws -> Duration {
+        switch self {
+        case .wholeDotted: throw ModelParseError.noteTooLong
+        case .whole: throw ModelParseError.noteTooLong
+        case .halfDotted: .wholeDotted
+        case .half: .whole
+        case .quarterDotted: .halfDotted
+        case .quarter: .half
+        case .eighthDotted: .quarterDotted
+        case .eighth: .quarter
+        case .sixteenthDotted: .eighthDotted
+        case .sixteenth: .eighth
+        case .thirtysecondDotted: .sixteenthDotted
+        case .thirtysecond: .sixteenth
+        case .sixtyfourthDotted: .thirtysecondDotted
+        case .sixtyfourth: .thirtysecond
         }
-
-        // TODO: move guard to init? This will have a cascading effect of try.
-        guard result >= 3 else { throw ModelParseError.noteTooShort }
-        return (result, rolloverValueNext)
     }
 
-    // shorthand constants
-    static let sixteenth = Duration(value: 12)
-    static let eighth = Duration(value: 24)
-    static let quarter = Duration(value: 48)
-    static let half = Duration(value: 96)
-    static let whole = Duration(value: 192)
+    func cut() throws -> Duration {
+        switch self {
+        case .wholeDotted: .halfDotted
+        case .whole: .half
+        case .halfDotted: .quarterDotted
+        case .half: .quarter
+        case .quarterDotted: .eighthDotted
+        case .quarter: .eighth
+        case .eighthDotted: .sixteenthDotted
+        case .eighth: .sixteenth
+        case .sixteenthDotted: .thirtysecondDotted
+        case .sixteenth: .thirtysecond
+        case .thirtysecondDotted: .sixtyfourthDotted
+        case .thirtysecond: .sixtyfourth
+        case .sixtyfourthDotted: throw ModelParseError.noteTooShort
+        case .sixtyfourth: throw ModelParseError.noteTooShort
+        }
+    }
+
+    func dotted() throws -> Duration {
+        switch self {
+        case .wholeDotted: throw ModelParseError.noteAlreadyDotted
+        case .whole: .wholeDotted
+        case .halfDotted: throw ModelParseError.noteAlreadyDotted
+        case .half: .halfDotted
+        case .quarterDotted: throw ModelParseError.noteAlreadyDotted
+        case .quarter: .quarterDotted
+        case .eighthDotted: throw ModelParseError.noteAlreadyDotted
+        case .eighth: .eighthDotted
+        case .sixteenthDotted: throw ModelParseError.noteAlreadyDotted
+        case .sixteenth: .sixteenthDotted
+        case .thirtysecondDotted: throw ModelParseError.noteAlreadyDotted
+        case .thirtysecond: .thirtysecondDotted
+        case .sixtyfourthDotted: throw ModelParseError.noteAlreadyDotted
+        case .sixtyfourth: .sixtyfourthDotted
+        }
+    }
+
+    /// Tries to modify this duration by a string such as "+" or "//"
+    func modified(by modifier: String) throws -> Duration {
+        switch modifier {
+        case "+": try doubled()
+        case "+.": try doubled().dotted()
+        case "++": try doubled().doubled()
+        case "++.": try doubled().doubled().dotted()
+        case "+++": try doubled().doubled().doubled()
+        case "+++.": try doubled().doubled().doubled().dotted()
+        case "++++": try doubled().doubled().doubled().doubled()
+        case "/": try cut()
+        case "//": try cut().cut()
+        case "///": try cut().cut().cut()
+        case "////": try cut().cut().cut().cut()
+        case ".": try dotted()
+        case "/.": try cut().dotted()
+        default: throw ModelParseError.invalidNoteLength
+        }
+    }
 }
 
 public enum Pitch {

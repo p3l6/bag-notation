@@ -32,7 +32,7 @@ extension Header: AbcSourceConverting {
         C:\(composer)
         R:\(style.abcSource())
         M:\(timeSignature.rawValue)
-        L:\(noteLength)
+        L:1/8
         K:HP
         """
     }
@@ -79,6 +79,7 @@ extension Note: AbcSourceConverting {
             abc += "{\(gracenotes.mapToAbc())}"
         }
         abc += pitch.abcSource()
+        abc += duration.abcSource()
         return abc
     }
 }
@@ -99,11 +100,26 @@ extension Pitch: AbcSourceConverting {
     }
 }
 
-// extension Duration: AbcSourceConverting {
-//    fileprivate func abcSource() -> String {
-//
-//    }
-// }
+ extension Duration: AbcSourceConverting {
+    fileprivate func abcSource() -> String {
+        switch self {
+        case .sixtyfourth: "///"
+        case .sixtyfourthDotted: "3/16"
+        case .thirtysecond: "//"
+        case .thirtysecondDotted: "3/8"
+        case .sixteenth: "/"
+        case .sixteenthDotted: "3/4"
+        case .eighth: "" // The constant base note length
+        case .eighthDotted: "3/2"
+        case .quarter: "2"
+        case .quarterDotted: "3"
+        case .half: "4"
+        case .halfDotted: "6"
+        case .whole: "8"
+        case .wholeDotted: "12"
+        }
+    }
+ }
 
 private protocol AbcSourceConverting {
     func abcSource() -> String

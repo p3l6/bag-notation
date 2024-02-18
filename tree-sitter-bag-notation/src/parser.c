@@ -465,6 +465,9 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '}') ADVANCE(22);
       if (lookahead == '\t' ||
           lookahead == ' ') SKIP(0)
+      if (lookahead == '+' ||
+          lookahead == '.' ||
+          lookahead == '/') ADVANCE(27);
       if (lookahead == '[' ||
           lookahead == ']' ||
           lookahead == '|') ADVANCE(18);
@@ -478,7 +481,6 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
           lookahead == 'p' ||
           ('t' <= lookahead && lookahead <= 'x') ||
           lookahead == 'z') ADVANCE(20);
-      if ((',' <= lookahead && lookahead <= '9')) ADVANCE(27);
       END_STATE();
     case 1:
       if (lookahead == '\t') SKIP(1)
@@ -509,6 +511,8 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '{') ADVANCE(21);
       if (lookahead == '\t' ||
           lookahead == ' ') ADVANCE(19);
+      if (lookahead == '+' ||
+          ('-' <= lookahead && lookahead <= '/')) ADVANCE(27);
       if (('a' <= lookahead && lookahead <= 'g') ||
           lookahead == 'q' ||
           lookahead == 'r') ADVANCE(23);
@@ -519,7 +523,6 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
           lookahead == 'p' ||
           ('t' <= lookahead && lookahead <= 'x') ||
           lookahead == 'z') ADVANCE(20);
-      if ((',' <= lookahead && lookahead <= '9')) ADVANCE(27);
       END_STATE();
     case 7:
       if (lookahead == '\t' ||
@@ -627,21 +630,27 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
     case 24:
       ACCEPT_TOKEN(sym_duration);
       if (lookahead == '\n') ADVANCE(11);
-      if ((',' <= lookahead && lookahead <= '9')) ADVANCE(27);
+      if (lookahead == '+' ||
+          ('-' <= lookahead && lookahead <= '/')) ADVANCE(27);
       END_STATE();
     case 25:
       ACCEPT_TOKEN(sym_duration);
       if (lookahead == '-') ADVANCE(24);
-      if ((',' <= lookahead && lookahead <= '9')) ADVANCE(27);
+      if (lookahead == '+' ||
+          lookahead == '.' ||
+          lookahead == '/') ADVANCE(27);
       END_STATE();
     case 26:
       ACCEPT_TOKEN(sym_duration);
       if (lookahead == '-') ADVANCE(25);
-      if ((',' <= lookahead && lookahead <= '9')) ADVANCE(27);
+      if (lookahead == '+' ||
+          lookahead == '.' ||
+          lookahead == '/') ADVANCE(27);
       END_STATE();
     case 27:
       ACCEPT_TOKEN(sym_duration);
-      if ((',' <= lookahead && lookahead <= '9')) ADVANCE(27);
+      if (lookahead == '+' ||
+          ('-' <= lookahead && lookahead <= '/')) ADVANCE(27);
       END_STATE();
     case 28:
       ACCEPT_TOKEN(anon_sym_DQUOTE);

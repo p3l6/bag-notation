@@ -85,7 +85,7 @@ Durations
 ---
 ---
 
-g2 f,e r.b c3/2 d- |
+g+ f/e. r.b/ c+. d- |
 
 ----->>
 
@@ -97,10 +97,10 @@ g2 f,e r.b c3/2 d- |
         (note (pitch) (duration)))
       (note_cluster
         (note (pitch) (duration))
-        (note (pitch)))
+        (note (pitch) (duration)))
       (note_cluster
         (note (pitch) (duration))
-        (note (pitch)))
+        (note (pitch) (duration)))
       (note_cluster
         (note (pitch) (duration)))
       (note_cluster

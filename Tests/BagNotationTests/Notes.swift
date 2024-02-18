@@ -84,19 +84,17 @@ final class Notes: XCTestCase {
     }
 
     func testNoteDuration() throws {
-        let e = Duration.eighth.value
-        let x = Duration.sixteenth.value
-        let notes = try makeNoteCluster(from: "cc2c3c.dc,dc/c//c3/2")
-        XCTAssertEqual(notes[0].duration, Duration(value: e)) // c
-        XCTAssertEqual(notes[1].duration, Duration(value: e * 2)) // c2
-        XCTAssertEqual(notes[2].duration, Duration(value: e * 3)) // c3
-        XCTAssertEqual(notes[3].duration, Duration(value: e + x)) // c.
-        XCTAssertEqual(notes[4].duration, Duration(value: x)) // .d
-        XCTAssertEqual(notes[5].duration, Duration(value: x)) // c,
-        XCTAssertEqual(notes[6].duration, Duration(value: e + x)) // ,d
-        XCTAssertEqual(notes[7].duration, Duration(value: x)) // c/
-        XCTAssertEqual(notes[8].duration, Duration(value: x / 2)) // c//
-        XCTAssertEqual(notes[9].duration, Duration(value: e * 3 / 2)) // c3/2
+        let notes = try makeNoteCluster(from: "cc+c+.c.d/c++d/.c/c//c+++")
+        XCTAssertEqual(notes[0].duration, .eighth)
+        XCTAssertEqual(notes[1].duration, .quarter)
+        XCTAssertEqual(notes[2].duration, .quarterDotted)
+        XCTAssertEqual(notes[3].duration, .eighthDotted)
+        XCTAssertEqual(notes[4].duration, .sixteenth)
+        XCTAssertEqual(notes[5].duration, .half)
+        XCTAssertEqual(notes[6].duration, .sixteenthDotted)
+        XCTAssertEqual(notes[7].duration, .sixteenth)
+        XCTAssertEqual(notes[8].duration, .thirtysecond)
+        XCTAssertEqual(notes[9].duration, .whole)
 
         // TODO: note is too short
         // TODO: too long?

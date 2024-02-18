@@ -87,6 +87,9 @@ public class ModelBuilder {
             case "note_cluster": childs.noteClusters.append(try clusterAtCursor())
             case "note": childs.notes.append(try noteAtCursor())
             case "comment", "tail_comment": break
+            case "ERROR": 
+                logger.error("File could not be parsed at line \(currentNode.pointRange.lowerBound.row+1) col \(currentNode.pointRange.lowerBound.column/2)")
+                throw ModelParseError.fileParseError
             default:
                 logger.error("Unknown node type encountered: \(currentNode.nodeType!)")
                 throw ModelParseError.unknownNodeType
@@ -132,13 +135,13 @@ public class ModelBuilder {
         let style = try fields["style"] ?! ModelParseError.tuneMissingStyle
         let tuneStyle = try TuneStyle(rawValue: style.lowercased()) ?! ModelParseError.invalidStyle
 
-        var timeSignature: TimeSignature! = if let time = fields["time"] {
+        let timeSignature: TimeSignature! = if let time = fields["time"] {
             try TimeSignature(rawValue: time) ?! ModelParseError.invalidTimeSignature
         } else {
             try tuneStyle.impliedTimeSignature ?! ModelParseError.tuneMissingTimeSignature
         }
 
-        var noteLength: Duration! = if let note = fields["note"] {
+        let noteLength: Duration! = if let note = fields["note"] {
             try Duration.fromString(note) ?! ModelParseError.invalidNoteLength
         } else {
             .eighth
@@ -227,10 +230,10 @@ public class ModelBuilder {
             _ = try pitch.gracenotes(for: embellishment!)
         }
 
-        let (duration, rollover) = if let durationNode = node.child(byFieldName: "duration") {
+        let duration = if let durationNode = node.child(byFieldName: "duration") {
             try context.noteLength.modified(by: text(of: durationNode))
         } else {
-            (context.noteLength, 0)
+            context.noteLength
         }
 
         let note = Note(context: context,
@@ -238,12 +241,12 @@ public class ModelBuilder {
                         embellishment: embellishment,
                         duration: duration)
 
-        context.rolloverDurationValue = rollover
         return note
     }
 }
 
 enum ModelParseError: Error {
+    case fileParseError
     case unknownNodeType
     case nodeHasNoChildren
     case cursorFailedToReturnToParent
@@ -252,6 +255,8 @@ enum ModelParseError: Error {
     case unexpectedNodeType
     case missingBarline
     case noteTooShort
+    case noteTooLong
+    case noteAlreadyDotted
 
     case tuneMissingTitle
     case tuneMissingComposer

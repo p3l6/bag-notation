@@ -15,6 +15,4 @@ public struct Context {
     var noteLength: Duration = .eighth // default note length
 
 //    var filePosition: (line: Int, col: Int, length: Int)
-
-    var rolloverDurationValue = 0 // used to carry dot-cut durations to the following note
 }

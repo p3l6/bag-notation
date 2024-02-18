@@ -41,7 +41,7 @@ module.exports = grammar({
     embellishment: $ => /[phluxtvwzkn]+/,
     literal_embellishment: $ => seq("{", repeat1($.pitch), "}"),
     pitch: $ => /[qrbcdefga]/,
-    duration: $ => /[0-9,.\/-]+/,
+    duration: $ => /[+.\/-]+/,
 
     //// Other
     string: $ => seq("\"", /[^"]+/, "\""),
