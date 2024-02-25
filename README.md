@@ -26,7 +26,9 @@ all fields are listed as labels and require values, unless listed with parenthes
 
 - header:
   - title: required
-  - composer: required, unless included in title with 'by'
+  - composer: required
+    - composer may also be included in the title field, with 'by'
+    - `trad` may also be listed by itself to specify the tune as trad, without a known composer
   - style: required
   - time: required, unless implied by a recognized valid [[tune style]]
   - note: set the base note length, ususally ommited for the default of 1/8

@@ -123,7 +123,7 @@ public class ModelBuilder {
         guard let styleField = fields[.style] else { throw ModelParseError.tuneMissingStyle }
 
         let (title, byline) = titleField.asTitle()
-        let possibleComposers = [fields[.composer]?.value, byline].compactMap { $0 }
+        let possibleComposers = [fields[.composer]?.value, byline, (fields[.trad] != nil ? "trad" : nil)].compactMap { $0 }
 
         guard possibleComposers.count <= 1 else { throw ModelParseError.duplicateComposers }
 

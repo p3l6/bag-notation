@@ -40,6 +40,18 @@ final class Headers: XCTestCase {
         XCTAssertEqual(header.composer, "trad")
     }
 
+    func testTrad() throws {
+        let source = """
+            title: First tune
+            trad
+            style: jig
+            """
+
+        let header = try makeHeader(from: source)
+        XCTAssertEqual(header.title, "First tune")
+        XCTAssertEqual(header.composer, "trad")
+    }
+
     func testTimeSignature() throws {
         let source = """
             title: First
@@ -137,10 +149,10 @@ final class Headers: XCTestCase {
             style: jig
             """))
 
-//        XCTAssertThrowsError(try makeHeader(from: """
-//            title: Firs by someone
-//            trad
-//            style: jig
-//            """))
+        XCTAssertThrowsError(try makeHeader(from: """
+            title: Firs by someone
+            trad
+            style: jig
+            """))
     }
 }
