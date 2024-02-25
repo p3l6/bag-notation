@@ -39,7 +39,13 @@ public struct Field {
     }
 
     func asDuration() throws -> Duration {
-        try Duration.fromString(value.lowercased()) ?! ModelParseError.invalidNoteLength
+        switch value.lowercased() {
+        case "sixteenth": .sixteenth
+        case "eighth": .eighth
+        case "quarter": .quarter
+        case "half": .half
+        default: throw ModelParseError.invalidNoteLength
+        }
     }
 }
 

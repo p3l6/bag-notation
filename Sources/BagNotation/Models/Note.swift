@@ -43,17 +43,6 @@ public enum Duration: Comparable {
     case whole
     case wholeDotted
 
-    // TODO: rename this, it is specifically for base note durations
-    static func fromString(_ string: String) -> Duration? {
-        switch string {
-        case "1/16": .sixteenth
-        case "1/8": .eighth
-        case "1/4": .quarter
-        case "1/2": .half
-        default: nil
-        }
-    }
-
     func doubled() throws -> Duration {
         switch self {
         case .wholeDotted: throw ModelParseError.noteTooLong

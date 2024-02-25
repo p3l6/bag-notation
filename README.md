@@ -31,7 +31,7 @@ all fields are listed as labels and require values, unless listed with parenthes
     - `trad` may also be listed by itself to specify the tune as trad, without a known composer
   - style: required
   - time: required, unless implied by a recognized valid [[tune style]]
-  - note: set the base note length, ususally ommited for the default of 1/8
+  - note: set the base note length, ususally ommited for the default of eighth
 - inline fields:
   - (h): harmony line. only valid at the very beginning of a line
   - note: change the base note length

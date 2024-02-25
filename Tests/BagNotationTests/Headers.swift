@@ -70,7 +70,7 @@ final class Headers: XCTestCase {
             composer: trad
             style: jig
             time: 4/4
-            note: 1/4
+            note: quarter
             """
         let header = try makeHeader(from: source)
         XCTAssertEqual(header.noteLength, .quarter)

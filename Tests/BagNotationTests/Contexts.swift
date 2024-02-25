@@ -12,7 +12,7 @@ final class Contexts: XCTestCase {
         title: First by trad
         style: jig
         ---
-        |: abc def | (note: 1/4) abc def | abc def  |
+        |: abc def | (note: quarter) abc def | abc def  |
            abc def | (time: 4/4) abc def | abc def :|
         [| abc def | abc def | abc def |]
 
