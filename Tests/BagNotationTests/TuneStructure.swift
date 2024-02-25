@@ -19,7 +19,7 @@ final class TuneStructure: XCTestCase {
             title: Second by trad
             style: 6/8 March
             ---
-            [| abc def |]
+            || abc def ||
             """
 
         let doc = try makeFile(from: source)

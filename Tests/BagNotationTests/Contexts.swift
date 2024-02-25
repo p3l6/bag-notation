@@ -14,22 +14,22 @@ final class Contexts: XCTestCase {
         ---
         |: abc def | (note: quarter) abc def | abc def  |
            abc def | (time: 4/4) abc def | abc def :|
-        [| abc def | abc def | abc def |]
+        || abc def | abc def | abc def ||
 
         ---
         title: Second by trad
         style: 6/8 March
         ---
-            [| abc def | abc def | abc def |
-        (h) [| ecd agb | def abc | def abc |
-               abc def | abc def | abc def |]
-        (h)    abc def | abc def | abc def |]
-            [| abc def | abc def | abc def |
-        (h) [| ecd agb | def abc | def abc |
-        (h) [| ecd agb | def abc | def abc |
-               abc def | abc def | abc def |]
-        (h)    abc def | abc def | abc def |]
-        (h)    abc def | abc def | abc def |]
+            || abc def | abc def | abc def |
+        (h) || ecd agb | def abc | def abc |
+               abc def | abc def | abc def ||
+        (h)    abc def | abc def | abc def ||
+            || abc def | abc def | abc def |
+        (h) || ecd agb | def abc | def abc |
+        (h) || ecd agb | def abc | def abc |
+               abc def | abc def | abc def ||
+        (h)    abc def | abc def | abc def ||
+        (h)    abc def | abc def | abc def ||
         """
 
     func testTuneNumber() throws {

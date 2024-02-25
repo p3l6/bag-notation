@@ -25,8 +25,8 @@ module.exports = grammar({
 
     //// Measures
     measure: $ => seq(repeat($._measure_content), prec(-1, $.barline)),
-    barline: $ => /[\[\]|:]+/, // TODO: optional trailing number or range(-,) or string. no space.
-    _measure_content: $ => choice($.string, prec(-1, $._inline_field), $.note_cluster),
+    barline: $ => /:?\|+:?/,
+    _measure_content: $ => choice(prec(-1, $._inline_field), $.note_cluster),
 
     //// Notes and clusters
     note_cluster: $ => seq(repeat1($.note), /[ \t]/),
@@ -41,7 +41,6 @@ module.exports = grammar({
     duration: $ => /[+.\/-]+/,
 
     //// Other
-    string: $ => seq("\"", /[^"]+/, "\""),
     _blank_line: $ => choice("\n", $.comment),
     comment: $ => seq("%", /[^\n]*/, "\n"),
     tail_comment: $ => seq("%", /[^\n]*/)

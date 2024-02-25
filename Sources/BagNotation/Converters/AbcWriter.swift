@@ -56,7 +56,7 @@ extension TuneStyle: AbcSourceConverting {
 
 extension Line: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        var abc = leadingBarline?.rawValue ?? ""
+        var abc = leadingBarline?.abcSource() ?? ""
         abc += " "
         abc += bars.mapToAbc(joined: " ")
         return abc
@@ -67,11 +67,23 @@ extension Bar: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = noteClusters.map { $0.mapToAbc() }.joined(separator: " ")
         abc += " "
-        abc += trailingBarline.rawValue
+        abc += trailingBarline.abcSource()
         return abc
     }
 }
 
+extension Barline: AbcSourceConverting {
+    fileprivate func abcSource() -> String {
+        switch self {
+        case .plain: "|"
+        case .partStart: "[|"
+        case .partEnd: "|]"
+        case .repeatStart: "|:"
+        case .repeatEnd: ":|"
+        case .double: "||"
+        }
+    }
+}
 extension Note: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = ""

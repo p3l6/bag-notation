@@ -5,8 +5,7 @@ Barlines
 ---
 ---
 
-[| a | b || c |: d :| e |]
-["2 of 2" f ]
+|| a | b || c |: d :| e ||
 
 ----->>
 
@@ -19,12 +18,4 @@ Barlines
       (measure (note_cluster (note (pitch))) (barline))
       (measure (note_cluster (note (pitch))) (barline))
       (measure (note_cluster (note (pitch))) (barline))
-      (measure (note_cluster (note (pitch))) (barline)))
-    (line
-      (barline)
-      (measure
-        (string)
-        (note_cluster (note (pitch))) (barline))))))
-
-
-
+      (measure (note_cluster (note (pitch))) (barline))))))

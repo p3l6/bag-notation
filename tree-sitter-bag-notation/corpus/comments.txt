@@ -6,7 +6,7 @@ Full line comments
 ---
 
 % this is a comment
-"xr" |
+xr |
 % this is also a comment
 
 ----->>
@@ -17,7 +17,7 @@ Full line comments
     (comment)
     (line
       (measure
-        (string) (barline)))
+        (note_cluster (note embellishment: (embellishment) pitch: (pitch))) (barline)))
     (comment))))
 
 
@@ -29,8 +29,8 @@ Trailing comments
 ---
 ---
 
-"xr" | % "xb"
-"xr" |
+xr | % xb
+xr |
 
 ----->>
 
@@ -39,9 +39,9 @@ Trailing comments
   (body
     (line
       (measure
-        (string) (barline))
+        (note_cluster (note embellishment: (embellishment) pitch: (pitch))) (barline))
       (tail_comment))
     (line
       (measure
-        (string) (barline))))))
+        (note_cluster (note embellishment: (embellishment) pitch: (pitch))) (barline))))))
 

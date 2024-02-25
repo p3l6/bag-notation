@@ -5,7 +5,7 @@ Inline field
 ---
 ---
 
-"xr" (meter: 6/8) "xc" |
+xr (meter: 6/8) xc |
 
 ----->>
 
@@ -13,9 +13,9 @@ Inline field
   (header)
   (body (line
     (measure
-      (string)
+      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
       (field label: (field_content) value: (field_content))
-      (string)
+      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
       (barline))))))
 
 
@@ -26,7 +26,7 @@ Field without value
 ---
 ---
 
-"xr" (triplet) "xc" |
+xr (triplet) xc |
 
 ----->>
 
@@ -34,9 +34,9 @@ Field without value
   (header)
   (body (line
     (measure
-      (string)
+      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
       (field label: (field_content))
-      (string)
+      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
       (barline))))))
 
 
@@ -50,7 +50,7 @@ Field labels and values with spaces
 some label: long value
 ---
 
-"xr" (valueless label) "xc" (space label: value words) |
+xr (valueless label) xc (space label: value words) |
 
 ----->>
 
@@ -59,9 +59,9 @@ some label: long value
     (field label: (field_content) value: (field_content)))
   (body (line
     (measure
-      (string)
+      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
       (field label: (field_content))
-      (string)
+      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
       (field label: (field_content) value: (field_content))
       (barline))))))
 

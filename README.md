@@ -20,6 +20,8 @@ Header may not contain blank lines.
 Notes should be clustered by beat.
 Dont support double dots.
 
+All barlines are `|` or `||` or `:|` or `|:`. Beginning and end of parts should use the double barline.
+
 ## allowed fields
 
 all fields are listed as labels and require values, unless listed with parenthesis, such as `(value)`.
@@ -48,7 +50,7 @@ phluxtvwzkn | embellishment markers
 (value) | inline field without label
 label: value | field, when inside header
 `---` | header begin and end marker
-`|[]:` | barline
+`|:` | barline
 % | comment marker
 `-` | tie, or slur
 `+` | doubles attached note length

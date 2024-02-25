@@ -10,6 +10,7 @@ public class ModelBuilder {
     let source: String
     private var cursor: TreeCursor!
     var context = Context()
+    var previousLineVoice = 0
 
     public init(_ source: String) { self.source = source }
 
@@ -91,6 +92,23 @@ public class ModelBuilder {
         return childs
     }
 
+    private func peekChildrenOfCursor() throws -> (barCount: Int, fieldCount: Int) {
+        var barCount = 0
+        var fieldCount = 0
+
+        let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
+
+        for i in 0..<node.childCount {
+            guard let child = node.child(at: i) else { throw  ModelParseError.cursorAtInvalidNode }
+            switch child.nodeType {
+            case "measure": barCount += 1
+            case "field", "inline_field": fieldCount += 1
+            default: continue
+            }
+        }
+        return (barCount, fieldCount)
+    }
+
     private func expectCursor(is type: String) throws {
         guard let node = cursor.currentNode, node.nodeType == type else {
             ModelParseError.logger.error("Incorrect node type: have \(self.cursor.currentNode?.nodeType ?? "nil") expected \(type)")
@@ -152,6 +170,7 @@ public class ModelBuilder {
         switch field.label {
         case .time: context.timeSignature = try field.asTimeSignature() ?! ModelParseError.invalidTimeSignature
         case .note: context.noteLength = try field.asDuration() ?! ModelParseError.invalidNoteLength
+        case .h: context.voiceNumber = previousLineVoice + 1 // TODO: Error if not at the beginning of the line
         default: break
         }
 
@@ -166,15 +185,15 @@ public class ModelBuilder {
     private func lineAtCursor() throws -> Line {
         try expectCursor(is: "line")
 
-        let children = try childrenOfCursor()
-
         context.lineNumberInTune += 1
         context.barNumberInLine = 0
-        if let leadingField = children.fields.first, leadingField.label == .h {
-            context.voiceNumber += 1
-        } else {
-            context.voiceNumber = 0
-        }
+        context.barCountInLine = try peekChildrenOfCursor().barCount
+
+        // Cache voice number, so we can increment in `fieldAtCursor` if needed
+        previousLineVoice = context.voiceNumber
+        context.voiceNumber = 0
+
+        let children = try childrenOfCursor()
 
         return Line(context: context, bars: children.bars, leadingBarline: children.barlines.first)
     }
@@ -191,7 +210,7 @@ public class ModelBuilder {
         // TODO: this function could be reused for leaf nodes without other context to extract
         try expectCursor(is: "barline")
         let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
-        let barline = try Barline(rawValue: text(of: node)) ?! ModelParseError.invalidBarline
+        let barline = try Barline(rawValue: text(of: node), context: context) ?! ModelParseError.invalidBarline
         return barline
     }
 
