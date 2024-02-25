@@ -18,12 +18,9 @@ module.exports = grammar({
     //// Header and fields
     header: $ => seq("---\n", repeat(seq($.field, "\n")), "---\n"),
     _inline_field: $ => seq("(", $.field, ")"),
-    field: $ => choice(
-                  field("value", $.field_content),
-                  seq(
+    field: $ => seq(
                     field("label", $.field_content),
-                    ":",
-                    field("value", $.field_content))),
+                    optional(seq(":", field("value", $.field_content)))),
     field_content: $ => /[ a-zA-Z0-9\/,]+/,
 
     //// Measures

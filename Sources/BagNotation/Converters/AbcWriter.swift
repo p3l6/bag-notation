@@ -100,7 +100,7 @@ extension Pitch: AbcSourceConverting {
     }
 }
 
- extension Duration: AbcSourceConverting {
+extension Duration: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         switch self {
         case .sixtyfourth: "///"
@@ -119,7 +119,7 @@ extension Pitch: AbcSourceConverting {
         case .wholeDotted: "12"
         }
     }
- }
+}
 
 private protocol AbcSourceConverting {
     func abcSource() -> String

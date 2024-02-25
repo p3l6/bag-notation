@@ -356,7 +356,7 @@ static const TSFieldMapSlice ts_field_map_slices[PRODUCTION_ID_COUNT] = {
 
 static const TSFieldMapEntry ts_field_map_entries[] = {
   [0] =
-    {field_value, 0},
+    {field_label, 0},
   [1] =
     {field_pitch, 0},
   [2] =

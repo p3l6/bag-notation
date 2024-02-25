@@ -20,7 +20,7 @@ Inline field
 
 
 =====>>
-Field without label
+Field without value
 =====>>
 
 ---
@@ -35,7 +35,7 @@ Field without label
   (body (line
     (measure
       (string)
-      (field value: (field_content))
+      (field label: (field_content))
       (string)
       (barline))))))
 
@@ -50,7 +50,7 @@ Field labels and values with spaces
 some label: long value
 ---
 
-"xr" (labelless value) "xc" (space label: value words) |
+"xr" (valueless label) "xc" (space label: value words) |
 
 ----->>
 
@@ -60,7 +60,7 @@ some label: long value
   (body (line
     (measure
       (string)
-      (field value: (field_content))
+      (field label: (field_content))
       (string)
       (field label: (field_content) value: (field_content))
       (barline))))))
@@ -82,13 +82,13 @@ Leading inline field
   (header)
   (body
     (line
-      (field value: (field_content))
+      (field label: (field_content))
       (measure
         (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
         (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
         (barline)))
     (line
-      (field value: (field_content))
+      (field label: (field_content))
       (barline)
       (measure
         (note_cluster (note embellishment: (embellishment) pitch: (pitch)))

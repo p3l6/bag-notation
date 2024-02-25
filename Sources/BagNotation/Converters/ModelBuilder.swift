@@ -3,11 +3,8 @@
 //  Bag Notation
 //
 
-import os
 import SwiftTreeSitter
 import TreeSitterBagNotation
-
-private let logger = Logger(subsystem: "BagNotation", category: "ModelBuilder")
 
 public class ModelBuilder {
     let source: String
@@ -56,7 +53,7 @@ public class ModelBuilder {
     private func text(at range: TSRange) -> String {
         let buf: [UInt16] = Array(source.utf16)
         let hmm = buf[Int(range.bytes.lowerBound / 2) ..< Int(range.bytes.upperBound / 2)]
-        return String(utf16CodeUnits: Array(hmm), count: hmm.count)
+        return String(utf16CodeUnits: Array(hmm), count: hmm.count).trimmingCharacters(in: .whitespaces)
     }
 
     private func text(of node: Node) -> String {
@@ -74,24 +71,18 @@ public class ModelBuilder {
             case "tune": childs.tunes.append(try tuneAtCursor())
             case "line": childs.lines.append(try lineAtCursor())
             case "header": childs.header = try headerAtCursor()
-            case "field", "inline_field":
-                let field = try fieldAtCursor()
-                if let label = field.label {
-                    childs.labeledFields[label] = field.value
-                } else {
-                    childs.unlabeledFields.append(field.value)
-                }
+            case "field", "inline_field": childs.fields.append(try fieldAtCursor())
             case "body": childs.lines.append(contentsOf: try bodyAtCursor())
             case "measure": childs.bars.append(try barAtCursor())
             case "barline": childs.barlines.append(try barlineAtCursor())
             case "note_cluster": childs.noteClusters.append(try clusterAtCursor())
             case "note": childs.notes.append(try noteAtCursor())
             case "comment", "tail_comment": break
-            case "ERROR": 
-                logger.error("File could not be parsed at line \(currentNode.pointRange.lowerBound.row+1) col \(currentNode.pointRange.lowerBound.column/2)")
+            case "ERROR":
+                ModelParseError.logger.error("File could not be parsed at line \(currentNode.pointRange.lowerBound.row + 1) col \(currentNode.pointRange.lowerBound.column / 2)")
                 throw ModelParseError.fileParseError
             default:
-                logger.error("Unknown node type encountered: \(currentNode.nodeType!)")
+                ModelParseError.logger.error("Unknown node type encountered: \(currentNode.nodeType!)")
                 throw ModelParseError.unknownNodeType
             }
         } while cursor.gotoNextSibling()
@@ -102,7 +93,7 @@ public class ModelBuilder {
 
     private func expectCursor(is type: String) throws {
         guard let node = cursor.currentNode, node.nodeType == type else {
-            logger.error("Incorrect node type: have \(self.cursor.currentNode?.nodeType ?? "nil") expected \(type)")
+            ModelParseError.logger.error("Incorrect node type: have \(self.cursor.currentNode?.nodeType ?? "nil") expected \(type)")
             throw ModelParseError.unexpectedNodeType
         }
     }
@@ -126,54 +117,45 @@ public class ModelBuilder {
     private func headerAtCursor() throws -> Header {
         try expectCursor(is: "header")
 
-        let fields = try childrenOfCursor().labeledFields
+        let fields = try childrenOfCursor().fields.uniqueByLabel()
 
-        let titleLine = try fields["title"] ?! ModelParseError.tuneMissingTitle
-        let titleParts = titleLine.split(separator: " by ").map(String.init)
-        let byline: String? = titleParts.count > 1 ? titleParts[1] : nil
+        guard let titleField = fields[.title] else { throw ModelParseError.tuneMissingTitle }
+        guard let styleField = fields[.style] else { throw ModelParseError.tuneMissingStyle }
 
-        let style = try fields["style"] ?! ModelParseError.tuneMissingStyle
-        let tuneStyle = try TuneStyle(rawValue: style.lowercased()) ?! ModelParseError.invalidStyle
+        let (title, byline) = titleField.asTitle()
+        let possibleComposers = [fields[.composer]?.value, byline].compactMap { $0 }
 
-        let timeSignature: TimeSignature! = if let time = fields["time"] {
-            try TimeSignature(rawValue: time) ?! ModelParseError.invalidTimeSignature
-        } else {
-            try tuneStyle.impliedTimeSignature ?! ModelParseError.tuneMissingTimeSignature
-        }
+        guard possibleComposers.count <= 1 else { throw ModelParseError.duplicateComposers }
 
-        let noteLength: Duration! = if let note = fields["note"] {
-            try Duration.fromString(note) ?! ModelParseError.invalidNoteLength
-        } else {
-            .eighth
-        }
+        let style = try styleField.asStyle()
 
-        context.timeSignature = timeSignature
-        context.noteLength = noteLength
+        context.timeSignature = try (try? fields[.time]?.asTimeSignature()) ?? style.impliedTimeSignature ?! ModelParseError.tuneMissingTimeSignature
+        context.noteLength = (try? fields[.note]?.asDuration()) ?? Duration.eighth
 
         return Header(
-            title: titleParts[0],
-            style: tuneStyle,
-            composer: try fields["composer"] ?? byline ?! ModelParseError.tuneMissingComposer,
-            noteLength: noteLength,
-            timeSignature: timeSignature)
+            title: title,
+            style: style,
+            composer: try possibleComposers.first ?! ModelParseError.tuneMissingComposer,
+            noteLength: context.noteLength,
+            timeSignature: context.timeSignature)
     }
 
-    private func fieldAtCursor() throws -> (label: String?, value: String) {
+    private func fieldAtCursor() throws -> Field {
         let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
-        let labelNode = node.child(byFieldName: "label")
-        let valueNode = try node.child(byFieldName: "value") ?! ModelParseError.nodeMissingField
-        let label: String? = if let labelNode { text(of: labelNode) } else { nil }
-        let value = text(of: valueNode).trimmingCharacters(in: .whitespaces)
+        let labelNode = try node.child(byFieldName: "label") ?! ModelParseError.nodeMissingChild
+        let valueNode = node.child(byFieldName: "value")
+        let label = text(of: labelNode)
+        let value: String? = if let valueNode { text(of: valueNode) } else { nil }
 
-        if let label {
-            switch label {
-            case "time": context.timeSignature = try TimeSignature(rawValue: value) ?! ModelParseError.invalidTimeSignature
-            case "note": context.noteLength = try Duration.fromString(value) ?! ModelParseError.invalidNoteLength
-            default: break
-            }
+        let field = try Field(label: label, value: value)
+
+        switch field.label {
+        case .time: context.timeSignature = try field.asTimeSignature() ?! ModelParseError.invalidTimeSignature
+        case .note: context.noteLength = try field.asDuration() ?! ModelParseError.invalidNoteLength
+        default: break
         }
 
-        return (label, value)
+        return field
     }
 
     private func bodyAtCursor() throws -> [Line] {
@@ -188,8 +170,7 @@ public class ModelBuilder {
 
         context.lineNumberInTune += 1
         context.barNumberInLine = 0
-        if let leadingField = children.unlabeledFields.first,
-           leadingField == "h" {
+        if let leadingField = children.fields.first, leadingField.label == .h {
             context.voiceNumber += 1
         } else {
             context.voiceNumber = 0
@@ -222,7 +203,7 @@ public class ModelBuilder {
     private func noteAtCursor() throws -> Note {
         let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
         try expectCursor(is: "note")
-        let pitchNode = try node.child(byFieldName: "pitch") ?! ModelParseError.nodeMissingField
+        let pitchNode = try node.child(byFieldName: "pitch") ?! ModelParseError.nodeMissingChild
         let pitch = try Pitch.from(string: text(of: pitchNode))
         var embellishment: Embellishment? = nil
         if let embellismentNode = node.child(byFieldName: "embellishment") {
@@ -245,37 +226,11 @@ public class ModelBuilder {
     }
 }
 
-enum ModelParseError: Error {
-    case fileParseError
-    case unknownNodeType
-    case nodeHasNoChildren
-    case cursorFailedToReturnToParent
-    case cursorAtInvalidNode
-    case nodeMissingField
-    case unexpectedNodeType
-    case missingBarline
-    case noteTooShort
-    case noteTooLong
-    case noteAlreadyDotted
-
-    case tuneMissingTitle
-    case tuneMissingComposer
-    case tuneMissingStyle
-    case tuneMissingTimeSignature
-
-    case invalidEmbellishment
-    case invalidStyle
-    case invalidTimeSignature
-    case invalidBarline
-    case invalidNoteLength
-}
-
 private struct NodeChildren {
     var tunes = [Tune]()
     var lines = [Line]()
     var header: Header?
-    var labeledFields = [String: String]()
-    var unlabeledFields = [String]()
+    var fields = [Field]()
     var bars = [Bar]()
     var barlines = [Barline]()
     var noteClusters = [[Note]]()

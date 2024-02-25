@@ -22,7 +22,6 @@ public enum TimeSignature: String {
     case time128 = "12/8"
 }
 
-// TODO: This should be title case in output
 public enum TuneStyle: String {
     case march
     case march24 = "2/4 march"

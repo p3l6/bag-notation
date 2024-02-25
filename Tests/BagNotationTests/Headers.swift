@@ -113,4 +113,34 @@ final class Headers: XCTestCase {
 
         XCTAssertThrowsError(try makeHeader(from: source))
     }
+
+    func testDuplicateFields() throws {
+        XCTAssertThrowsError(try makeHeader(from: """
+            title: First
+            composer: trad
+            title: Second
+            style: jig
+            """))
+
+        XCTAssertThrowsError(try makeHeader(from: """
+            style: march
+            title: First
+            composer: trad
+            style: jig
+            """))
+    }
+
+    func testConflictingComposers() throws {
+        XCTAssertThrowsError(try makeHeader(from: """
+            title: First by someone
+            composer: someone else
+            style: jig
+            """))
+
+//        XCTAssertThrowsError(try makeHeader(from: """
+//            title: Firs by someone
+//            trad
+//            style: jig
+//            """))
+    }
 }

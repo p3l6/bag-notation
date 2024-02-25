@@ -43,7 +43,7 @@ public enum Duration: Comparable {
     case whole
     case wholeDotted
 
-    // TODO:  rename this, it is specifically for base note durations
+    // TODO: rename this, it is specifically for base note durations
     static func fromString(_ string: String) -> Duration? {
         switch string {
         case "1/16": .sixteenth
