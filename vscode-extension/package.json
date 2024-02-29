@@ -1,0 +1,70 @@
+{
+    "name": "bag-notation",
+    "displayName": "Bagpipe Notation",
+    "description": "Language support for BAG Notation.",
+    "publisher": "p3l6",
+    "version": "0.0.1",
+    "engines": {"vscode": "^1.86.0"},
+    "categories": ["Programming Languages"],
+    "main": "./out/main.js",
+    "activationEvents": [],
+    "contributes": {
+        "languages": [
+            {
+                "id": "bag",
+                "aliases": [
+                    "BAG Notation",
+                    "bag"
+                ],
+                "extensions": [
+                    "bag"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "bag",
+                "scopeName": "source.bag",
+                "path": "./bag.tmLanguage.json"
+            }
+        ],
+        "problemMatchers": [{
+            "name": "bag-notation",
+            "pattern": {
+                "regexp": "^(.*):(\\d+),(\\d+)-(\\d+):\\s+(warning|error|info):\\s+(.*)$",
+                "file": 1,
+                "line": 2,
+                "column": 3,
+                "endColumn": 4,
+                "severity": 5,
+                "message": 6
+            }
+        }]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run esbuild-base -- --minify",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild": "npm run esbuild-base -- --sourcemap",
+        "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js",
+        "json-syntax": "js-yaml bag.tmLanguage.yaml > bag.tmLanguage.json",
+        "build": "npm run json-syntax && npm run esbuild"
+    },
+    "devDependencies": {
+        "@types/glob": "^7.2.0",
+        "@types/mocha": "^9.1.0",
+        "@types/node": "14.x",
+        "@types/vscode": "^1.64.0",
+        "@typescript-eslint/eslint-plugin": "^5.12.1",
+        "@typescript-eslint/parser": "^5.12.1",
+        "@vscode/test-electron": "^2.1.2",
+        "esbuild": "^0.14.24",
+        "eslint": "^8.9.0",
+        "glob": "^7.2.0",
+        "js-yaml": "^3.13.1",
+        "mocha": "^9.2.1",
+        "typescript": "^4.5.5"
+    }
+}

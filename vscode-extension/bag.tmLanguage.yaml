@@ -1,0 +1,62 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+---
+name: Bag Notation
+scopeName: source.bag
+fileTypes: [bag]
+uuid: bf9f47d0-6435-46f2-bcad-e3eb0a454a74
+
+patterns:
+  - include: '#header'
+  - include: '#field-inline'
+  - include: '#barline'
+  - include: '#embellishment'
+  - include: '#pitch'
+  - include: '#duration'
+  - include: '#comment'
+
+repository:
+  header:
+    name: meta.tune.header.bag
+    begin: '---'
+    end: '---'
+    patterns:
+      - name: meta.header-field.bag
+        begin: '^'
+        end: $
+        patterns:
+          - include: '#field'
+
+  field:
+    name: meta.field.bag
+    match: '([ a-zA-Z0-9\/,]+)(:[ a-zA-Z0-9\/,]+)?'
+    captures:
+      '1': {name: support.constant.field-label.bag}
+      '2': {name: string.unquoted.field-value.bag}
+
+  field-inline:
+    name: meta.field.inline.bag
+    begin: \(
+    end: \)
+    patterns:
+      - include: '#field'
+
+  comment:
+    name: comment.line.percentage.bag
+    begin: '(?:^\s*)?%'
+    end: $
+
+  pitch:
+    name: constant.character.pitch.bag
+    match: '[qrbcdefga]'
+
+  embellishment:
+    name: variable.other.embellishment.bag
+    match: '[phluxtvwzkn]+'
+
+  duration:
+    name: support.constant.duration.bag
+    match: '[+.\/-]+'
+
+  barline:
+    name: keyword.operator.barline.bag
+    match: ':?\|+:?'
