@@ -14,7 +14,39 @@ public class AbcWriter {
     public init(_ doc: Doc) { self.doc = doc }
 
     public func makeAbc() throws -> String {
-        doc.tunes.mapToAbc(joined: "\n\n")
+        formatSpecs() + doc.tunes.mapToAbc(joined: "\n\n")
+    }
+
+    func formatSpecs() -> String {
+        """
+        %%writefields R
+        %%infoname R
+        %%titlefont Coronet 32
+        %%composerfont Arial 14
+        %%equalbars 1
+        %%notespacingfactor 1.5
+        %%tuplets 2 1 0 1
+        %%slurheight 2
+        %%rbmax 5
+        %%rightmargin 0.8cm
+        %%leftmargin 0.8cm
+        %%topmargin 0.8cm
+        %%bottommargin 0.8cm
+        %%maxshrink 1
+        %%linewarn 0
+        %%linebreak <EOL>
+        %%nowrap 1
+        %%gracespace 10 6 10
+        %%flatbeamgracing 1
+
+        """
+
+        // TODO: Option to enable landscape
+        // %% landscape 1
+        // TODO: Argument to add date footer (optional param, default now)
+        // %% dateformat "%e %b %Y"
+        // %% footerfont * 12
+        // %% footer "(rev: $D)\t\t"
     }
 }
 
