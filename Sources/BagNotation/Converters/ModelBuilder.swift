@@ -52,7 +52,7 @@ public class ModelBuilder {
             return try docAtCursor()
         } catch let error as ModelParseError {
             if let loc = cursor.currentNode?.pointRange {
-                let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2)+1)")
+                let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2) + 1)")
                 locError.log()
                 throw locError
             } else {
@@ -106,8 +106,8 @@ public class ModelBuilder {
 
         let node = try cursor.currentNode ?! ModelParseError.cursorAtInvalidNode
 
-        for i in 0..<node.childCount {
-            guard let child = node.child(at: i) else { throw  ModelParseError.cursorAtInvalidNode }
+        for i in 0 ..< node.childCount {
+            guard let child = node.child(at: i) else { throw ModelParseError.cursorAtInvalidNode }
             switch child.nodeType {
             case "measure": barCount += 1
             case "field", "inline_field": fieldCount += 1
@@ -119,7 +119,7 @@ public class ModelBuilder {
 
     private func expectCursor(is type: String) throws {
         guard let node = cursor.currentNode, node.nodeType == type else {
-            throw ModelParseError.unexpectedNodeType(type: self.cursor.currentNode?.nodeType ?? "nil")
+            throw ModelParseError.unexpectedNodeType(type: cursor.currentNode?.nodeType ?? "nil")
         }
     }
 
@@ -148,7 +148,7 @@ public class ModelBuilder {
         guard let styleField = fields[.style] else { throw ModelParseError.tuneMissingStyle }
 
         let (title, byline) = titleField.asTitle()
-        let possibleComposers = [fields[.composer]?.value, byline, (fields[.trad] != nil ? "trad" : nil)].compactMap { $0 }
+        let possibleComposers = [fields[.composer]?.value, byline, fields[.trad] != nil ? "trad" : nil].compactMap { $0 }
 
         guard possibleComposers.count <= 1 else { throw ModelParseError.duplicateComposers }
 

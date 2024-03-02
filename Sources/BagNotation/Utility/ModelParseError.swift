@@ -3,12 +3,12 @@
 //  Bag Notation
 //
 
-import os
 import Foundation
+import os
 
 public enum ModelParseError: Error, LocalizedError {
     static let logger = Logger(subsystem: "BagNotation", category: "ModelParseError")
-    
+
     case fileParseError
     case unknownNodeType(type: String)
     case nodeHasNoChildren
@@ -39,12 +39,12 @@ public enum ModelParseError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .fileParseError: "File parsing error"
-        case .unknownNodeType(let type): "Unknown node type: \(type)"
+        case let .unknownNodeType(type): "Unknown node type: \(type)"
         case .nodeHasNoChildren: "Node has no children"
         case .cursorFailedToReturnToParent: "Cursor failed to return to parent"
         case .cursorAtInvalidNode: "Cursor at invalid node"
         case .nodeMissingChild: "Node missing child"
-        case .unexpectedNodeType(let type): "Unexpected node type: \(type)"
+        case let .unexpectedNodeType(type): "Unexpected node type: \(type)"
         case .missingBarline: "Missing barline"
         case .noteTooShort: "Note is too short"
         case .noteTooLong: "Note is too long"
@@ -77,6 +77,6 @@ public struct LocatedModelParseError: Error, LocalizedError {
     public var errorDescription: String? {
         "\(location): \(base.errorDescription!)"
     }
-    
+
     func log() { ModelParseError.logger.error("\(self.errorDescription!)") }
 }

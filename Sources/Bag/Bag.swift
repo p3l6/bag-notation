@@ -23,7 +23,7 @@ enum RuntimeError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .couldNotRead(let file): "Could not read file: \(file)"
+        case let .couldNotRead(file): "Could not read file: \(file)"
         }
     }
 }

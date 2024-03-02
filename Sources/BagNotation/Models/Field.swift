@@ -29,7 +29,7 @@ public struct Field {
     }
 
     func asVariation() -> String? {
-        return _value
+        _value
     }
 
     func asTitle() -> (title: String, byline: String?) {

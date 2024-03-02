@@ -16,7 +16,7 @@ public struct Bar {
 
 public enum Barline {
     case plain
-    case repeatStart 
+    case repeatStart
     case repeatEnd
     case partStart
     case partEnd
