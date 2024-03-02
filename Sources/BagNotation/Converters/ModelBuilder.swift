@@ -48,7 +48,18 @@ public class ModelBuilder {
     public func makeModel() throws -> Doc {
         // modelDebug(from: tree.rootNode!)
         cursor = tree.rootNode!.treeCursor
-        return try docAtCursor()
+        do {
+            return try docAtCursor()
+        } catch let error as ModelParseError {
+            if let loc = cursor.currentNode?.pointRange {
+                let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2)+1)")
+                locError.log()
+                throw locError
+            } else {
+                error.log()
+                throw error
+            }
+        }
     }
 
     private func text(at range: TSRange) -> String {
@@ -79,12 +90,9 @@ public class ModelBuilder {
             case "note_cluster": childs.noteClusters.append(try clusterAtCursor())
             case "note": childs.notes.append(try noteAtCursor())
             case "comment", "tail_comment": break
-            case "ERROR":
-                ModelParseError.logger.error("File could not be parsed at line \(currentNode.pointRange.lowerBound.row + 1) col \(currentNode.pointRange.lowerBound.column / 2)")
-                throw ModelParseError.fileParseError
+            case "ERROR": throw ModelParseError.fileParseError
             default:
-                ModelParseError.logger.error("Unknown node type encountered: \(currentNode.nodeType!)")
-                throw ModelParseError.unknownNodeType
+                throw ModelParseError.unknownNodeType(type: currentNode.nodeType!)
             }
         } while cursor.gotoNextSibling()
         guard cursor.gotoParent() else { throw ModelParseError.cursorFailedToReturnToParent }
@@ -111,8 +119,7 @@ public class ModelBuilder {
 
     private func expectCursor(is type: String) throws {
         guard let node = cursor.currentNode, node.nodeType == type else {
-            ModelParseError.logger.error("Incorrect node type: have \(self.cursor.currentNode?.nodeType ?? "nil") expected \(type)")
-            throw ModelParseError.unexpectedNodeType
+            throw ModelParseError.unexpectedNodeType(type: self.cursor.currentNode?.nodeType ?? "nil")
         }
     }
 

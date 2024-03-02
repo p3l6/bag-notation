@@ -4,6 +4,7 @@
 //
 
 import ArgumentParser
+import Foundation
 
 @main
 struct Bag: AsyncParsableCommand {
@@ -14,5 +15,15 @@ struct Bag: AsyncParsableCommand {
     struct Options: ParsableArguments {
         @Argument(help: "Path of a bag notation file.")
         var inputFile: String
+    }
+}
+
+enum RuntimeError: Error, LocalizedError {
+    case couldNotRead(file: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .couldNotRead(let file): "Could not read file: \(file)"
+        }
     }
 }

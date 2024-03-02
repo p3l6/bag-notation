@@ -5,7 +5,6 @@
 
 import ArgumentParser
 import BagNotation
-import Foundation
 
 struct Abc: AsyncParsableCommand {
     static var configuration = CommandConfiguration(
@@ -19,7 +18,7 @@ struct Abc: AsyncParsableCommand {
 
     mutating func run() async throws {
         guard let input = try? String(contentsOfFile: options.inputFile) else {
-            throw RuntimeError("Couldn't read from '\(options.inputFile)'!")
+            throw RuntimeError.couldNotRead(file: options.inputFile)
         }
 
         // TODO: change names of these. BagReader().makeDoc()  AbcWriter()
@@ -31,14 +30,5 @@ struct Abc: AsyncParsableCommand {
         } else {
             print(abc)
         }
-    }
-}
-
-// TODO: enum style errors. Move to main file.
-struct RuntimeError: Error, CustomStringConvertible {
-    var description: String
-
-    init(_ description: String) {
-        self.description = description
     }
 }
