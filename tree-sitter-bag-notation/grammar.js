@@ -21,7 +21,7 @@ module.exports = grammar({
     field: $ => seq(
                     field("label", $.field_content),
                     optional(seq(":", field("value", $.field_content)))),
-    field_content: $ => /[ a-zA-Z0-9\/,]+/,
+    field_content: $ => /[ a-zA-Z0-9\/,']+/,
 
     //// Measures
     measure: $ => seq(repeat($._measure_content), prec(-1, $.barline)),

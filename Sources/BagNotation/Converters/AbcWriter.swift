@@ -88,6 +88,9 @@ extension TuneStyle: AbcSourceConverting {
 
 extension Line: AbcSourceConverting {
     fileprivate func abcSource() -> String {
+        // TODO:  check context diff before barline, h, and always insert a [V: 0]
+        // Additionally, start the tune with a %%staves M
+        // Then, insert additional staves markers after the first pass of convertion is complete, at the tune level
         var abc = leadingBarline?.abcSource() ?? ""
         abc += " "
         abc += bars.mapToAbc(joined: " ")
@@ -97,9 +100,27 @@ extension Line: AbcSourceConverting {
 
 extension Bar: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        var abc = noteClusters.map { $0.mapToAbc() }.joined(separator: " ")
+        var abc = noteClusters.map {
+            var abc = $0.first?.context.abcSource() ?? ""
+            abc += $0.mapToAbc()
+            return abc
+        }.joined(separator: " ")
         abc += " "
         abc += trailingBarline.abcSource()
+        return abc
+    }
+}
+
+extension Context: AbcSourceConverting {
+    static private var previousCheckedContext : Context? = nil
+    
+    /// Prints differences since the last time this function was called
+    fileprivate func abcSource() -> String {
+        var abc = ""
+        if variation != Self.previousCheckedContext?.variation {
+            abc = if let variation { " [\"\(variation)\" " } else { " ] " }
+        }
+        Self.previousCheckedContext = self
         return abc
     }
 }

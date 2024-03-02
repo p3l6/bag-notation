@@ -25,6 +25,10 @@ public struct Field {
         _value = value
     }
 
+    func asVariation() -> String? {
+        return _value
+    }
+
     func asTitle() -> (title: String, byline: String?) {
         let titleParts = value.split(separator: " by ").map(String.init)
         return (titleParts[0], titleParts.count > 1 ? titleParts[1] : nil)
@@ -57,10 +61,11 @@ public enum FieldLabel: String {
     case time
     case trad
     case h
+    case v
 
     var requiresValue: Bool {
         switch self {
-        case .trad, .h:
+        case .trad, .h, .v:
             false
         default:
             true

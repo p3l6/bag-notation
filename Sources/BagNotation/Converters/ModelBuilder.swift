@@ -171,6 +171,7 @@ public class ModelBuilder {
         case .time: context.timeSignature = try field.asTimeSignature() ?! ModelParseError.invalidTimeSignature
         case .note: context.noteLength = try field.asDuration() ?! ModelParseError.invalidNoteLength
         case .h: context.voiceNumber = previousLineVoice + 1 // TODO: Error if not at the beginning of the line
+        case .v: context.variation = field.asVariation()
         default: break
         }
 

@@ -20,25 +20,20 @@ repository:
     begin: '---'
     end: '---'
     patterns:
-      - name: meta.header-field.bag
-        begin: '^'
-        end: $
-        patterns:
-          - include: '#field'
-
-  field:
-    name: meta.field.bag
-    match: '([ a-zA-Z0-9\/,]+)(:[ a-zA-Z0-9\/,]+)?'
-    captures:
-      '1': {name: support.constant.field-label.bag}
-      '2': {name: string.unquoted.field-value.bag}
+      - name: meta.field.header.bag
+        match: '^([^:]+:?)(.+)?$'
+        captures:
+          '1': {name: support.constant.field.label.bag}
+          '2': {name: string.unquoted.field.value.bag}
 
   field-inline:
     name: meta.field.inline.bag
-    begin: \(
-    end: \)
-    patterns:
-      - include: '#field'
+    match: '(\()([^):]+:?)([^)]+)?(\))'
+    captures:
+      '1': {name: support.constant.field.paren.open.bag}
+      '2': {name: support.constant.field.label.bag}
+      '3': {name: string.unquoted.field.value.bag}
+      '4': {name: support.constant.field.paren.close.bag}
 
   comment:
     name: comment.line.percentage.bag

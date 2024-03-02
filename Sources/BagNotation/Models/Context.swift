@@ -11,8 +11,7 @@ public struct Context {
     var barCountInLine: Int = 0
 
     var voiceNumber: Int = 0 // melody voice is 0
-
-    //    var variation: Int
+    var variation: String? // nil for no variation
 
     var timeSignature: TimeSignature = .time44 // placeholder will be overwritten
     var noteLength: Duration = .eighth // default note length
