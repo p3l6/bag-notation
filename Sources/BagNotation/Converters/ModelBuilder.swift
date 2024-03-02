@@ -240,7 +240,8 @@ public class ModelBuilder {
         let note = Note(context: context,
                         pitch: pitch,
                         embellishment: embellishment,
-                        duration: duration)
+                        duration: duration,
+                        tied: node.child(byFieldName: "tie") != nil)
 
         return note
     }

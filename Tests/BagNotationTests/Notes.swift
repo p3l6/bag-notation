@@ -101,9 +101,11 @@ final class Notes: XCTestCase {
     }
 
     func testTies() throws {
-        // TODO: re-evaluate. as a property? "tiedToNext"?
-//        let notes = try makeNoteCluster(from: "c2-")
-//        XCTAssertEqual(notes[0].duration, "2-")
+        let notes = try makeNoteCluster(from: "c+_cxc_d_e")
+        XCTAssertEqual(notes[0].tiedToNext, true)
+        XCTAssertEqual(notes[1].tiedToNext, false)
+        XCTAssertEqual(notes[2].tiedToNext, true)
+        XCTAssertEqual(notes[3].tiedToNext, true)
     }
 
     func testRests() throws { XCTFail() }

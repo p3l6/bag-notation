@@ -52,7 +52,7 @@ label: value | field, when inside header
 `---` | header begin and end marker
 `|:` | barline
 % | comment marker
-`-` | tie, or slur
+`_` | tie, or slur
 `+` | doubles attached note length
 `/` | cuts attached note length
 `.` | dots attached note length

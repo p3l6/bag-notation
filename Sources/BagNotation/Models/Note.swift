@@ -17,12 +17,15 @@ public struct Note {
     let pitch: Pitch
     let embellishment: Embellishment?
     let duration: Duration
+    /// Tie or slur, depending on next pitch
+    let tiedToNext: Bool
 
-    init(context: Context, pitch: Pitch, embellishment: Embellishment?, duration: Duration) {
+    init(context: Context, pitch: Pitch, embellishment: Embellishment?, duration: Duration, tied: Bool) {
         self.context = context
         self.pitch = pitch
         self.embellishment = embellishment
         self.duration = duration
+        tiedToNext = tied
     }
 }
 

@@ -145,6 +145,10 @@ extension Note: AbcSourceConverting {
         }
         abc += pitch.abcSource()
         abc += duration.abcSource()
+        if tiedToNext {
+            abc += "-"
+        }
+        // TODO: slurs
         return abc
     }
 }

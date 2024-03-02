@@ -33,12 +33,14 @@ module.exports = grammar({
     note: $ => seq(
                    field('embellishment', optional($._embellishment)),
                    field('pitch', $.pitch),
-                   field('duration', optional($.duration))),
+                   field('duration', optional($.duration)),
+                   field('tie', optional($.tie))),
     _embellishment: $ => choice($.embellishment, $.literal_embellishment),
     embellishment: $ => /[phluxtvwzkn]+/,
     literal_embellishment: $ => seq("{", repeat1($.pitch), "}"),
     pitch: $ => /[qrbcdefga]/,
-    duration: $ => /[+.\/-]+/,
+    duration: $ => /[+.\/]+/,
+    tie: $ => /_/,
 
     //// Other
     _blank_line: $ => choice("\n", $.comment),
