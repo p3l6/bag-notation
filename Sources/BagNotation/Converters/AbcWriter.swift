@@ -50,9 +50,20 @@ public class AbcWriter {
     }
 }
 
+
 extension Tune: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        header.abcSource() + "\n" + lines.mapToAbc(joined: "\n")
+        var abc = header.abcSource() + "\n"
+
+        var currentGroupMax = 0
+        for (line, maxVoiceInGroup) in lines.withMaximumVoiceInGroup() {
+            if maxVoiceInGroup != currentGroupMax {
+                abc += "%%staves \((0...maxVoiceInGroup).map(String.init).joined(separator: " "))\n"
+                currentGroupMax = maxVoiceInGroup
+            }
+            abc += line.abcSource() + "\n"
+        }
+        return abc
     }
 }
 
@@ -88,13 +99,24 @@ extension TuneStyle: AbcSourceConverting {
 
 extension Line: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        // TODO: check context diff before barline, h, and always insert a [V: 0]
-        // Additionally, start the tune with a %%staves M
-        // Then, insert additional staves markers after the first pass of convertion is complete, at the tune level
-        var abc = leadingBarline?.abcSource() ?? ""
+        var abc = "[V: \(context.voiceNumber)] "
+        abc += leadingBarline?.abcSource() ?? ""
         abc += " "
         abc += bars.mapToAbc(joined: " ")
         return abc
+    }
+}
+
+extension [Line] {
+    fileprivate func withMaximumVoiceInGroup() -> some Sequence<(Line, Int)> {
+        var maxVoice: Int = 0
+        var maxVoices = [Int](repeating: 0, count: count)
+        for i in (0..<count).reversed() {
+            let lineVoice = self[i].context.voiceNumber
+            if maxVoice == 0 { maxVoice = lineVoice }
+            maxVoices[i] = maxVoice
+        }
+        return zip(self, maxVoices)
     }
 }
 

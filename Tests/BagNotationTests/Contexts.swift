@@ -14,7 +14,7 @@ final class Contexts: XCTestCase {
         ---
         |: abc def | (note: quarter) abc def | abc def  |
            abc def | (time: 4/4) abc def | abc def :|
-        || abc def | abc def | abc def ||
+        || abc def | abc (v: 1) abc (v: 2) def (v) abc | abc def ||
 
         ---
         title: Second by trad
@@ -69,7 +69,12 @@ final class Contexts: XCTestCase {
     }
 
     func testVariation() throws {
-        XCTFail()
+        let doc = try makeFile(from: source)
+        XCTAssertEqual(doc.tunes[0].lines[2].bars[1].notes[0].context.variation, nil)
+        XCTAssertEqual(doc.tunes[0].lines[2].bars[1].notes[3].context.variation, "1")
+        XCTAssertEqual(doc.tunes[0].lines[2].bars[1].notes[6].context.variation, "2")
+        XCTAssertEqual(doc.tunes[0].lines[2].bars[1].notes[9].context.variation, nil)
+
     }
 
     func testVoice() throws {
