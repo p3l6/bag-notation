@@ -32,6 +32,10 @@ public struct Field {
         _value
     }
 
+    func asTempo() throws -> Int {
+        try Int(value) ?! ModelParseError.invalidTempo
+    }
+
     func asTitle() -> (title: String, byline: String?) {
         let titleParts = value.split(separator: " by ").map(String.init)
         return (titleParts[0], titleParts.count > 1 ? titleParts[1] : nil)
@@ -62,6 +66,7 @@ public enum FieldLabel: String {
     case style
     case note
     case time
+    case tempo
     case trad
     case h
     case v

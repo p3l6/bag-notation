@@ -158,11 +158,14 @@ public class ModelBuilder {
         context.noteLength = (try? fields[.note]?.asDuration()) ?? Duration.eighth
 
         return Header(
+            context: context,
             title: title,
             style: style,
             composer: try possibleComposers.first ?! ModelParseError.tuneMissingComposer,
             noteLength: context.noteLength,
-            timeSignature: context.timeSignature)
+            timeSignature: context.timeSignature,
+            tempo: try fields[.tempo]?.asTempo()
+        )
     }
 
     private func fieldAtCursor() throws -> Field {
@@ -179,6 +182,7 @@ public class ModelBuilder {
         case .note: context.noteLength = try field.asDuration() ?! ModelParseError.invalidNoteLength
         case .h: context.voiceNumber = previousLineVoice + 1 // TODO: Error if not at the beginning of the line
         case .v: context.variation = field.asVariation()
+        case .tempo: context.tempo = try field.asTempo()
         default: break
         }
 

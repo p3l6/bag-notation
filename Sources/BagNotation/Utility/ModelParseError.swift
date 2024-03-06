@@ -34,6 +34,7 @@ public enum ModelParseError: Error, LocalizedError {
     case invalidTimeSignature
     case invalidBarline
     case invalidNoteLength
+    case invalidTempo
     case invalidField
 
     public var errorDescription: String? {
@@ -64,6 +65,7 @@ public enum ModelParseError: Error, LocalizedError {
         case .invalidBarline: "Invalid barline"
         case .invalidNoteLength: "Invalid note length"
         case .invalidField: "Invalid field"
+        case .invalidTempo: "Invalid tempo"
         }
     }
 

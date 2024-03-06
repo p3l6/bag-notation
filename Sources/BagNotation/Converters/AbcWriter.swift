@@ -69,13 +69,22 @@ extension Tune: AbcSourceConverting {
 
 extension Header: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        """
+        _ = context.abcSource() // initialize the static comparison context
+        
+        let tempoLine = if let tempo {
+            "Q:\(timeSignature.beatLength.representedNote())=\(tempo)"
+        } else {
+            "% no tempo"
+        }
+
+        return """
         X:1
         T:\(title)
         C:\(composer)
         R:\(style.abcSource())
         M:\(timeSignature.rawValue)
         L:1/8
+        \(tempoLine)
         K:HP
         """
     }
@@ -115,6 +124,7 @@ extension [Line] {
             let lineVoice = self[i].context.voiceNumber
             if maxVoice == 0 { maxVoice = lineVoice }
             maxVoices[i] = maxVoice
+            if lineVoice == 0 { maxVoice = 0 }
         }
         return zip(self, maxVoices)
     }
@@ -141,6 +151,9 @@ extension Context: AbcSourceConverting {
         var abc = ""
         if variation != Self.previousCheckedContext?.variation {
             abc = if let variation { " [\"\(variation)\" " } else { " ] " }
+        }
+        if let tempo, tempo != Self.previousCheckedContext?.tempo {
+            abc += "[Q:\(timeSignature.beatLength.representedNote())=\(tempo)]"
         }
         Self.previousCheckedContext = self
         return abc
@@ -209,6 +222,25 @@ extension Duration: AbcSourceConverting {
         case .halfDotted: "6"
         case .whole: "8"
         case .wholeDotted: "12"
+        }
+    }
+
+    fileprivate func representedNote() -> String {
+        switch self {
+        case .sixtyfourth: "1/64"
+        case .sixtyfourthDotted: "3/128"
+        case .thirtysecond: "1/32"
+        case .thirtysecondDotted: "3/64"
+        case .sixteenth: "1/16"
+        case .sixteenthDotted: "3/32"
+        case .eighth: "1/8"
+        case .eighthDotted: "3/16"
+        case .quarter: "1/4"
+        case .quarterDotted: "3/8"
+        case .half: "1/2"
+        case .halfDotted: "3/4"
+        case .whole: "1"
+        case .wholeDotted: "3/2"
         }
     }
 }

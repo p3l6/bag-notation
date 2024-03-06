@@ -4,22 +4,13 @@
 //
 
 public struct Header {
+    let context: Context // TODO: Remove explicit fields that are covered via context. noteLength, timeSig, etc.
     let title: String
     let style: TuneStyle
     let composer: String
     let noteLength: Duration
     let timeSignature: TimeSignature
-}
-
-public enum TimeSignature: String {
-    case time22 = "2/2"
-    case time24 = "2/4"
-    case time34 = "3/4"
-    case time44 = "4/4"
-    case time54 = "5/4"
-    case time68 = "6/8"
-    case time98 = "9/8"
-    case time128 = "12/8"
+    let tempo: Int?
 }
 
 public enum TuneStyle: String {
