@@ -50,7 +50,6 @@ public class AbcWriter {
     }
 }
 
-
 extension Tune: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = header.abcSource() + "\n"
@@ -62,7 +61,7 @@ extension Tune: AbcSourceConverting {
 extension Header: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         _ = context.abcSource() // initialize the static comparison context
-        
+
         let tempoLine = if let tempo {
             "Q:\(timeSignature.beatLength.representedNote())=\(tempo)"
         } else {
@@ -70,15 +69,15 @@ extension Header: AbcSourceConverting {
         }
 
         return """
-        X:1
-        T:\(title)
-        C:\(composer)
-        R:\(style.abcSource())
-        M:\(timeSignature.rawValue)
-        L:1/8
-        \(tempoLine)
-        K:HP
-        """
+            X:1
+            T:\(title)
+            C:\(composer)
+            R:\(style.abcSource())
+            M:\(timeSignature.rawValue)
+            L:1/8
+            \(tempoLine)
+            K:HP
+            """
     }
 }
 
@@ -104,7 +103,7 @@ extension Line: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = ""
         if voices.count != Self.currentVoiceCount {
-            abc += "%%staves \((0..<voices.count).map(String.init).joined(separator: " "))\n"
+            abc += "%%staves \((0 ..< voices.count).map(String.init).joined(separator: " "))\n"
             Self.currentVoiceCount = voices.count
         }
         abc += voices.mapToAbc(joined: "\n")

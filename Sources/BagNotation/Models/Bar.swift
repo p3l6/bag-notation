@@ -10,7 +10,7 @@ public struct Bar {
 
     var notes: [Note] { Array(noteClusters.joined()) }
     var isPickup: Bool {
-        context.barNumberInLine == 1 && noteClusters.count < beatsInBar(context.timeSignature)
+        context.barNumberInLine == 1 && noteClusters.count < context.timeSignature.beatsPerBar
     }
 }
 
@@ -35,16 +35,6 @@ public enum Barline {
     }
 }
 
-// TODO: extra, now exists on timesig
-private func beatsInBar(_ timeSignature: TimeSignature) -> Int {
-    switch timeSignature {
-    case .time22: 2
-    case .time24: 2
-    case .time34: 3
-    case .time44: 4
-    case .time54: 5
-    case .time68: 2
-    case .time98: 3
-    case .time128: 4
-    }
+extension String {
+    func toBarline(in context: Context) throws -> Barline { try Barline(rawValue: self, context: context) ?! ModelParseError.invalidBarline }
 }

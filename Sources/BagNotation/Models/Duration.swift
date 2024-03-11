@@ -1,8 +1,6 @@
 //
-//  File.swift
-//  
-//
-//  Created by Paul Landers on 3/6/24.
+//  Duration.swift
+//  Bag Notation
 //
 
 import Foundation
@@ -26,8 +24,8 @@ public enum Duration: Comparable {
 
     func doubled() throws -> Duration {
         switch self {
-        case .wholeDotted: throw ModelParseError.noteTooLong
-        case .whole: throw ModelParseError.noteTooLong
+        case .wholeDotted: throw ModelParseError.invalidNoteLength(why: "Too long")
+        case .whole: throw ModelParseError.invalidNoteLength(why: "Too long")
         case .halfDotted: .wholeDotted
         case .half: .whole
         case .quarterDotted: .halfDotted
@@ -57,26 +55,26 @@ public enum Duration: Comparable {
         case .sixteenth: .thirtysecond
         case .thirtysecondDotted: .sixtyfourthDotted
         case .thirtysecond: .sixtyfourth
-        case .sixtyfourthDotted: throw ModelParseError.noteTooShort
-        case .sixtyfourth: throw ModelParseError.noteTooShort
+        case .sixtyfourthDotted: throw ModelParseError.invalidNoteLength(why: "Too short")
+        case .sixtyfourth: throw ModelParseError.invalidNoteLength(why: "Too short")
         }
     }
 
     func dotted() throws -> Duration {
         switch self {
-        case .wholeDotted: throw ModelParseError.noteAlreadyDotted
+        case .wholeDotted: throw ModelParseError.invalidNoteLength(why: "Already dotted")
         case .whole: .wholeDotted
-        case .halfDotted: throw ModelParseError.noteAlreadyDotted
+        case .halfDotted: throw ModelParseError.invalidNoteLength(why: "Already dotted")
         case .half: .halfDotted
-        case .quarterDotted: throw ModelParseError.noteAlreadyDotted
+        case .quarterDotted: throw ModelParseError.invalidNoteLength(why: "Already dotted")
         case .quarter: .quarterDotted
-        case .eighthDotted: throw ModelParseError.noteAlreadyDotted
+        case .eighthDotted: throw ModelParseError.invalidNoteLength(why: "Already dotted")
         case .eighth: .eighthDotted
-        case .sixteenthDotted: throw ModelParseError.noteAlreadyDotted
+        case .sixteenthDotted: throw ModelParseError.invalidNoteLength(why: "Already dotted")
         case .sixteenth: .sixteenthDotted
-        case .thirtysecondDotted: throw ModelParseError.noteAlreadyDotted
+        case .thirtysecondDotted: throw ModelParseError.invalidNoteLength(why: "Already dotted")
         case .thirtysecond: .thirtysecondDotted
-        case .sixtyfourthDotted: throw ModelParseError.noteAlreadyDotted
+        case .sixtyfourthDotted: throw ModelParseError.invalidNoteLength(why: "Already dotted")
         case .sixtyfourth: .sixtyfourthDotted
         }
     }
@@ -97,9 +95,13 @@ public enum Duration: Comparable {
         case "////": try cut().cut().cut().cut()
         case ".": try dotted()
         case "/.": try cut().dotted()
-        default: throw ModelParseError.invalidNoteLength
+        default: throw ModelParseError.invalidNoteLength(why: "Failed to parse length modifiers")
         }
     }
+}
+
+extension String {
+    func toDuration(modifying base: Duration) throws -> Duration { try base.modified(by: self) }
 }
 
 public enum TimeSignature: String {

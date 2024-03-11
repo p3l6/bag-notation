@@ -16,5 +16,4 @@ public struct Context {
     var timeSignature: TimeSignature = .time44 // placeholder will be overwritten
     var noteLength: Duration = .eighth // default note length
     var tempo: Int?
-
 }

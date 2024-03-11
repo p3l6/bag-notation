@@ -22,7 +22,7 @@ public struct Field {
 
     init(label rawLabel: FieldLabel.RawValue, value: String?) throws {
         guard let label = FieldLabel(rawValue: rawLabel) else { throw ModelParseError.invalidField }
-        guard value != nil || !label.requiresValue else { throw ModelParseError.fieldMissingValue }
+        guard value != nil || !label.requiresValue else { throw ModelParseError.missingFieldValue }
 
         self.label = label
         _value = value
@@ -55,7 +55,7 @@ public struct Field {
         case "eighth": .eighth
         case "quarter": .quarter
         case "half": .half
-        default: throw ModelParseError.invalidNoteLength
+        default: throw ModelParseError.invalidNoteLength(why: "Not a recognized note length: sixteenth, eighth, quarter, half")
         }
     }
 }

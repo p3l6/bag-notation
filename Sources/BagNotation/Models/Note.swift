@@ -92,6 +92,11 @@ public enum Embellishment: CaseIterable {
     case halfCadenceWithHighAGracenote
 }
 
+extension String {
+    func toPitch() throws -> Pitch { try Pitch.from(string: self) }
+    func toEmbellishment() throws -> Embellishment { try Embellishment.from(string: self) }
+}
+
 public enum NoteParseError: Error {
     case unknownPitch
     case unknownEmbellishment

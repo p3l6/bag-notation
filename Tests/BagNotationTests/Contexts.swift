@@ -74,7 +74,6 @@ final class Contexts: XCTestCase {
         XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[3].context.variation, "1")
         XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[6].context.variation, "2")
         XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[9].context.variation, nil)
-
     }
 
     func testVoice() throws {
