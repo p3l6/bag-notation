@@ -37,6 +37,8 @@ public enum ModelParseError: Error, LocalizedError {
     case invalidTempo
     case invalidField
 
+    // TODO: clean up unused
+
     public var errorDescription: String? {
         switch self {
         case .fileParseError: "File parsing error"

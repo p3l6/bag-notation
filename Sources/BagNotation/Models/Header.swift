@@ -15,7 +15,7 @@ public struct Header {
 
 public enum TuneStyle: String {
     case march
-    case march24 = "2/4 march"
+    case march24 = "2/4 march" // TODO: delete these extra styles, make the function return a style and signtagure tuple. 
     case march34 = "3/4 march"
     case march44 = "4/4 march"
     case march54 = "5/4 march"

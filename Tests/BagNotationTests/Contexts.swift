@@ -47,42 +47,45 @@ final class Contexts: XCTestCase {
 
     func testBarNumber() throws {
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].context.barNumberInLine, 1)
-        XCTAssertEqual(doc.tunes[0].lines[0].bars[2].context.barNumberInLine, 3)
-        XCTAssertEqual(doc.tunes[0].lines[1].bars[2].context.barNumberInLine, 3)
+        XCTAssertEqual(doc.tunes[0].lines[0].voices[0].bars[0].context.barNumberInLine, 1)
+        XCTAssertEqual(doc.tunes[0].lines[0].voices[0].bars[2].context.barNumberInLine, 3)
+        XCTAssertEqual(doc.tunes[0].lines[1].voices[0].bars[2].context.barNumberInLine, 3)
     }
 
     func testTimeSignature() throws {
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.timeSignature, .time68)
-        XCTAssertEqual(doc.tunes[0].lines[1].bars[1].notes[0].context.timeSignature, .time44)
-        XCTAssertEqual(doc.tunes[0].lines[2].bars[0].notes[0].context.timeSignature, .time44)
-        XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.timeSignature, .time68)
+        XCTAssertEqual(doc.tunes[0].lines[0].voices[0].bars[0].notes[0].context.timeSignature, .time68)
+        XCTAssertEqual(doc.tunes[0].lines[1].voices[0].bars[1].notes[0].context.timeSignature, .time44)
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[0].notes[0].context.timeSignature, .time44)
+        XCTAssertEqual(doc.tunes[1].lines[0].voices[0].bars[0].notes[0].context.timeSignature, .time68)
     }
 
     func testNoteLenth() throws {
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes[0].lines[0].bars[0].notes[0].context.noteLength, .eighth)
-        XCTAssertEqual(doc.tunes[0].lines[0].bars[1].notes[0].context.noteLength, .quarter)
-        XCTAssertEqual(doc.tunes[0].lines[1].bars[0].notes[0].context.noteLength, .quarter)
-        XCTAssertEqual(doc.tunes[1].lines[0].bars[0].notes[0].context.noteLength, .eighth)
+        XCTAssertEqual(doc.tunes[0].lines[0].voices[0].bars[0].notes[0].context.noteLength, .eighth)
+        XCTAssertEqual(doc.tunes[0].lines[0].voices[0].bars[1].notes[0].context.noteLength, .quarter)
+        XCTAssertEqual(doc.tunes[0].lines[1].voices[0].bars[0].notes[0].context.noteLength, .quarter)
+        XCTAssertEqual(doc.tunes[1].lines[0].voices[0].bars[0].notes[0].context.noteLength, .eighth)
     }
 
     func testVariation() throws {
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes[0].lines[2].bars[1].notes[0].context.variation, nil)
-        XCTAssertEqual(doc.tunes[0].lines[2].bars[1].notes[3].context.variation, "1")
-        XCTAssertEqual(doc.tunes[0].lines[2].bars[1].notes[6].context.variation, "2")
-        XCTAssertEqual(doc.tunes[0].lines[2].bars[1].notes[9].context.variation, nil)
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[0].context.variation, nil)
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[3].context.variation, "1")
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[6].context.variation, "2")
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[9].context.variation, nil)
 
     }
 
     func testVoice() throws {
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes[1].lines[0].context.voiceNumber, 0)
-        XCTAssertEqual(doc.tunes[1].lines[1].context.voiceNumber, 1)
-        XCTAssertEqual(doc.tunes[1].lines[2].context.voiceNumber, 0)
-        XCTAssertEqual(doc.tunes[1].lines[3].context.voiceNumber, 1)
-        XCTAssertEqual(doc.tunes[1].lines[6].context.voiceNumber, 2)
+        XCTAssertEqual(doc.tunes[1].lines[0].voices.count, 2)
+        XCTAssertEqual(doc.tunes[1].lines[0].voices[0].context.voiceNumber, 0)
+        XCTAssertEqual(doc.tunes[1].lines[0].voices[1].context.voiceNumber, 1)
+        XCTAssertEqual(doc.tunes[1].lines[1].voices.count, 2)
+        XCTAssertEqual(doc.tunes[1].lines[1].voices[0].context.voiceNumber, 0)
+        XCTAssertEqual(doc.tunes[1].lines[1].voices[1].context.voiceNumber, 1)
+        XCTAssertEqual(doc.tunes[1].lines[2].voices.count, 3)
+        XCTAssertEqual(doc.tunes[1].lines[3].voices.count, 3)
     }
 }

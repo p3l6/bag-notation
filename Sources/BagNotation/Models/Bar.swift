@@ -35,6 +35,7 @@ public enum Barline {
     }
 }
 
+// TODO: extra, now exists on timesig
 private func beatsInBar(_ timeSignature: TimeSignature) -> Int {
     switch timeSignature {
     case .time22: 2

@@ -21,8 +21,7 @@ struct Abc: AsyncParsableCommand {
             throw RuntimeError.couldNotRead(file: options.inputFile)
         }
 
-        // TODO: change names of these. BagReader().makeDoc()  AbcWriter()
-        let doc = try ModelBuilder(input).makeModel()
+        let doc = try BagReader(input).makeModel()
         let abc = try AbcWriter(doc).makeAbc()
 
         if let outputFile {

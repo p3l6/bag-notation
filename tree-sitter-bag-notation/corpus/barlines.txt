@@ -11,11 +11,10 @@ Barlines
 
 (file (tune
   (header)
-  (body
     (line
       (barline)
       (measure (note_cluster (note (pitch))) (barline))
       (measure (note_cluster (note (pitch))) (barline))
       (measure (note_cluster (note (pitch))) (barline))
       (measure (note_cluster (note (pitch))) (barline))
-      (measure (note_cluster (note (pitch))) (barline))))))
+      (measure (note_cluster (note (pitch))) (barline)))))

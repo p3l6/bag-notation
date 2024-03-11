@@ -17,5 +17,4 @@ public struct Context {
     var noteLength: Duration = .eighth // default note length
     var tempo: Int?
 
-//    var filePosition: (line: Int, col: Int, length: Int)
 }

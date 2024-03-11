@@ -54,15 +54,7 @@ public class AbcWriter {
 extension Tune: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = header.abcSource() + "\n"
-
-        var currentGroupMax = 0
-        for (line, maxVoiceInGroup) in lines.withMaximumVoiceInGroup() {
-            if maxVoiceInGroup != currentGroupMax {
-                abc += "%%staves \((0...maxVoiceInGroup).map(String.init).joined(separator: " "))\n"
-                currentGroupMax = maxVoiceInGroup
-            }
-            abc += line.abcSource() + "\n"
-        }
+        abc += lines.mapToAbc(joined: "\n")
         return abc
     }
 }
@@ -107,26 +99,26 @@ extension TuneStyle: AbcSourceConverting {
 }
 
 extension Line: AbcSourceConverting {
+    static var currentVoiceCount = 0
+
+    fileprivate func abcSource() -> String {
+        var abc = ""
+        if voices.count != Self.currentVoiceCount {
+            abc += "%%staves \((0..<voices.count).map(String.init).joined(separator: " "))\n"
+            Self.currentVoiceCount = voices.count
+        }
+        abc += voices.mapToAbc(joined: "\n")
+        return abc
+    }
+}
+
+extension Line.Voice: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = "[V: \(context.voiceNumber)] "
         abc += leadingBarline?.abcSource() ?? ""
         abc += " "
         abc += bars.mapToAbc(joined: " ")
         return abc
-    }
-}
-
-extension [Line] {
-    fileprivate func withMaximumVoiceInGroup() -> some Sequence<(Line, Int)> {
-        var maxVoice: Int = 0
-        var maxVoices = [Int](repeating: 0, count: count)
-        for i in (0..<count).reversed() {
-            let lineVoice = self[i].context.voiceNumber
-            if maxVoice == 0 { maxVoice = lineVoice }
-            maxVoices[i] = maxVoice
-            if lineVoice == 0 { maxVoice = 0 }
-        }
-        return zip(self, maxVoices)
     }
 }
 

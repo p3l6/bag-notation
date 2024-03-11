@@ -108,7 +108,13 @@ final class Notes: XCTestCase {
         XCTAssertEqual(notes[3].tiedToNext, true)
     }
 
-    func testRests() throws { XCTFail() }
-
-    func testAccidentals() throws { XCTFail() }
+//    func testTriplets() throws {
+//        let notes = try makeNoteCluster(from: "xxexd-e-fg")
+//        XCTAssertEqual(notes[0].context.tupletSize, 0)
+//        XCTAssertEqual(notes[1].context.tupletSize, 3)
+//        XCTAssertEqual(notes[2].context.tupletSize, 3)
+//        XCTAssertEqual(notes[3].context.tupletSize, 3)
+//        XCTAssertEqual(notes[4].context.tupletSize, 0)
+// TODO: same with quarters. split over a bar? no that's too much. must be within bar, or error.
+//    }
 }

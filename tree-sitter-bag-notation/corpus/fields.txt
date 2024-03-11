@@ -11,12 +11,12 @@ xr (meter: 6/8) xc |
 
 (file (tune
   (header)
-  (body (line
+  (line
     (measure
-      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-      (field label: (field_content) value: (field_content))
-      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-      (barline))))))
+      (note_cluster (note (embellishment) (pitch)))
+      (field (field_label) (field_value))
+      (note_cluster (note (embellishment) (pitch)))
+      (barline)))))
 
 
 =====>>
@@ -32,12 +32,12 @@ xr (triplet) xc |
 
 (file (tune
   (header)
-  (body (line
+  (line
     (measure
-      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-      (field label: (field_content))
-      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-      (barline))))))
+      (note_cluster (note (embellishment) (pitch)))
+      (field (field_label))
+      (note_cluster (note (embellishment) (pitch)))
+      (barline)))))
 
 
 
@@ -56,14 +56,14 @@ xr (valueless label) xc (space label: value words) |
 
 (file (tune
   (header
-    (field label: (field_content) value: (field_content)))
-  (body (line
+    (field (field_label) (field_value)))
+  (line
     (measure
-      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-      (field label: (field_content))
-      (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-      (field label: (field_content) value: (field_content))
-      (barline))))))
+      (note_cluster (note (embellishment) (pitch)))
+      (field (field_label))
+      (note_cluster (note (embellishment) (pitch)))
+      (field (field_label) (field_value))
+      (barline)))))
 
 
 =====>>
@@ -80,17 +80,16 @@ Leading inline field
 
 (file (tune
   (header)
-  (body
     (line
-      (field label: (field_content))
+      (field (field_label))
       (measure
-        (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-        (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
+        (note_cluster (note (embellishment) (pitch)))
+        (note_cluster (note (embellishment) (pitch)))
         (barline)))
     (line
-      (field label: (field_content))
+      (field (field_label))
       (barline)
       (measure
-        (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-        (note_cluster (note embellishment: (embellishment) pitch: (pitch)))
-        (barline))))))
+        (note_cluster (note (embellishment) (pitch)))
+        (note_cluster (note (embellishment) (pitch)))
+        (barline)))))

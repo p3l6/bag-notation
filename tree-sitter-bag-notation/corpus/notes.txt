@@ -11,7 +11,7 @@ q r b c d e f g a |
 
 (file (tune
   (header)
-  (body (line
+  (line
     (measure
       (note_cluster (note (pitch)))
       (note_cluster (note (pitch)))
@@ -22,7 +22,7 @@ q r b c d e f g a |
       (note_cluster (note (pitch)))
       (note_cluster (note (pitch)))
       (note_cluster (note (pitch)))
-      (barline))))))
+      (barline)))))
 
 
 =====>>
@@ -38,7 +38,7 @@ qrbc defga |
 
 (file (tune
   (header)
-  (body (line
+  (line
     (measure
       (note_cluster
         (note (pitch))
@@ -51,7 +51,7 @@ qrbc defga |
         (note (pitch))
         (note (pitch))
         (note (pitch)))
-      (barline))))))
+      (barline)))))
 
 
 =====>>
@@ -67,7 +67,7 @@ xrxc vvbd |
 
 (file (tune
   (header)
-  (body (line
+  (line
     (measure
       (note_cluster
         (note (embellishment) (pitch))
@@ -75,7 +75,7 @@ xrxc vvbd |
       (note_cluster
         (note (embellishment) (pitch))
         (note (pitch)))
-      (barline))))))
+      (barline)))))
 
 
 =====>>
@@ -91,7 +91,7 @@ g+ f/e. r.b/ c+. d_ |
 
 (file (tune
   (header)
-  (body (line
+  (line
     (measure
       (note_cluster
         (note (pitch) (duration)))
@@ -105,7 +105,7 @@ g+ f/e. r.b/ c+. d_ |
         (note (pitch) (duration)))
       (note_cluster
         (note (pitch) (tie)))
-      (barline))))))
+      (barline)))))
 
 
 =====>>
@@ -115,18 +115,18 @@ Embellishment literals
 ---
 ---
 
-xr{bdb}c {qrqgf}bd |
+xrjpjbc qoqyubd |
 
 ----->>
 
 (file (tune
   (header)
-  (body (line
+  (line
     (measure
       (note_cluster
         (note (embellishment) (pitch))
-        (note (literal_embellishment (pitch) (pitch) (pitch)) (pitch)))
+        (note (embellishment) (pitch)))
       (note_cluster
-        (note (literal_embellishment (pitch) (pitch) (pitch) (pitch) (pitch)) (pitch))
+        (note (embellishment) (pitch))
         (note (pitch)))
-      (barline))))))
+      (barline)))))

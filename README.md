@@ -34,10 +34,12 @@ all fields are listed as labels and require values, unless listed with parenthes
   - style: required
   - time: required, unless implied by a recognized valid [[tune style]]
   - note: set the base note length, ususally ommited for the default of eighth
+  - tempo: set the tunes tempo. should be an integer in bpm
 - inline fields:
   - (h): harmony line. only valid at the very beginning of a line
   - note: change the base note length
   - time: change the time signature
+  - tempo: change the tempo
   
   
 ## language symbols
@@ -52,7 +54,9 @@ label: value | field, when inside header
 `---` | header begin and end marker
 `|:` | barline
 % | comment marker
-`_` | tie, or slur
+`_` | tie
+`~` | slur
+`-` | triplet/tuplet
 `+` | doubles attached note length
 `/` | cuts attached note length
 `.` | dots attached note length

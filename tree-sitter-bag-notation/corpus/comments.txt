@@ -13,12 +13,11 @@ xr |
 
 (file (tune
   (header)
-  (body
     (comment)
     (line
       (measure
-        (note_cluster (note embellishment: (embellishment) pitch: (pitch))) (barline)))
-    (comment))))
+        (note_cluster (note (embellishment) (pitch))) (barline)))
+    (comment)))
 
 
 
@@ -36,12 +35,11 @@ xr |
 
 (file (tune
   (header)
-  (body
     (line
       (measure
-        (note_cluster (note embellishment: (embellishment) pitch: (pitch))) (barline))
+        (note_cluster (note (embellishment) (pitch))) (barline))
       (tail_comment))
     (line
       (measure
-        (note_cluster (note embellishment: (embellishment) pitch: (pitch))) (barline))))))
+        (note_cluster (note (embellishment) (pitch))) (barline)))))
 

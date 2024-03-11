@@ -9,7 +9,7 @@ func makeFile(from source: String) throws -> Doc {
     // Swift multiline strings do not end in a newline
     // This is easier than making sure they exist in every test path.
     let withFinalNewline = source + "\n"
-    return try ModelBuilder(withFinalNewline).makeModel()
+    return try BagReader(withFinalNewline).makeModel()
 }
 
 func makeHeader(from fragment: String) throws -> Header {
@@ -23,7 +23,7 @@ func makeHeader(from fragment: String) throws -> Header {
     .header
 }
 
-func makeLine(from fragment: String) throws -> Line {
+func makeLineVoice(from fragment: String) throws -> Line.Voice {
     try makeFile(from: """
         ---
         title: test by test
@@ -33,6 +33,7 @@ func makeLine(from fragment: String) throws -> Line {
         """)
     .tunes[0]
     .lines[0]
+    .melody
 }
 
 func makeBar(from fragment: String) throws -> Bar {
@@ -45,6 +46,7 @@ func makeBar(from fragment: String) throws -> Bar {
         """)
     .tunes[0]
     .lines[0]
+    .melody
     .bars[1]
 }
 
@@ -58,6 +60,7 @@ func makeNoteCluster(from fragment: String) throws -> [Note] {
         """)
     .tunes[0]
     .lines[0]
+    .melody
     .bars[0]
     .noteClusters[0]
 }
