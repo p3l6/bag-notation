@@ -4,7 +4,6 @@
 //
 
 public struct Header {
-    let context: Context // TODO: Remove explicit fields that are covered via context. noteLength, timeSig, etc.
     let title: String
     let style: TuneStyle
     let composer: String

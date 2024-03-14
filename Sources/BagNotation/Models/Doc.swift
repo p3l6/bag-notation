@@ -4,5 +4,6 @@
 //
 
 public struct Doc {
+    let context: DocContext
     let tunes: [Tune]
 }

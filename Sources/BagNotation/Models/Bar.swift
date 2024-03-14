@@ -4,13 +4,20 @@
 //
 
 public struct Bar {
-    let context: Context
-    let noteClusters: [[Note]]
+    let context: BarContext
+
+    let clusters: [Cluster]
     let trailingBarline: Barline
 
-    var notes: [Note] { Array(noteClusters.joined()) }
+    init(context: BarContext, clusters: [Cluster], trailingBarline: Barline) {
+        self.context = context
+        self.clusters = clusters
+        self.trailingBarline = trailingBarline == .double && context.body.barNumber == context.body.voice.barCount ? .partEnd : trailingBarline
+    }
+
+    var notes: [Note] { Array(clusters.map(\.notes).joined()) }
     var isPickup: Bool {
-        context.barNumberInLine == 1 && noteClusters.count < context.timeSignature.beatsPerBar
+        context.body.barNumber == 1 && clusters.count < context.tail.timeSignature.beatsPerBar
     }
 }
 
@@ -21,20 +28,20 @@ public enum Barline {
     case partStart
     case partEnd
     case double
+}
 
-    public init?(rawValue: String, context: Context) {
-        switch (rawValue, context.barNumberInLine) {
-        case ("|", _): self = .plain
-        case ("|:", _): self = .repeatStart
-        case (":|", _): self = .repeatEnd
-        case ("||", 0): self = .partStart
-        case ("||", context.barCountInLine): self = .partEnd
-        case ("||", _): self = .double
-        default: return nil
+extension Barline {
+    static func from(string: String) throws -> Barline {
+        switch string {
+        case "|": .plain
+        case "|:": .repeatStart
+        case ":|": .repeatEnd
+        case "||": .double
+        default: throw ModelParseError.invalidBarline
         }
     }
 }
 
 extension String {
-    func toBarline(in context: Context) throws -> Barline { try Barline(rawValue: self, context: context) ?! ModelParseError.invalidBarline }
+    func toBarline() throws -> Barline { try Barline.from(string: self) }
 }

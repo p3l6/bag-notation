@@ -13,13 +13,13 @@
 // ?z: {afege}f ? in No. 64
 
 public struct Note {
-    let context: Context
+    let context: NoteContext
     let pitch: Pitch
     let embellishment: Embellishment?
     let duration: Duration
     let tiedToNext: Bool
 
-    init(context: Context, pitch: Pitch, embellishment: Embellishment?, duration: Duration, tied: Bool) {
+    init(context: NoteContext, pitch: Pitch, embellishment: Embellishment?, duration: Duration, tied: Bool) {
         self.context = context
         self.pitch = pitch
         self.embellishment = embellishment
@@ -120,6 +120,8 @@ extension Pitch {
         }
     }
 }
+
+// TODO: break embellishments out to a new file
 
 extension Embellishment {
     static func from(string: String) throws -> Embellishment {

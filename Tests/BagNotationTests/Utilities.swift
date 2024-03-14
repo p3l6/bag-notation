@@ -23,7 +23,7 @@ func makeHeader(from fragment: String) throws -> Header {
     .header
 }
 
-func makeLineVoice(from fragment: String) throws -> Line.Voice {
+func makeLineVoice(from fragment: String) throws -> Voice {
     try makeFile(from: """
         ---
         title: test by test
@@ -50,7 +50,7 @@ func makeBar(from fragment: String) throws -> Bar {
     .bars[1]
 }
 
-func makeNoteCluster(from fragment: String) throws -> [Note] {
+func makeCluster(from fragment: String) throws -> [Note] {
     try makeFile(from: """
         ---
         title: test by test
@@ -62,5 +62,6 @@ func makeNoteCluster(from fragment: String) throws -> [Note] {
     .lines[0]
     .melody
     .bars[0]
-    .noteClusters[0]
+    .clusters[0]
+    .notes
 }

@@ -50,8 +50,12 @@ public class AbcWriter {
     }
 }
 
+private var activeFlow: FlowContext!
+
 extension Tune: AbcSourceConverting {
     fileprivate func abcSource() -> String {
+        activeFlow = context.head
+
         var abc = header.abcSource() + "\n"
         abc += lines.mapToAbc(joined: "\n")
         return abc
@@ -60,8 +64,6 @@ extension Tune: AbcSourceConverting {
 
 extension Header: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        _ = context.abcSource() // initialize the static comparison context
-
         let tempoLine = if let tempo {
             "Q:\(timeSignature.beatLength.representedNote())=\(tempo)"
         } else {
@@ -111,9 +113,9 @@ extension Line: AbcSourceConverting {
     }
 }
 
-extension Line.Voice: AbcSourceConverting {
+extension Voice: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        var abc = "[V: \(context.voiceNumber)] "
+        var abc = "[V: \(context.body.voiceNumber)] "
         abc += leadingBarline?.abcSource() ?? ""
         abc += " "
         abc += bars.mapToAbc(joined: " ")
@@ -123,9 +125,9 @@ extension Line.Voice: AbcSourceConverting {
 
 extension Bar: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        var abc = noteClusters.map {
-            var abc = $0.first?.context.abcSource() ?? ""
-            abc += $0.mapToAbc()
+        var abc = clusters.map {
+            var abc = $0.context.head.abcSource()
+            abc += $0.abcSource()
             return abc
         }.joined(separator: " ")
         abc += " "
@@ -134,19 +136,16 @@ extension Bar: AbcSourceConverting {
     }
 }
 
-extension Context: AbcSourceConverting {
-    private static var previousCheckedContext: Context? = nil
-
-    /// Prints differences since the last time this function was called
+extension FlowContext: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = ""
-        if variation != Self.previousCheckedContext?.variation {
+        if variation != activeFlow.variation {
             abc = if let variation { " [\"\(variation)\" " } else { " ] " }
         }
-        if let tempo, tempo != Self.previousCheckedContext?.tempo {
+        if let tempo, tempo != activeFlow.tempo {
             abc += "[Q:\(timeSignature.beatLength.representedNote())=\(tempo)]"
         }
-        Self.previousCheckedContext = self
+        activeFlow = self
         return abc
     }
 }
@@ -161,6 +160,12 @@ extension Barline: AbcSourceConverting {
         case .repeatEnd: ":|"
         case .double: "||"
         }
+    }
+}
+
+extension Cluster: AbcSourceConverting {
+    fileprivate func abcSource() -> String {
+        notes.mapToAbc()
     }
 }
 

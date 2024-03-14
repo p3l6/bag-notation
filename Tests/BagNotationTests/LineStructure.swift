@@ -44,11 +44,11 @@ final class LineStructure: XCTestCase {
         XCTAssertEqual(line.bars[4].trailingBarline, .partEnd)
     }
 
-    func testNoteClusters() throws {
+    func testClusters() throws {
         let line = try makeLineVoice(from: "| abc def | abcdef | ab cd ef |")
-        XCTAssertEqual(line.bars[0].noteClusters.count, 2)
-        XCTAssertEqual(line.bars[1].noteClusters.count, 1)
-        XCTAssertEqual(line.bars[2].noteClusters.count, 3)
+        XCTAssertEqual(line.bars[0].clusters.count, 2)
+        XCTAssertEqual(line.bars[1].clusters.count, 1)
+        XCTAssertEqual(line.bars[2].clusters.count, 3)
     }
 
     func testMissingTrailingBarline() throws {

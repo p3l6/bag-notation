@@ -43,7 +43,11 @@ public class BagReader: NodeSourceTextProvider {
 
     public func makeModel() throws -> Doc {
         // modelDebug(from: tree.rootNode!)
-        try DocModeler(node: tree.rootNode!, context: Context(), textSource: self).model()
+        let docModeler = try DocModeler(node: tree.rootNode!, textSource: self)
+        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, tempo: nil, variation: nil)
+        let docContext = DocContextBody(tuneCount: docModeler.tuneModelers.count)
+        _ = try docModeler.provideContext(head: docFlow, body: docContext)
+        return docModeler.model()
     }
 
     private func text(at range: TSRange) -> String {
@@ -58,9 +62,6 @@ public class BagReader: NodeSourceTextProvider {
 
     // // // plan!
 
-    // split NoteContext, linecontext, tuneContext (basically replaces header)
-    // all contain the previous level. defined in the respective files.
-
     // add preceding note to note context
 
     // commit checkpoint
@@ -68,6 +69,8 @@ public class BagReader: NodeSourceTextProvider {
     // back to implementing tuplets
     // then do slurs to round it out?
 }
+
+// MARK: Modeling helpers
 
 private struct NodeChildren {
     let all: [Node]
@@ -78,7 +81,7 @@ private struct NodeChildren {
         var childrenByType = [NodeType: [Node]]()
 
         for child in (0 ..< node.childCount).compactMap(node.child(at:)).filter(\.isNamed) {
-            let nodeType = try node.type()
+            let nodeType = try child.type()
 
             guard nodeType != .comment && nodeType != .tailComment else {
                 continue
@@ -118,7 +121,7 @@ private struct NodeChildren {
     }
 }
 
-enum NodeType: String {
+private enum NodeType: String {
     case file
     case tune
     case line
@@ -127,7 +130,7 @@ enum NodeType: String {
     case body
     case measure
     case barline
-    case noteCluster = "note_cluster"
+    case cluster = "note_cluster"
     case note
     case comment
     case tailComment = "tail_comment"
@@ -140,47 +143,55 @@ enum NodeType: String {
     case fieldValue = "field_value"
 }
 
-protocol NodeSourceTextProvider {
+private protocol NodeSourceTextProvider {
     func text(of: Node) -> String
 }
 
-class Modeler<Output> {
-    let node: Node
-    let context: Context
-    var continuationContext: Context
-    let textSource: NodeSourceTextProvider
-    var expectedNodeType: NodeType { .error }
-    var expectedChildNodeTypes: [NodeType] { [.error] }
-    fileprivate var children: NodeChildren!
+private protocol LeafModeler {
+    associatedtype Output
 
-    init(node: Node, context: Context, textSource: NodeSourceTextProvider) throws {
-        self.node = node
-        self.context = context
-        continuationContext = context
-        self.textSource = textSource
-    }
+    // TODO: would be a great to have a better way to wrap these, instead of the extra argument
+    init(node: Node, textSource: NodeSourceTextProvider) throws
+    init(node: Node, textSource: NodeSourceTextProvider, impl: Bool) throws
 
-    final func model() throws -> Output {
-        do {
-            children = try NodeChildren(node: node, verifyingTypes: expectedChildNodeTypes)
+    func model() -> Output
+}
 
-            guard let nodeType = NodeType(rawValue: node.nodeType!), nodeType == expectedNodeType else {
-                throw ModelParseError.unexpectedNodeType(type: node.nodeType!)
-            }
-
-            return try modelerImplementation()
-        } catch let error as ModelParseError {
+extension LeafModeler {
+    init(node: Node, textSource: NodeSourceTextProvider) throws {
+        do { try self.init(node: node, textSource: textSource, impl: true) }
+        catch let error as ModelParseError {
             let loc = node.pointRange
             let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2) + 1)")
             locError.log()
             throw locError
         }
     }
-
-    fileprivate func modelerImplementation() throws -> Output { throw ModelParseError.missingFunctionImplementation }
 }
 
-extension Node {
+private protocol Modeler: LeafModeler {
+    associatedtype OutputContext
+
+    var node: Node { get }
+    var textSource: any NodeSourceTextProvider { get }
+
+    func provideContext(head: FlowContext, body: OutputContext) throws -> FlowContext
+    func provideContextImpl(head: FlowContext, body: OutputContext) throws -> FlowContext
+}
+
+extension Modeler {
+    func provideContext(head: FlowContext, body: OutputContext) throws -> FlowContext {
+        do { return try provideContextImpl(head: head, body: body) }
+        catch let error as ModelParseError {
+            let loc = node.pointRange
+            let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2) + 1)")
+            locError.log()
+            throw locError
+        }
+    }
+}
+
+private extension Node {
     func text(from source: NodeSourceTextProvider) -> String { source.text(of: self) }
 
     func type() throws -> NodeType {
@@ -192,69 +203,135 @@ extension Node {
         }
         return nodeType
     }
-}
 
-class DocModeler: Modeler<Doc> {
-    override var expectedNodeType: NodeType { .file }
-    override var expectedChildNodeTypes: [NodeType] { [.tune] }
-
-    override func modelerImplementation() throws -> Doc {
-        return Doc(tunes: try children[.tune].map {
-            continuationContext.tuneNumber += 1
-            return try TuneModeler(node: $0, context: continuationContext, textSource: textSource).model()
-        })
+    func childrenVerifying(typeIs expectedType: NodeType, childrenAre expectedChildTypes: [NodeType]) throws -> NodeChildren {
+        let type = try type()
+        guard type == expectedType else {
+            throw ModelParseError.unexpectedNodeType(type: type.rawValue)
+        }
+        return try NodeChildren(node: self, verifyingTypes: expectedChildTypes)
     }
 }
 
-class TuneModeler: Modeler<Tune> {
-    override var expectedNodeType: NodeType { .tune }
-    override var expectedChildNodeTypes: [NodeType] { [.line, .header] }
+// MARK: - Modelers
 
-    override func modelerImplementation() throws -> Tune {
-        continuationContext.lineNumberInTune = 0
+private final class DocModeler: Modeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
 
-        let header = try HeaderModeler(node: children.unique(.header), context: context, textSource: textSource).model()
-        continuationContext.timeSignature = header.timeSignature
-        continuationContext.noteLength = header.noteLength
+    let tuneModelers: [TuneModeler]
 
-        var lines = [Line]()
-        var voicesInLine = [Line.Voice]()
+    var context: DocContext!
 
-        for child in children.all {
-            switch try child.type() {
-            case .header:
-                break
-            case .line:
-                continuationContext.barNumberInLine = 0
+    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+        self.node = node
+        self.textSource = textSource
 
-                // TODO: maybe update grammar to match this terminology
-                continuationContext.voiceNumber += 1
-                let voice = try VoiceModeler(node: child, context: continuationContext, textSource: textSource).model()
-                continuationContext = voice.context
-                if !voice.isHarmony && !voicesInLine.isEmpty {
-                    continuationContext.lineNumberInTune += 1
-                    lines.append(Line(context: continuationContext, voices: voicesInLine))
-                    voicesInLine.removeAll()
-                }
-                voicesInLine.append(voice)
-            default: throw ModelParseError.unexpectedNodeType(type: child.nodeType!)
+        let children = try node.childrenVerifying(typeIs: .file, childrenAre: [.tune])
+
+        tuneModelers = try children[.tune].map {
+            try TuneModeler(node: $0, textSource: textSource)
+        }
+    }
+
+    func provideContextImpl(head: FlowContext, body: DocContextBody) throws -> FlowContext {
+        var flow = head
+
+        for (idx, tm) in tuneModelers.enumerated() {
+            let tuneContext = TuneContextBody(tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
+            let headerFlow = FlowContext(timeSignature: tm.header.timeSignature, noteLength: tm.header.noteLength, tempo: tm.header.tempo, variation: nil)
+            flow = try tm.provideContext(head: headerFlow, body: tuneContext)
+        }
+
+        context = DocContext(head: head, body: body, tail: flow)
+        return flow
+    }
+
+    func model() -> Doc {
+        Doc(context: context, tunes: tuneModelers.map { $0.model() })
+    }
+}
+
+private final class TuneModeler: Modeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
+
+    let header: Header
+    let voiceModelersByLine: [[VoiceModeler]]
+
+    var context: TuneContext!
+    var lineContexts = [LineContext]()
+
+    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+        self.node = node
+        self.textSource = textSource
+
+        let children = try node.childrenVerifying(typeIs: .tune, childrenAre: [.line, .header])
+        header = try HeaderModeler(node: children.unique(.header), textSource: textSource).model()
+
+        let voiceModelers = try children[.line].map {
+            try VoiceModeler(node: $0, textSource: textSource)
+        }
+
+        var voiceModelersByLine = [[VoiceModeler]]()
+        var voicesInLine = [VoiceModeler]()
+        for voiceModeler in voiceModelers {
+            if !voiceModeler.isHarmony && !voicesInLine.isEmpty {
+                voiceModelersByLine.append(voicesInLine)
+                voicesInLine.removeAll()
             }
+            voicesInLine.append(voiceModeler)
         }
         if !voicesInLine.isEmpty {
-            continuationContext.lineNumberInTune += 1
-            lines.append(Line(context: continuationContext, voices: voicesInLine))
+            voiceModelersByLine.append(voicesInLine)
+        }
+        self.voiceModelersByLine = voiceModelersByLine
+    }
+
+    func provideContextImpl(head: FlowContext, body: TuneContextBody) throws -> FlowContext {
+        var flow = head
+        // TODO: split flow per voice
+
+        for (lineIdx, lineVoices) in voiceModelersByLine.enumerated() {
+            let lineBody = LineContextBody(tune: body, lineNumber: lineIdx + 1, voiceCount: lineVoices.count)
+            let lineHead = flow
+            for (voiceIdx, voiceModeler) in lineVoices.enumerated() {
+                let voiceBody = VoiceContextBody(line: lineBody, voiceNumber: voiceIdx, barCount: voiceModeler.barModelers.count)
+                flow = try voiceModeler.provideContext(head: flow, body: voiceBody)
+            }
+            lineContexts.append(LineContext(head: lineHead, body: lineBody, tail: flow))
         }
 
-        return Tune(header: header, lines: lines)
+        context = TuneContext(head: head, body: body, tail: flow)
+        return flow
+        // TODO: update grammar to match this terminology (voice vs line)
+        // TODO: rename measure to bar in grammar
+        // and note_clusters
+    }
+
+    func model() -> Tune {
+        let lines = zip(voiceModelersByLine, lineContexts).map { lineVoices, lineContext in
+            let voices = lineVoices.map { $0.model() }
+            return Line(context: lineContext, voices: voices)
+        }
+
+        return Tune(context: context, header: header, lines: lines)
     }
 }
 
-class HeaderModeler: Modeler<Header> {
-    override var expectedNodeType: NodeType { .header }
-    override var expectedChildNodeTypes: [NodeType] { [.field] }
+private final class HeaderModeler: LeafModeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
 
-    override func modelerImplementation() throws -> Header {
-        let fields = try children[.field].map { try FieldModeler(node: $0, context: context, textSource: textSource).model() }.uniqueByLabel()
+    let header: Header
+
+    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+        self.node = node
+        self.textSource = textSource
+
+        let children = try node.childrenVerifying(typeIs: .header, childrenAre: [.field])
+
+        let fields = try children[.field].map { try FieldModeler(node: $0, textSource: textSource).model() }.uniqueByLabel()
 
         guard let titleField = fields[.title] else { throw ModelParseError.missingTuneTitle }
         guard let styleField = fields[.style] else { throw ModelParseError.missingTuneStyle }
@@ -266,8 +343,7 @@ class HeaderModeler: Modeler<Header> {
 
         let style = try styleField.asStyle()
 
-        return Header(
-            context: context,
+        header = Header(
             title: title,
             style: style,
             composer: try possibleComposers.first ?! ModelParseError.missingTuneComposer,
@@ -275,118 +351,218 @@ class HeaderModeler: Modeler<Header> {
             timeSignature: try (try? fields[.time]?.asTimeSignature()) ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
             tempo: try fields[.tempo]?.asTempo())
     }
+
+    func model() -> Header { header }
 }
 
-class VoiceModeler: Modeler<Line.Voice> {
-    override var expectedNodeType: NodeType { .line }
-    override var expectedChildNodeTypes: [NodeType] { [.barline, .measure, .field] }
+private final class FieldModeler: LeafModeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
 
-    override func modelerImplementation() throws -> Line.Voice {
-        let leadingBarline = try children.optional(.barline)?.text(from: textSource).toBarline(in: context)
+    let field: Field
 
-        continuationContext.barNumberInLine = 0
-        continuationContext.barCountInLine = children[.measure].count // TODO: rename measure to bar in grammar
+    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+        self.node = node
+        self.textSource = textSource
 
-        var bars = [Bar]()
-        var isHarmony = false
+        let children = try node.childrenVerifying(typeIs: .field, childrenAre: [.fieldLabel, .fieldValue])
 
-        for child in children.all {
-            switch try child.type() {
-            case .barline:
-                break
-            case .measure:
-                continuationContext.barNumberInLine += 1
-                let bar = try BarModeler(node: child, context: continuationContext, textSource: textSource).model()
-                continuationContext = bar.context
-                bars.append(bar)
-            case .field:
-                let field = try FieldModeler(node: child, context: context, textSource: textSource).model()
-                switch field.label {
-                case .h: isHarmony = true
-                default: throw ModelParseError.unexpectedField(label: field.label)
-                }
-            default: throw ModelParseError.unexpectedNodeType(type: child.nodeType!)
-            }
-        }
-
-        if !isHarmony { continuationContext.voiceNumber = 0 }
-
-        return Line.Voice(context: continuationContext, isHarmony: isHarmony, bars: bars, leadingBarline: leadingBarline)
-    }
-}
-
-class BarModeler: Modeler<Bar> {
-    override var expectedNodeType: NodeType { .measure }
-    override var expectedChildNodeTypes: [NodeType] { [.noteCluster, .barline, .field] }
-
-    override func modelerImplementation() throws -> Bar {
-        let barline = try children.unique(.barline).text(from: textSource).toBarline(in: context)
-        var clusters = [[Note]]()
-
-        for child in children.all {
-            switch try child.type() {
-            case .barline:
-                break
-            case .noteCluster:
-                try clusters.append(NoteClusterModeler(node: child, context: continuationContext, textSource: textSource).model())
-            case .field:
-                let field = try FieldModeler(node: child, context: context, textSource: textSource).model()
-                switch field.label {
-                // TODO: better name for continuationContext
-                case .time: continuationContext.timeSignature = try field.asTimeSignature()
-                case .note: continuationContext.noteLength = try field.asDuration()
-                case .v: continuationContext.variation = field.asVariation()
-                case .tempo: continuationContext.tempo = try field.asTempo()
-                default: throw ModelParseError.unexpectedField(label: field.label)
-                }
-            default: throw ModelParseError.unexpectedNodeType(type: child.nodeType!)
-            }
-        }
-
-        return Bar(context: continuationContext, noteClusters: clusters, trailingBarline: barline)
-    }
-}
-
-class FieldModeler: Modeler<Field> {
-    override var expectedNodeType: NodeType { .field }
-    override var expectedChildNodeTypes: [NodeType] { [.fieldLabel, .fieldValue] }
-
-    override func modelerImplementation() throws -> Field {
         let label = try children.unique(.fieldLabel).text(from: textSource)
         let value = try children.optional(.fieldValue)?.text(from: textSource)
-        return try Field(label: label, value: value)
+        field = try Field(label: label, value: value)
     }
+
+    func model() -> Field { field }
 }
 
-class NoteClusterModeler: Modeler<[Note]> {
-    override var expectedNodeType: NodeType { .noteCluster }
-    override var expectedChildNodeTypes: [NodeType] { [.note] }
+private final class VoiceModeler: Modeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
 
-    override func modelerImplementation() throws -> [Note] {
-        let notes = try children[.note].map {
-            try NoteModeler(node: $0, context: context, textSource: textSource).model()
+    let leadingBarline: Barline?
+    let leadingField: Field?
+    let barModelers: [BarModeler]
+
+    var context: VoiceContext!
+    var isHarmony: Bool { leadingField?.label == .h }
+
+    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+        self.node = node
+        self.textSource = textSource
+
+        let children = try node.childrenVerifying(typeIs: .line, childrenAre: [.barline, .measure, .field])
+
+        if let barline = try children.optional(.barline)?.text(from: textSource).toBarline() {
+            leadingBarline = barline == .double ? .partStart : barline
+        } else { leadingBarline = nil }
+
+        if let fieldNode = try children.optional(.field) {
+            let field = try FieldModeler(node: fieldNode, textSource: textSource).model()
+            leadingField = field
+            if field.label != .h {
+                throw ModelParseError.unexpectedField(label: field.label)
+            }
+        } else {
+            leadingField = nil
         }
-        return notes
+
+        barModelers = try children[.measure].map {
+            try BarModeler(node: $0, textSource: textSource)
+        }
+    }
+
+    func provideContextImpl(head: FlowContext, body: VoiceContextBody) throws -> FlowContext {
+        var flow = head
+
+        for (idx, barModeler) in barModelers.enumerated() {
+            let barBody = BarContextBody(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count)
+            flow = try barModeler.provideContext(head: flow, body: barBody)
+        }
+        context = VoiceContext(head: head, body: body, tail: flow)
+        return flow
+    }
+
+    func model() -> Voice {
+        let bars = barModelers.map { $0.model() }
+        return Voice(context: context, isHarmony: isHarmony, bars: bars, leadingBarline: leadingBarline)
     }
 }
 
-class NoteModeler: Modeler<Note> {
-    override var expectedNodeType: NodeType { .note }
-    override var expectedChildNodeTypes: [NodeType] { [.embellishment, .pitch, .duration, .tie] }
+private final class BarModeler: Modeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
 
-    override func modelerImplementation() throws -> Note {
-        let pitch = try children.unique(.pitch).text(from: textSource).toPitch()
-        let embellishment = try children.optional(.embellishment)?.text(from: textSource).toEmbellishment()
-        let duration = try children.optional(.duration)?.text(from: textSource).toDuration(modifying: context.noteLength) ?? context.noteLength
+    var barline: Barline
+    var clusterModelers = [ClusterModeler]()
+    var fieldsByClusterIndex = [Int: Field]()
+
+    var context: BarContext!
+
+    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+        self.node = node
+        self.textSource = textSource
+
+        let children = try node.childrenVerifying(typeIs: .measure, childrenAre: [.cluster, .barline, .field])
+
+        barline = try children.unique(.barline).text(from: textSource).toBarline()
+
+        for child in children.all {
+            switch try child.type() {
+            case .barline:
+                break
+            case .cluster:
+                let clusterModeler = try ClusterModeler(node: child, textSource: textSource)
+                clusterModelers.append(clusterModeler)
+            case .field:
+                let field = try FieldModeler(node: child, textSource: textSource).model()
+                // TODO: handle multiple fields between clusters
+                fieldsByClusterIndex[clusterModelers.count] = field
+            default: throw ModelParseError.unexpectedNodeType(type: child.nodeType!)
+            }
+        }
+    }
+
+    func provideContextImpl(head: FlowContext, body: BarContextBody) throws -> FlowContext {
+        var flow = head
+
+        for (idx, clusterModeler) in clusterModelers.enumerated() {
+            if let field = fieldsByClusterIndex[idx] {
+                switch field.label {
+                case .time: flow = FlowContext(from: flow, timeSignature: try field.asTimeSignature())
+                case .note: flow = FlowContext(from: flow, noteLength: try field.asDuration())
+                case .v: flow = FlowContext(from: flow, variation: field.asVariation())
+                case .tempo: flow = FlowContext(from: flow, tempo: try field.asTempo())
+                default: throw ModelParseError.unexpectedField(label: field.label)
+                }
+            }
+
+            let clusterBody = ClusterContextBody(bar: body, clusterNumber: idx + 1)
+            flow = try clusterModeler.provideContext(head: flow, body: clusterBody)
+        }
+
+        context = BarContext(head: head, body: body, tail: flow)
+        return flow
+    }
+
+    func model() -> Bar {
+        let clusters = clusterModelers.map { $0.model() }
+        return Bar(context: context, clusters: clusters, trailingBarline: barline)
+    }
+}
+
+private final class ClusterModeler: Modeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
+
+    let noteModelers: [NoteModeler]
+
+    var context: ClusterContext!
+
+    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+        self.node = node
+        self.textSource = textSource
+
+        let children = try node.childrenVerifying(typeIs: .cluster, childrenAre: [.note])
+
+        noteModelers = try children[.note].map {
+            try NoteModeler(node: $0, textSource: textSource)
+        }
+    }
+
+    func provideContextImpl(head: FlowContext, body: ClusterContextBody) throws -> FlowContext {
+        var flow = head
+
+        for (idx, noteModeler) in noteModelers.enumerated() {
+            let noteBody = NoteContextBody(cluster: body)
+            flow = try noteModeler.provideContext(head: flow, body: noteBody)
+        }
+        context = ClusterContext(head: head, body: body, tail: flow)
+        return flow
+    }
+
+    func model() -> Cluster {
+        let notes = noteModelers.map { $0.model() }
+        return Cluster(context: context, notes: notes)
+    }
+}
+
+private final class NoteModeler: Modeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
+
+    let pitch: Pitch
+    let embellishment: Embellishment?
+    let tie: Node?
+    fileprivate let children: NodeChildren
+
+    var duration: Duration!
+    var context: NoteContext!
+
+    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+        self.node = node
+        self.textSource = textSource
+
+        children = try node.childrenVerifying(typeIs: .note, childrenAre: [.embellishment, .pitch, .duration, .tie])
+
+        pitch = try children.unique(.pitch).text(from: textSource).toPitch()
+        embellishment = try children.optional(.embellishment)?.text(from: textSource).toEmbellishment()
+        tie = try children.optional(.tie)
 
         if let embellishment { _ = try pitch.gracenotes(for: embellishment) }
+    }
 
-        let note = Note(context: context,
-                        pitch: pitch,
-                        embellishment: embellishment,
-                        duration: duration,
-                        tied: try children.optional(.tie) != nil)
+    func provideContextImpl(head: FlowContext, body: NoteContextBody) throws -> FlowContext {
+        duration = try children.optional(.duration)?.text(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
 
-        return note
+        context = NoteContext(head: head, body: body, tail: head)
+        return head
+    }
+
+    func model() -> Note {
+        Note(context: context,
+             pitch: pitch,
+             embellishment: embellishment,
+             duration: duration,
+             tied: tie != nil)
     }
 }

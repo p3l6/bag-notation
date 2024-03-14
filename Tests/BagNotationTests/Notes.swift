@@ -8,7 +8,7 @@ import XCTest
 
 final class Notes: XCTestCase {
     func testPitches() throws {
-        let notes = try makeNoteCluster(from: "qrbcdefga")
+        let notes = try makeCluster(from: "qrbcdefga")
         XCTAssertEqual(notes[0].pitch, .lowG)
         XCTAssertEqual(notes[1].pitch, .lowA)
         XCTAssertEqual(notes[2].pitch, .b)
@@ -21,55 +21,55 @@ final class Notes: XCTestCase {
     }
 
     func testEmbellishments() throws {
-        var notes = try makeNoteCluster(from: "xcpxclxcuxchxc")
+        var notes = try makeCluster(from: "xcpxclxcuxchxc")
         XCTAssertEqual(notes[0].embellishment, .gGracenote)
         XCTAssertEqual(notes[1].embellishment, .dGracenote)
         XCTAssertEqual(notes[2].embellishment, .eGracenote)
         XCTAssertEqual(notes[3].embellishment, .fGracenote)
         XCTAssertEqual(notes[4].embellishment, .highAGracenote)
 
-        notes = try makeNoteCluster(from: "tdltdxtd")
+        notes = try makeCluster(from: "tdltdxtd")
         XCTAssertEqual(notes[0].embellishment, .tap)
         XCTAssertEqual(notes[1].embellishment, .lightTap)
         XCTAssertEqual(notes[2].embellishment, .tapWithGGracenote)
 
-        notes = try makeNoteCluster(from: "xxchxxclxxc")
+        notes = try makeCluster(from: "xxchxxclxxc")
         XCTAssertEqual(notes[0].embellishment, .doubling)
         XCTAssertEqual(notes[1].embellishment, .doublingWithHighAGracenote)
         XCTAssertEqual(notes[2].embellishment, .halfDoubling)
 
-        notes = try makeNoteCluster(from: "vcpvrvvcxvvchvvc")
+        notes = try makeCluster(from: "vcpvrvvcxvvchvvc")
         XCTAssertEqual(notes[0].embellishment, .grip)
         XCTAssertEqual(notes[1].embellishment, .rodin)
         XCTAssertEqual(notes[2].embellishment, .odro)
         XCTAssertEqual(notes[3].embellishment, .odroWithGGracenote)
         XCTAssertEqual(notes[4].embellishment, .odroWithHighAGracenote)
 
-        notes = try makeNoteCluster(from: "wrpwrwwepwwe")
+        notes = try makeCluster(from: "wrpwrwwepwwe")
         XCTAssertEqual(notes[0].embellishment, .taorluath)
         XCTAssertEqual(notes[1].embellishment, .taorluathFromD)
         XCTAssertEqual(notes[2].embellishment, .crunluath)
         XCTAssertEqual(notes[3].embellishment, .crunluathFromD)
 
-        notes = try makeNoteCluster(from: "zdlzdzzglzzg")
+        notes = try makeCluster(from: "zdlzdzzglzzg")
         XCTAssertEqual(notes[0].embellishment, .special)
         XCTAssertEqual(notes[1].embellishment, .lightSpecial)
         XCTAssertEqual(notes[2].embellishment, .wideSpecial)
         XCTAssertEqual(notes[3].embellishment, .lightWideSpecial)
 
-        notes = try makeNoteCluster(from: "kdlkdkkc")
+        notes = try makeCluster(from: "kdlkdkkc")
         XCTAssertEqual(notes[0].embellishment, .strike)
         XCTAssertEqual(notes[1].embellishment, .lightStrike)
         XCTAssertEqual(notes[2].embellishment, .pelay)
 
-        notes = try makeNoteCluster(from: "ttrhttrxttrlttrpttr")
+        notes = try makeCluster(from: "ttrhttrxttrlttrpttr")
         XCTAssertEqual(notes[0].embellishment, .birl)
         XCTAssertEqual(notes[1].embellishment, .birlWithHighAGracenote)
         XCTAssertEqual(notes[2].embellishment, .birlWithHighGGracenote)
         XCTAssertEqual(notes[3].embellishment, .birlWithoutInitialA)
         XCTAssertEqual(notes[4].embellishment, .birlWithDGracenote)
 
-        notes = try makeNoteCluster(from: "nbhnblnbunb")
+        notes = try makeCluster(from: "nbhnblnbunb")
         XCTAssertEqual(notes[0].embellishment, .cadence)
         XCTAssertEqual(notes[1].embellishment, .cadenceWithHighAGracenote)
         XCTAssertEqual(notes[2].embellishment, .halfCadence)
@@ -77,14 +77,14 @@ final class Notes: XCTestCase {
     }
 
     func testMismatchedEmbellishments() throws {
-        XCTAssertThrowsError(try makeNoteCluster(from: "hxa"))
-        XCTAssertThrowsError(try makeNoteCluster(from: "zq"))
-        XCTAssertThrowsError(try makeNoteCluster(from: "we"))
-        XCTAssertThrowsError(try makeNoteCluster(from: "wwr"))
+        XCTAssertThrowsError(try makeCluster(from: "hxa"))
+        XCTAssertThrowsError(try makeCluster(from: "zq"))
+        XCTAssertThrowsError(try makeCluster(from: "we"))
+        XCTAssertThrowsError(try makeCluster(from: "wwr"))
     }
 
     func testNoteDuration() throws {
-        let notes = try makeNoteCluster(from: "cc+c+.c.d/c++d/.c/c//c+++")
+        let notes = try makeCluster(from: "cc+c+.c.d/c++d/.c/c//c+++")
         XCTAssertEqual(notes[0].duration, .eighth)
         XCTAssertEqual(notes[1].duration, .quarter)
         XCTAssertEqual(notes[2].duration, .quarterDotted)
@@ -101,7 +101,7 @@ final class Notes: XCTestCase {
     }
 
     func testTies() throws {
-        let notes = try makeNoteCluster(from: "c+_cxc_d_e")
+        let notes = try makeCluster(from: "c+_cxc_d_e")
         XCTAssertEqual(notes[0].tiedToNext, true)
         XCTAssertEqual(notes[1].tiedToNext, false)
         XCTAssertEqual(notes[2].tiedToNext, true)
@@ -109,7 +109,7 @@ final class Notes: XCTestCase {
     }
 
 //    func testTriplets() throws {
-//        let notes = try makeNoteCluster(from: "xxexd-e-fg")
+//        let notes = try makeCluster(from: "xxexd-e-fg")
 //        XCTAssertEqual(notes[0].context.tupletSize, 0)
 //        XCTAssertEqual(notes[1].context.tupletSize, 3)
 //        XCTAssertEqual(notes[2].context.tupletSize, 3)
