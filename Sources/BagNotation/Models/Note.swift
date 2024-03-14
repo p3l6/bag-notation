@@ -18,13 +18,15 @@ public struct Note {
     let embellishment: Embellishment?
     let duration: Duration
     let tiedToNext: Bool
+    let slurredToNext: Bool
 
-    init(context: NoteContext, pitch: Pitch, embellishment: Embellishment?, duration: Duration, tied: Bool) {
+    init(context: NoteContext, pitch: Pitch, embellishment: Embellishment?, duration: Duration, tied: Bool, slurred: Bool) {
         self.context = context
         self.pitch = pitch
         self.embellishment = embellishment
         self.duration = duration
         tiedToNext = tied
+        slurredToNext = slurred
     }
 }
 

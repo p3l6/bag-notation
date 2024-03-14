@@ -33,6 +33,7 @@ public enum ModelParseError: Error, LocalizedError {
     case invalidNoteLength(why: String)
     case invalidTempo
     case invalidField
+    case invalidNoteConnector
 
     public var errorDescription: String? {
         switch self {
@@ -60,6 +61,7 @@ public enum ModelParseError: Error, LocalizedError {
         case .invalidNoteLength: "Invalid note length"
         case .invalidField: "Invalid field"
         case .invalidTempo: "Invalid tempo"
+        case .invalidNoteConnector: "Invalid note connector"
         }
     }
 

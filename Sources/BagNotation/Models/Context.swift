@@ -98,4 +98,9 @@ public struct ClusterContextBody {
 typealias NoteContext = Context<NoteContextBody>
 public struct NoteContextBody {
     let cluster: ClusterContextBody
+
+    // Zero when not in a tuplet
+    let tupletSize: Int
+    // First note in tuplet is 1
+    let tupletNumber: Int
 }

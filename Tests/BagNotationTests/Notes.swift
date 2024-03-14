@@ -106,15 +106,28 @@ final class Notes: XCTestCase {
         XCTAssertEqual(notes[1].tiedToNext, false)
         XCTAssertEqual(notes[2].tiedToNext, true)
         XCTAssertEqual(notes[3].tiedToNext, true)
+        XCTAssertEqual(notes[4].tiedToNext, false)
     }
 
-//    func testTriplets() throws {
-//        let notes = try makeCluster(from: "xxexd-e-fg")
-//        XCTAssertEqual(notes[0].context.tupletSize, 0)
-//        XCTAssertEqual(notes[1].context.tupletSize, 3)
-//        XCTAssertEqual(notes[2].context.tupletSize, 3)
-//        XCTAssertEqual(notes[3].context.tupletSize, 3)
-//        XCTAssertEqual(notes[4].context.tupletSize, 0)
-    // TODO: same with quarters. split over a bar? no that's too much. must be within bar, or error.
-//    }
+    func testTriplets() throws {
+        var notes = try makeCluster(from: "xxexd-e-fg")
+        XCTAssertEqual(notes.map(\.context.body.tupletSize), [0,3,3,3,0])
+        XCTAssertEqual(notes.map(\.context.body.tupletNumber), [0,1,2,3,0])
+
+        notes = try makeCluster(from: "xd-e-fxe-d-c")
+        XCTAssertEqual(notes.map(\.context.body.tupletSize), [3,3,3,3,3,3])
+        XCTAssertEqual(notes.map(\.context.body.tupletNumber), [1,2,3,1,2,3])
+
+   //  TODO: Convert other tests to this map style, where appropriate
+    }
+
+    func testTuplets() throws {
+        var notes = try makeCluster(from: "a-b-c-d-e-fgbd")
+        XCTAssertEqual(notes.map(\.context.body.tupletSize), [6,6,6,6,6,6,0,0,0])
+        XCTAssertEqual(notes.map(\.context.body.tupletNumber), [1,2,3,4,5,6,0,0,0])
+        
+        notes = try makeCluster(from: "a+-b+-c+-d+")
+        XCTAssertEqual(notes.map(\.context.body.tupletSize), [4, 4, 4 ,4])
+        XCTAssertEqual(notes.map(\.context.body.tupletNumber), [1,2,3,4,])
+    }
 }

@@ -19,6 +19,7 @@ Header may not contain blank lines.
 
 Notes should be clustered by beat.
 Dont support double dots.
+Tuplets must be within a cluster.
 
 All barlines are `|` or `||` or `:|` or `|:`. Beginning and end of parts should use the double barline.
 

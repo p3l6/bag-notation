@@ -170,8 +170,18 @@ extension Cluster: AbcSourceConverting {
 }
 
 extension Note: AbcSourceConverting {
+    static var closeNextSlur = false
+    
     fileprivate func abcSource() -> String {
         var abc = ""
+        if slurredToNext {
+            abc += "("
+        }
+
+        if context.body.tupletNumber == 1 {
+            abc += "(\(context.body.tupletSize)"
+        }
+
         if let embellishment, let gracenotes = try? pitch.gracenotes(for: embellishment) {
             abc += "{\(gracenotes.mapToAbc())}"
         }
@@ -180,6 +190,14 @@ extension Note: AbcSourceConverting {
         if tiedToNext {
             abc += "-"
         }
+        if Self.closeNextSlur {
+            abc += ")"
+            Self.closeNextSlur = false
+        }
+        if slurredToNext {
+            Self.closeNextSlur = true
+        }
+
         // TODO: slurs
         return abc
     }

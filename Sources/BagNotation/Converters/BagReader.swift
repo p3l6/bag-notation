@@ -303,6 +303,7 @@ private final class TuneModeler: Modeler {
         // TODO: update grammar to match this terminology (voice vs line)
         // TODO: rename measure to bar in grammar
         // and note_clusters
+        // and tie to connector
     }
 
     func model() -> Tune {
@@ -508,9 +509,34 @@ private final class ClusterModeler: Modeler {
     func provideContextImpl(head: FlowContext, body: ClusterContextBody) throws -> FlowContext {
         var flow = head
 
-        for (idx, noteModeler) in noteModelers.enumerated() {
-            let noteBody = NoteContextBody(cluster: body)
-            flow = try noteModeler.provideContext(head: flow, body: noteBody)
+        var tupletSizes = [Int]()
+        var tupletSize = 0
+        for nm in noteModelers {
+            if nm.continuesTuplet {
+                tupletSize += 1
+            } else if tupletSize > 0 {
+                tupletSizes.append(tupletSize + 1)
+                tupletSize = 0
+            }
+        }
+
+        var tupletSizeIndex = 0
+        var tupletPosition = 0
+
+        for (_, nm) in noteModelers.enumerated() {
+            if nm.continuesTuplet || tupletPosition > 0 {
+                tupletPosition += 1
+            }
+
+            let noteBody = NoteContextBody(cluster: body,
+                                           tupletSize: tupletPosition == 0 ? 0 : tupletSizes[tupletSizeIndex],
+                                           tupletNumber: tupletPosition)
+            flow = try nm.provideContext(head: flow, body: noteBody)
+            
+            if tupletPosition != 0 && !nm.continuesTuplet {
+                tupletPosition = 0
+                tupletSizeIndex += 1
+            }
         }
         context = ClusterContext(head: head, body: body, tail: flow)
         return flow
@@ -528,7 +554,11 @@ private final class NoteModeler: Modeler {
 
     let pitch: Pitch
     let embellishment: Embellishment?
-    let tie: Node?
+    
+    let tied: Bool
+    let continuesTuplet: Bool
+    let slurred: Bool
+
     fileprivate let children: NodeChildren
 
     var duration: Duration!
@@ -542,8 +572,12 @@ private final class NoteModeler: Modeler {
 
         pitch = try children.unique(.pitch).text(from: textSource).toPitch()
         embellishment = try children.optional(.embellishment)?.text(from: textSource).toEmbellishment()
-        tie = try children.optional(.tie)
 
+        let connector = try children.optional(.tie)?.text(from: textSource)
+        tied = connector == "_"
+        continuesTuplet = connector == "-"
+        slurred = connector == "~"
+        
         if let embellishment { _ = try pitch.gracenotes(for: embellishment) }
     }
 
@@ -559,6 +593,7 @@ private final class NoteModeler: Modeler {
              pitch: pitch,
              embellishment: embellishment,
              duration: duration,
-             tied: tie != nil)
+             tied: tied,
+             slurred: slurred)
     }
 }
