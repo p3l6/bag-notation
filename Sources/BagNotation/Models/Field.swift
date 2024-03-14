@@ -28,8 +28,8 @@ public struct Field {
         _value = value
     }
 
-    func asVariation() -> String? {
-        _value
+    func asVariation() -> Variation {
+        _value == nil ? .none : .other(label: _value!) 
     }
 
     func asTempo() throws -> Int {

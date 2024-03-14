@@ -70,10 +70,10 @@ final class Contexts: XCTestCase {
 
     func testVariation() throws {
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[0].context.head.variation, nil)
-        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[3].context.head.variation, "1")
-        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[6].context.head.variation, "2")
-        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[9].context.head.variation, nil)
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[0].context.head.variation, .none)
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[3].context.head.variation, .other(label: "1"))
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[6].context.head.variation, .other(label: "2"))
+        XCTAssertEqual(doc.tunes[0].lines[2].voices[0].bars[1].notes[9].context.head.variation, .none)
     }
 
     func testVoice() throws {

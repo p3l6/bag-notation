@@ -140,7 +140,10 @@ extension FlowContext: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = ""
         if variation != activeFlow.variation {
-            abc = if let variation { " [\"\(variation)\" " } else { " ] " }
+            switch variation {
+            case .none: abc += " ] "
+            case let .other(label): abc += " [\"\(label)\" "
+            }
         }
         if let tempo, tempo != activeFlow.tempo {
             abc += "[Q:\(timeSignature.beatLength.representedNote())=\(tempo)]"

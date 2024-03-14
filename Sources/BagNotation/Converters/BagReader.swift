@@ -45,7 +45,7 @@ public class BagReader: NodeSourceTextProvider {
         // modelDebug(from: tree.rootNode!)
         let docModeler = try DocModeler(node: tree.rootNode!, textSource: self)
         // docFlow is essentially ignored
-        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: nil)
+        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: .none)
         let docContext = DocContextBody(tuneCount: docModeler.tuneModelers.count)
         _ = try docModeler.provideContext(head: docFlow, body: docContext)
         return docModeler.model()
@@ -235,7 +235,7 @@ private final class DocModeler: Modeler {
                                          noteLength: tm.header.noteLength,
                                          previousPitch: .e,
                                          tempo: tm.header.tempo,
-                                         variation: nil)
+                                         variation: .none)
             flow = try tm.provideContext(head: headerFlow, body: tuneContext)
         }
 
@@ -396,7 +396,7 @@ private final class VoiceModeler: Modeler {
         if let fieldNode = try children.optional(.field) {
             let field = try FieldModeler(node: fieldNode, textSource: textSource).model()
             leadingField = field
-            if field.label != .h {
+            if field.label != .h && field.label != .v {
                 throw ModelParseError.unexpectedField(label: field.label)
             }
         } else {
@@ -409,7 +409,7 @@ private final class VoiceModeler: Modeler {
     }
 
     func provideContextImpl(head: FlowContext, body: VoiceContextBody) throws -> FlowContext {
-        var flow = head
+        var flow = FlowContext(from: head, variation: leadingField?.label == .v ? leadingField!.asVariation() : nil)
 
         for (idx, barModeler) in barModelers.enumerated() {
             let barBody = BarContextBody(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count)

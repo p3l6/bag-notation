@@ -16,14 +16,14 @@ public struct FlowContext {
     let timeSignature: TimeSignature
     let noteLength: Duration
     let tempo: Int?
-    let variation: String?
+    let variation: Variation
     let previousPitch: Pitch
 
     init(timeSignature: TimeSignature, 
          noteLength: Duration,
          previousPitch: Pitch,
          tempo: Int?,
-         variation: String?
+         variation: Variation
     ) {
         self.timeSignature = timeSignature
         self.noteLength = noteLength
@@ -37,16 +37,22 @@ public struct FlowContext {
          noteLength: Duration? = nil,
          previousPitch: Pitch? = nil,
          tempo: Int? = nil,
-         variation: String? = nil
+         variation: Variation? = nil
     ) {
         self.timeSignature = timeSignature ?? base.timeSignature
         self.noteLength = noteLength ?? base.noteLength
         self.previousPitch = previousPitch ?? base.previousPitch
         self.tempo = tempo ?? base.tempo
-        // TODO: cannot clear this value back to nil
         self.variation = variation ?? base.variation
     }
 }
+
+enum Variation: Equatable {
+    case none
+    case other(label: String)
+}
+
+// MARK: Context Bodies
 
 typealias DocContext = Context<DocContextBody>
 public struct DocContextBody {
