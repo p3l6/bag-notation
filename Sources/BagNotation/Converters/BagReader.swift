@@ -44,7 +44,8 @@ public class BagReader: NodeSourceTextProvider {
     public func makeModel() throws -> Doc {
         // modelDebug(from: tree.rootNode!)
         let docModeler = try DocModeler(node: tree.rootNode!, textSource: self)
-        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, tempo: nil, variation: nil)
+        // docFlow is essentially ignored
+        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: nil)
         let docContext = DocContextBody(tuneCount: docModeler.tuneModelers.count)
         _ = try docModeler.provideContext(head: docFlow, body: docContext)
         return docModeler.model()
@@ -59,15 +60,6 @@ public class BagReader: NodeSourceTextProvider {
     func text(of node: Node) -> String {
         text(at: node.tsRange)
     }
-
-    // // // plan!
-
-    // add preceding note to note context
-
-    // commit checkpoint
-
-    // back to implementing tuplets
-    // then do slurs to round it out?
 }
 
 // MARK: Modeling helpers
@@ -239,7 +231,11 @@ private final class DocModeler: Modeler {
 
         for (idx, tm) in tuneModelers.enumerated() {
             let tuneContext = TuneContextBody(tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
-            let headerFlow = FlowContext(timeSignature: tm.header.timeSignature, noteLength: tm.header.noteLength, tempo: tm.header.tempo, variation: nil)
+            let headerFlow = FlowContext(timeSignature: tm.header.timeSignature,
+                                         noteLength: tm.header.noteLength,
+                                         previousPitch: .e,
+                                         tempo: tm.header.tempo,
+                                         variation: nil)
             flow = try tm.provideContext(head: headerFlow, body: tuneContext)
         }
 
@@ -554,7 +550,7 @@ private final class NoteModeler: Modeler {
     func provideContextImpl(head: FlowContext, body: NoteContextBody) throws -> FlowContext {
         duration = try children.optional(.duration)?.text(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
 
-        context = NoteContext(head: head, body: body, tail: head)
+        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch))
         return head
     }
 

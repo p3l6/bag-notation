@@ -17,17 +17,31 @@ public struct FlowContext {
     let noteLength: Duration
     let tempo: Int?
     let variation: String?
+    let previousPitch: Pitch
 
-    init(timeSignature: TimeSignature, noteLength: Duration, tempo: Int?, variation: String?) {
+    init(timeSignature: TimeSignature, 
+         noteLength: Duration,
+         previousPitch: Pitch,
+         tempo: Int?,
+         variation: String?
+    ) {
         self.timeSignature = timeSignature
         self.noteLength = noteLength
+        self.previousPitch = previousPitch
         self.tempo = tempo
         self.variation = variation
     }
 
-    init(from base: FlowContext, timeSignature: TimeSignature? = nil, noteLength: Duration? = nil, tempo: Int? = nil, variation: String? = nil) {
+    init(from base: FlowContext, 
+         timeSignature: TimeSignature? = nil,
+         noteLength: Duration? = nil,
+         previousPitch: Pitch? = nil,
+         tempo: Int? = nil,
+         variation: String? = nil
+    ) {
         self.timeSignature = timeSignature ?? base.timeSignature
         self.noteLength = noteLength ?? base.noteLength
+        self.previousPitch = previousPitch ?? base.previousPitch
         self.tempo = tempo ?? base.tempo
         // TODO: cannot clear this value back to nil
         self.variation = variation ?? base.variation
