@@ -17,11 +17,14 @@ npm run generate && npm run test
 Comments are not allowed in tune header.
 Header may not contain blank lines. 
 
-Notes should be clustered by beat.
 Dont support double dots.
 Tuplets must be within a cluster.
 
 All barlines are `|` or `||` or `:|` or `|:`. Beginning and end of parts should use the double barline.
+
+## not rules, but suggestions
+
+Notes should be clustered by beat.
 
 ## allowed fields
 
@@ -47,8 +50,9 @@ all fields are listed as labels and require values, unless listed with parenthes
 
 symbol | meaning
 |---|---|
-qrabcdefga | the scale
-phluxtvwzkn | embellishment markers
+labcdefgh | the scale
+qojkpzuym | the scale of literal gracenotes
+tsnxvr | semantic embellishment markers
 (label: value) | inline field
 (value) | inline field without label
 label: value | field, when inside header
@@ -62,3 +66,25 @@ label: value | field, when inside header
 `/` | cuts attached note length
 `.` | dots attached note length
 
+## Semantic embellishments
+
+These consider the preceding and following note, to choose the correct embellishment 
+
+t: a low tap
+s: (soft) a light/softer low tap
+n: (note) this is a stand-in for the following note
+x: a high gracenote, usually g
+v: a grip (looks like a grip, upside down, perhaps)
+r: a throw
+
+These can be combined, such as the following examples. n can be used, but is usually omitted when not ambiguous. 
+
+xx: doubling. also could be written xnx => gracenote, theme note, gracenote. Usually the n is omitted.
+vz: taorluath. A grip followed by an e grace.
+xt: strike. (or xnt) gracenote, theme note, tap
+tt: birl. the short one, as if from already on low a. 
+    other birl variations include: 
+        ntt: with a preceding low a
+        xtt: with a high g gracenote at the beginning
+        
+a full list of the possible semantic embellishments and what they will yeild can be found on a different page. For now, see Sources/BagNotation/Models/Embellishment.swift 
