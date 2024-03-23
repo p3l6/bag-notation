@@ -377,16 +377,10 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '+' ||
           lookahead == '.' ||
           lookahead == '/') ADVANCE(23);
-      if (('a' <= lookahead && lookahead <= 'g') ||
-          lookahead == 'q' ||
-          lookahead == 'r') ADVANCE(22);
-      if (lookahead == 'h' ||
-          lookahead == 'k' ||
-          lookahead == 'l' ||
-          lookahead == 'n' ||
-          lookahead == 'p' ||
-          ('t' <= lookahead && lookahead <= 'x') ||
-          lookahead == 'z') ADVANCE(21);
+      if (('a' <= lookahead && lookahead <= 'h') ||
+          lookahead == 'l') ADVANCE(22);
+      if (('j' <= lookahead && lookahead <= 'v') ||
+          ('x' <= lookahead && lookahead <= 'z')) ADVANCE(21);
       END_STATE();
     case 1:
       if (lookahead == '\t') SKIP(1)
@@ -426,16 +420,10 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '-' ||
           lookahead == '_' ||
           lookahead == '~') ADVANCE(24);
-      if (('a' <= lookahead && lookahead <= 'g') ||
-          lookahead == 'q' ||
-          lookahead == 'r') ADVANCE(22);
-      if (lookahead == 'h' ||
-          lookahead == 'k' ||
-          lookahead == 'l' ||
-          lookahead == 'n' ||
-          lookahead == 'p' ||
-          ('t' <= lookahead && lookahead <= 'x') ||
-          lookahead == 'z') ADVANCE(21);
+      if (('a' <= lookahead && lookahead <= 'h') ||
+          lookahead == 'l') ADVANCE(22);
+      if (('j' <= lookahead && lookahead <= 'v') ||
+          ('x' <= lookahead && lookahead <= 'z')) ADVANCE(21);
       END_STATE();
     case 8:
       if (eof) ADVANCE(9);
@@ -447,16 +435,10 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '|') ADVANCE(19);
       if (lookahead == '\t' ||
           lookahead == ' ') SKIP(8)
-      if (('a' <= lookahead && lookahead <= 'g') ||
-          lookahead == 'q' ||
-          lookahead == 'r') ADVANCE(22);
-      if (lookahead == 'h' ||
-          lookahead == 'k' ||
-          lookahead == 'l' ||
-          lookahead == 'n' ||
-          lookahead == 'p' ||
-          ('t' <= lookahead && lookahead <= 'x') ||
-          lookahead == 'z') ADVANCE(21);
+      if (('a' <= lookahead && lookahead <= 'h') ||
+          lookahead == 'l') ADVANCE(22);
+      if (('j' <= lookahead && lookahead <= 'v') ||
+          ('x' <= lookahead && lookahead <= 'z')) ADVANCE(21);
       END_STATE();
     case 9:
       ACCEPT_TOKEN(ts_builtin_sym_end);
@@ -513,13 +495,10 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       END_STATE();
     case 21:
       ACCEPT_TOKEN(sym_embellishment);
-      if (lookahead == 'h' ||
+      if (lookahead == 'j' ||
           lookahead == 'k' ||
-          lookahead == 'l' ||
-          lookahead == 'n' ||
-          lookahead == 'p' ||
-          ('t' <= lookahead && lookahead <= 'x') ||
-          lookahead == 'z') ADVANCE(21);
+          ('m' <= lookahead && lookahead <= 'v') ||
+          ('x' <= lookahead && lookahead <= 'z')) ADVANCE(21);
       END_STATE();
     case 22:
       ACCEPT_TOKEN(sym_pitch);

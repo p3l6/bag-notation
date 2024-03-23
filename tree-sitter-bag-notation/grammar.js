@@ -34,8 +34,8 @@ module.exports = grammar({
                  $.pitch,
                  optional($.duration),
                  optional($.tie)),
-    embellishment: $ => /[phluxtvwzkn]+/,  // /[qojkpzuymsnxtvr]+/
-    pitch: $ => /[qrbcdefga]/, // /[labcdefgh]/
+    embellishment: $ => /[qojkpzuymtsnxvr]+/,
+    pitch: $ => /[labcdefgh]/,
     duration: $ => /[+.\/]+/,
     tie: $ => /[-_~]/,
 

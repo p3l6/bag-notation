@@ -174,7 +174,7 @@ extension Cluster: AbcSourceConverting {
 
 extension Note: AbcSourceConverting {
     static var closeNextSlur = false
-    
+
     fileprivate func abcSource() -> String {
         var abc = ""
         if slurredToNext {
@@ -185,8 +185,8 @@ extension Note: AbcSourceConverting {
             abc += "(\(context.body.tupletSize)"
         }
 
-        if let embellishment, let gracenotes = try? pitch.gracenotes(for: embellishment) {
-            abc += "{\(gracenotes.mapToAbc())}"
+        if let embellishment {
+            abc += "{\(embellishment.pitches.mapToAbc())}"
         }
         abc += pitch.abcSource()
         abc += duration.abcSource()

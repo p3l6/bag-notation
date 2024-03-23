@@ -13,6 +13,7 @@ patterns:
   - include: '#pitch'
   - include: '#duration'
   - include: '#comment'
+  - include '#migrationFailure'
 
 repository:
   header:
@@ -42,16 +43,20 @@ repository:
 
   pitch:
     name: constant.character.pitch.bag
-    match: '[qrbcdefga]'
+    match: '[labcdefgh]'
 
   embellishment:
     name: variable.other.embellishment.bag
-    match: '[phluxtvwzkn]+'
+    match: '[qojkpzuymtsnxvr]+'
 
   duration:
     name: support.constant.duration.bag
-    match: '[+.\/-]+'
+    match: '[+.\/-_~]+'
 
   barline:
     name: keyword.operator.barline.bag
     match: ':?\|+:?'
+
+  migrationFailure:
+    name: invalid.migration
+    match: '<.*>'

@@ -143,6 +143,8 @@ private protocol LeafModeler {
     associatedtype Output
 
     // TODO: would be a great to have a better way to wrap these, instead of the extra argument
+    // can using "where" help? like init(collection: T) where T.Element == String {
+    // or just using differently named existing parameters
     init(node: Node, textSource: NodeSourceTextProvider) throws
     init(node: Node, textSource: NodeSourceTextProvider, impl: Bool) throws
 
@@ -532,7 +534,7 @@ private final class ClusterModeler: Modeler {
                                            tupletSize: tupletPosition == 0 ? 0 : tupletSizes[tupletSizeIndex],
                                            tupletNumber: tupletPosition)
             flow = try nm.provideContext(head: flow, body: noteBody)
-            
+
             if tupletPosition != 0 && !nm.continuesTuplet {
                 tupletPosition = 0
                 tupletSizeIndex += 1
@@ -553,14 +555,14 @@ private final class NoteModeler: Modeler {
     let textSource: NodeSourceTextProvider
 
     let pitch: Pitch
-    let embellishment: Embellishment?
-    
+
     let tied: Bool
     let continuesTuplet: Bool
     let slurred: Bool
 
     fileprivate let children: NodeChildren
 
+    var embellishment: Embellishment?
     var duration: Duration!
     var context: NoteContext!
 
@@ -571,21 +573,22 @@ private final class NoteModeler: Modeler {
         children = try node.childrenVerifying(typeIs: .note, childrenAre: [.embellishment, .pitch, .duration, .tie])
 
         pitch = try children.unique(.pitch).text(from: textSource).toPitch()
-        embellishment = try children.optional(.embellishment)?.text(from: textSource).toEmbellishment()
 
         let connector = try children.optional(.tie)?.text(from: textSource)
         tied = connector == "_"
         continuesTuplet = connector == "-"
         slurred = connector == "~"
-        
-        if let embellishment { _ = try pitch.gracenotes(for: embellishment) }
     }
 
     func provideContextImpl(head: FlowContext, body: NoteContextBody) throws -> FlowContext {
+        embellishment = if let embellishmentStr = try children.optional(.embellishment)?.text(from: textSource) {
+            try Embellishment(string: embellishmentStr, from: head.previousPitch, on: pitch)
+        } else { nil }
+
         duration = try children.optional(.duration)?.text(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
 
         context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch))
-        return head
+        return context.tail
     }
 
     func model() -> Note {

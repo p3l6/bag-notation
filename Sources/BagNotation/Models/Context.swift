@@ -19,12 +19,11 @@ public struct FlowContext {
     let variation: Variation
     let previousPitch: Pitch
 
-    init(timeSignature: TimeSignature, 
+    init(timeSignature: TimeSignature,
          noteLength: Duration,
          previousPitch: Pitch,
          tempo: Int?,
-         variation: Variation
-    ) {
+         variation: Variation) {
         self.timeSignature = timeSignature
         self.noteLength = noteLength
         self.previousPitch = previousPitch
@@ -32,13 +31,12 @@ public struct FlowContext {
         self.variation = variation
     }
 
-    init(from base: FlowContext, 
+    init(from base: FlowContext,
          timeSignature: TimeSignature? = nil,
          noteLength: Duration? = nil,
          previousPitch: Pitch? = nil,
          tempo: Int? = nil,
-         variation: Variation? = nil
-    ) {
+         variation: Variation? = nil) {
         self.timeSignature = timeSignature ?? base.timeSignature
         self.noteLength = noteLength ?? base.noteLength
         self.previousPitch = previousPitch ?? base.previousPitch
