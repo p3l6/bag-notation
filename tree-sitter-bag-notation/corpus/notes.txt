@@ -5,23 +5,23 @@ Scale
 ---
 ---
 
-q r b c d e f g a |
+l a b c d e f g h |
 
 ----->>
 
 (file (tune
   (header)
-  (line
-    (measure
-      (note_cluster (note (pitch)))
-      (note_cluster (note (pitch)))
-      (note_cluster (note (pitch)))
-      (note_cluster (note (pitch)))
-      (note_cluster (note (pitch)))
-      (note_cluster (note (pitch)))
-      (note_cluster (note (pitch)))
-      (note_cluster (note (pitch)))
-      (note_cluster (note (pitch)))
+  (voice
+    (bar
+      (cluster (note (pitch)))
+      (cluster (note (pitch)))
+      (cluster (note (pitch)))
+      (cluster (note (pitch)))
+      (cluster (note (pitch)))
+      (cluster (note (pitch)))
+      (cluster (note (pitch)))
+      (cluster (note (pitch)))
+      (cluster (note (pitch)))
       (barline)))))
 
 
@@ -32,20 +32,20 @@ Note clusters
 ---
 ---
 
-qrbc defga |
+labc defgh |
 
 ----->>
 
 (file (tune
   (header)
-  (line
-    (measure
-      (note_cluster
+  (voice
+    (bar
+      (cluster
         (note (pitch))
         (note (pitch))
         (note (pitch))
         (note (pitch)))
-      (note_cluster
+      (cluster
         (note (pitch))
         (note (pitch))
         (note (pitch))
@@ -61,18 +61,18 @@ Embellishments
 ---
 ---
 
-xrxc vvbd |
+xaxc vbd |
 
 ----->>
 
 (file (tune
   (header)
-  (line
-    (measure
-      (note_cluster
+  (voice
+    (bar
+      (cluster
         (note (embellishment) (pitch))
         (note (embellishment) (pitch)))
-      (note_cluster
+      (cluster
         (note (embellishment) (pitch))
         (note (pitch)))
       (barline)))))
@@ -85,26 +85,26 @@ Durations
 ---
 ---
 
-g+ f/e. r.b/ c+. d_ |
+g+ f/e. a.b/ c+. d_ |
 
 ----->>
 
 (file (tune
   (header)
-  (line
-    (measure
-      (note_cluster
+  (voice
+    (bar
+      (cluster
         (note (pitch) (duration)))
-      (note_cluster
+      (cluster
         (note (pitch) (duration))
         (note (pitch) (duration)))
-      (note_cluster
+      (cluster
         (note (pitch) (duration))
         (note (pitch) (duration)))
-      (note_cluster
+      (cluster
         (note (pitch) (duration)))
-      (note_cluster
-        (note (pitch) (tie)))
+      (cluster
+        (note (pitch) (connector)))
       (barline)))))
 
 
@@ -115,18 +115,18 @@ Embellishment literals
 ---
 ---
 
-xrjpjbc qoqyubd |
+xajpjc qoqyubd |
 
 ----->>
 
 (file (tune
   (header)
-  (line
-    (measure
-      (note_cluster
+  (voice
+    (bar
+      (cluster
         (note (embellishment) (pitch))
         (note (embellishment) (pitch)))
-      (note_cluster
+      (cluster
         (note (embellishment) (pitch))
         (note (pitch)))
       (barline)))))

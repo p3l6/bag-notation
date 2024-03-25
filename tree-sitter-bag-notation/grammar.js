@@ -7,11 +7,11 @@ module.exports = grammar({
     //// File structure
     file: $ => seq(optional(repeat($._blank_line)), repeat1($.tune)),
     tune: $ => seq($.header, optional($._body)),
-    _body: $ => repeat1(choice($._blank_line, $.line)),
-    line: $ => seq(
+    _body: $ => repeat1(choice($._blank_line, $.voice)),
+    voice: $ => seq(
                  optional($._inline_field),
                  optional($.barline),
-                 repeat1($.measure),
+                 repeat1($.bar),
                  optional($.tail_comment),
                  "\n"),
 
@@ -22,22 +22,22 @@ module.exports = grammar({
     field_label: $ => /[ a-zA-Z0-9\/,']+/,
     field_value: $ => /[ a-zA-Z0-9\/,']+/,
 
-    //// Measures
-    measure: $ => seq(repeat($._measure_content), prec(-1, $.barline)),
+    //// Bars
+    bar: $ => seq(repeat($._bar_content), prec(-1, $.barline)),
     barline: $ => /:?\|+:?/,
-    _measure_content: $ => choice(prec(-1, $._inline_field), $.note_cluster),
+    _bar_content: $ => choice(prec(-1, $._inline_field), $.cluster),
 
     //// Notes and clusters
-    note_cluster: $ => seq(repeat1($.note), /[ \t]/),
+    cluster: $ => seq(repeat1($.note), /[ \t]/),
     note: $ => seq(
                  optional($.embellishment),
                  $.pitch,
                  optional($.duration),
-                 optional($.tie)),
+                 optional($.connector)),
     embellishment: $ => /[qojkpzuymtsnxvr]+/,
     pitch: $ => /[labcdefgh]/,
     duration: $ => /[+.\/]+/,
-    tie: $ => /[-_~]/,
+    connector: $ => /[-_~]/,
 
     //// Other
     _blank_line: $ => choice("\n", $.comment),

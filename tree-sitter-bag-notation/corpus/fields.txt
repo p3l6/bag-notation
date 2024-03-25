@@ -5,17 +5,17 @@ Inline field
 ---
 ---
 
-xr (meter: 6/8) xc |
+xa (meter: 6/8) xc |
 
 ----->>
 
 (file (tune
   (header)
-  (line
-    (measure
-      (note_cluster (note (embellishment) (pitch)))
+  (voice
+    (bar
+      (cluster (note (embellishment) (pitch)))
       (field (field_label) (field_value))
-      (note_cluster (note (embellishment) (pitch)))
+      (cluster (note (embellishment) (pitch)))
       (barline)))))
 
 
@@ -26,17 +26,17 @@ Field without value
 ---
 ---
 
-xr (triplet) xc |
+xa (triplet) xc |
 
 ----->>
 
 (file (tune
   (header)
-  (line
-    (measure
-      (note_cluster (note (embellishment) (pitch)))
+  (voice
+    (bar
+      (cluster (note (embellishment) (pitch)))
       (field (field_label))
-      (note_cluster (note (embellishment) (pitch)))
+      (cluster (note (embellishment) (pitch)))
       (barline)))))
 
 
@@ -50,18 +50,18 @@ Field labels and values with spaces
 some label: long value
 ---
 
-xr (valueless label) xc (space label: value words) |
+xa (valueless label) xc (space label: value words) |
 
 ----->>
 
 (file (tune
   (header
     (field (field_label) (field_value)))
-  (line
-    (measure
-      (note_cluster (note (embellishment) (pitch)))
+  (voice
+    (bar
+      (cluster (note (embellishment) (pitch)))
       (field (field_label))
-      (note_cluster (note (embellishment) (pitch)))
+      (cluster (note (embellishment) (pitch)))
       (field (field_label) (field_value))
       (barline)))))
 
@@ -73,23 +73,23 @@ Leading inline field
 ---
 ---
 
-(h) xr xc |
-(h) | xr xc |
+(h) xa xc |
+(h) | xa xc |
 
 ----->>
 
 (file (tune
   (header)
-    (line
+    (voice
       (field (field_label))
-      (measure
-        (note_cluster (note (embellishment) (pitch)))
-        (note_cluster (note (embellishment) (pitch)))
+      (bar
+        (cluster (note (embellishment) (pitch)))
+        (cluster (note (embellishment) (pitch)))
         (barline)))
-    (line
+    (voice
       (field (field_label))
       (barline)
-      (measure
-        (note_cluster (note (embellishment) (pitch)))
-        (note_cluster (note (embellishment) (pitch)))
+      (bar
+        (cluster (note (embellishment) (pitch)))
+        (cluster (note (embellishment) (pitch)))
         (barline)))))

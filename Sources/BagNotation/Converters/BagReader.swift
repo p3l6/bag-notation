@@ -116,13 +116,13 @@ private struct NodeChildren {
 private enum NodeType: String {
     case file
     case tune
-    case line
+    case voice
     case header
     case field
     case body
-    case measure
+    case bar
     case barline
-    case cluster = "note_cluster"
+    case cluster
     case note
     case comment
     case tailComment = "tail_comment"
@@ -130,7 +130,7 @@ private enum NodeType: String {
     case embellishment
     case duration
     case pitch
-    case tie
+    case connector
     case fieldLabel = "field_label"
     case fieldValue = "field_value"
 }
@@ -261,10 +261,10 @@ private final class TuneModeler: Modeler {
         self.node = node
         self.textSource = textSource
 
-        let children = try node.childrenVerifying(typeIs: .tune, childrenAre: [.line, .header])
+        let children = try node.childrenVerifying(typeIs: .tune, childrenAre: [.voice, .header])
         header = try HeaderModeler(node: children.unique(.header), textSource: textSource).model()
 
-        let voiceModelers = try children[.line].map {
+        let voiceModelers = try children[.voice].map {
             try VoiceModeler(node: $0, textSource: textSource)
         }
 
@@ -299,10 +299,6 @@ private final class TuneModeler: Modeler {
 
         context = TuneContext(head: head, body: body, tail: flow)
         return flow
-        // TODO: update grammar to match this terminology (voice vs line)
-        // TODO: rename measure to bar in grammar
-        // and note_clusters
-        // and tie to connector
     }
 
     func model() -> Tune {
@@ -386,7 +382,7 @@ private final class VoiceModeler: Modeler {
         self.node = node
         self.textSource = textSource
 
-        let children = try node.childrenVerifying(typeIs: .line, childrenAre: [.barline, .measure, .field])
+        let children = try node.childrenVerifying(typeIs: .voice, childrenAre: [.barline, .bar, .field])
 
         if let barline = try children.optional(.barline)?.text(from: textSource).toBarline() {
             leadingBarline = barline == .double ? .partStart : barline
@@ -402,7 +398,7 @@ private final class VoiceModeler: Modeler {
             leadingField = nil
         }
 
-        barModelers = try children[.measure].map {
+        barModelers = try children[.bar].map {
             try BarModeler(node: $0, textSource: textSource)
         }
     }
@@ -438,7 +434,7 @@ private final class BarModeler: Modeler {
         self.node = node
         self.textSource = textSource
 
-        let children = try node.childrenVerifying(typeIs: .measure, childrenAre: [.cluster, .barline, .field])
+        let children = try node.childrenVerifying(typeIs: .bar, childrenAre: [.cluster, .barline, .field])
 
         barline = try children.unique(.barline).text(from: textSource).toBarline()
 
@@ -567,11 +563,11 @@ private final class NoteModeler: Modeler {
         self.node = node
         self.textSource = textSource
 
-        children = try node.childrenVerifying(typeIs: .note, childrenAre: [.embellishment, .pitch, .duration, .tie])
+        children = try node.childrenVerifying(typeIs: .note, childrenAre: [.embellishment, .pitch, .duration, .connector])
 
         pitch = try children.unique(.pitch).text(from: textSource).toPitch()
 
-        let connector = try children.optional(.tie)?.text(from: textSource)
+        let connector = try children.optional(.connector)?.text(from: textSource)
         tied = connector == "_"
         continuesTuplet = connector == "-"
         slurred = connector == "~"

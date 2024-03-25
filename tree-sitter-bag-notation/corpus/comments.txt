@@ -6,7 +6,7 @@ Full line comments
 ---
 
 % this is a comment
-xr |
+xa |
 % this is also a comment
 
 ----->>
@@ -14,9 +14,9 @@ xr |
 (file (tune
   (header)
     (comment)
-    (line
-      (measure
-        (note_cluster (note (embellishment) (pitch))) (barline)))
+    (voice
+      (bar
+        (cluster (note (embellishment) (pitch))) (barline)))
     (comment)))
 
 
@@ -28,18 +28,18 @@ Trailing comments
 ---
 ---
 
-xr | % xb
-xr |
+xa | % xb
+xa |
 
 ----->>
 
 (file (tune
   (header)
-    (line
-      (measure
-        (note_cluster (note (embellishment) (pitch))) (barline))
+    (voice
+      (bar
+        (cluster (note (embellishment) (pitch))) (barline))
       (tail_comment))
-    (line
-      (measure
-        (note_cluster (note (embellishment) (pitch))) (barline)))))
+    (voice
+      (bar
+        (cluster (note (embellishment) (pitch))) (barline)))))
 
