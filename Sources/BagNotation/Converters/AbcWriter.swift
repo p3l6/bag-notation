@@ -75,7 +75,7 @@ extension Header: AbcSourceConverting {
             T:\(title)
             C:\(composer)
             R:\(style.abcSource())
-            M:\(timeSignature.rawValue)
+            M:\(timeSignature.abcSource())
             L:1/8
             \(tempoLine)
             K:HP
@@ -86,15 +86,29 @@ extension Header: AbcSourceConverting {
 extension TuneStyle: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         switch self {
-        case .march, .march24, .march34, .march44, .march54, .march68, .march98, .march128:
-            "March"
+        case .march: "March"
         case .hornpipe: "Hornpipe"
-        case .jig, .jig98, .jig128: "Jig"
+        case .jig: "Jig"
         case .reel: "Reel"
         case .strathspey: "Strathspey"
         case .slowAir: "Slow Air"
         case .slowMarch: "Slow March"
         case .piob: "Piobaireachd"
+        }
+    }
+}
+
+extension TimeSignature: AbcSourceConverting {
+    fileprivate func abcSource() -> String {
+        switch self {
+        case .time22: "2/2"
+        case .time24: "2/4"
+        case .time34: "3/4"
+        case .time44: "4/4"
+        case .time54: "5/4"
+        case .time68: "6/8"
+        case .time98: "9/8"
+        case .time128: "12/8"
         }
     }
 }
@@ -201,7 +215,6 @@ extension Note: AbcSourceConverting {
             Self.closeNextSlur = true
         }
 
-        // TODO: slurs
         return abc
     }
 }

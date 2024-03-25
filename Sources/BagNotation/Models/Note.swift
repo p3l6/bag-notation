@@ -3,15 +3,6 @@
 //  Bag Notation
 //
 
-// Future embellishments:
-// uxxd: e{fde}d ? No. 24, 63
-// ttg: g{ege}g ? No. 64 (double tap on the piob high g)
-// low g variation crunluath ?
-// uw: taorluath a mach ? (on bcd)
-// uww: crunluath a mach ? (on bcd)
-// ?z: {geAfA}e ?
-// ?z: {afege}f ? in No. 64
-
 public struct Note {
     let context: NoteContext
     let pitch: Pitch
@@ -42,10 +33,6 @@ public enum Pitch: Comparable {
     case highA
 }
 
-extension String {
-    func toPitch() throws -> Pitch { try Pitch.from(string: self) }
-}
-
 public enum NoteParseError: Error {
     case unknownPitch
     case unknownEmbellishment
@@ -53,7 +40,6 @@ public enum NoteParseError: Error {
 
 // MARK: Create from strings
 
-// TODO: Standarize these methods
 extension Pitch {
     static func from(string: String) throws -> Pitch {
         switch string {
@@ -69,4 +55,8 @@ extension Pitch {
         default: throw NoteParseError.unknownPitch
         }
     }
+}
+
+extension String {
+    func toPitch() throws -> Pitch { try Pitch.from(string: self) }
 }

@@ -30,6 +30,8 @@ public enum Barline {
     case double
 }
 
+// MARK: Create from strings
+
 extension Barline {
     static func from(string: String) throws -> Barline {
         switch string {

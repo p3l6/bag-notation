@@ -41,14 +41,6 @@ public struct Field {
         return (titleParts[0], titleParts.count > 1 ? titleParts[1] : nil)
     }
 
-    func asStyle() throws -> TuneStyle {
-        try TuneStyle(rawValue: value.lowercased()) ?! ModelParseError.invalidStyle
-    }
-
-    func asTimeSignature() throws -> TimeSignature {
-        try TimeSignature(rawValue: value.lowercased()) ?! ModelParseError.invalidTimeSignature
-    }
-
     func asDuration() throws -> Duration {
         switch value.lowercased() {
         case "sixteenth": .sixteenth

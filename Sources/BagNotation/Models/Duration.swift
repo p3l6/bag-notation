@@ -78,7 +78,11 @@ public enum Duration: Comparable {
         case .sixtyfourth: .sixtyfourthDotted
         }
     }
+}
 
+// MARK: Create from strings
+
+extension Duration {
     /// Tries to modify this duration by a string such as "+" or "//"
     func modified(by modifier: String) throws -> Duration {
         switch modifier {
@@ -102,32 +106,4 @@ public enum Duration: Comparable {
 
 extension String {
     func toDuration(modifying base: Duration) throws -> Duration { try base.modified(by: self) }
-}
-
-public enum TimeSignature: String {
-    case time22 = "2/2"
-    case time24 = "2/4"
-    case time34 = "3/4"
-    case time44 = "4/4"
-    case time54 = "5/4"
-    case time68 = "6/8"
-    case time98 = "9/8"
-    case time128 = "12/8"
-
-    var beatLength: Duration {
-        switch self {
-        case .time22: .half
-        case .time68, .time98, .time128: .quarterDotted
-        case .time24, .time34, .time44, .time54: .quarter
-        }
-    }
-
-    var beatsPerBar: Int {
-        switch self {
-        case .time22, .time24, .time68: 2
-        case .time34, .time98: 3
-        case .time44, .time128: 4
-        case .time54: 5
-        }
-    }
 }

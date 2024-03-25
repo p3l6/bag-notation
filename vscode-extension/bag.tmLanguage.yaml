@@ -6,6 +6,7 @@ fileTypes: [bag]
 uuid: bf9f47d0-6435-46f2-bcad-e3eb0a454a74
 
 patterns:
+  - include: '#migrationFailure'
   - include: '#header'
   - include: '#field-inline'
   - include: '#barline'
@@ -13,7 +14,6 @@ patterns:
   - include: '#pitch'
   - include: '#duration'
   - include: '#comment'
-  - include '#migrationFailure'
 
 repository:
   header:
@@ -58,5 +58,5 @@ repository:
     match: ':?\|+:?'
 
   migrationFailure:
-    name: invalid.migration
+    name: invalid.illegal.migration
     match: '<.*>'

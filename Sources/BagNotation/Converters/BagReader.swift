@@ -142,18 +142,15 @@ private protocol NodeSourceTextProvider {
 private protocol LeafModeler {
     associatedtype Output
 
-    // TODO: would be a great to have a better way to wrap these, instead of the extra argument
-    // can using "where" help? like init(collection: T) where T.Element == String {
-    // or just using differently named existing parameters
     init(node: Node, textSource: NodeSourceTextProvider) throws
-    init(node: Node, textSource: NodeSourceTextProvider, impl: Bool) throws
+    init(private node: Node, textSource: NodeSourceTextProvider) throws
 
     func model() -> Output
 }
 
 extension LeafModeler {
     init(node: Node, textSource: NodeSourceTextProvider) throws {
-        do { try self.init(node: node, textSource: textSource, impl: true) }
+        do { try self.init(private: node, textSource: textSource) }
         catch let error as ModelParseError {
             let loc = node.pointRange
             let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2) + 1)")
@@ -170,12 +167,12 @@ private protocol Modeler: LeafModeler {
     var textSource: any NodeSourceTextProvider { get }
 
     func provideContext(head: FlowContext, body: OutputContext) throws -> FlowContext
-    func provideContextImpl(head: FlowContext, body: OutputContext) throws -> FlowContext
+    func provideContext(private head: FlowContext, body: OutputContext) throws -> FlowContext
 }
 
 extension Modeler {
     func provideContext(head: FlowContext, body: OutputContext) throws -> FlowContext {
-        do { return try provideContextImpl(head: head, body: body) }
+        do { return try provideContext(private: head, body: body) }
         catch let error as ModelParseError {
             let loc = node.pointRange
             let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2) + 1)")
@@ -217,7 +214,7 @@ private final class DocModeler: Modeler {
 
     var context: DocContext!
 
-    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
@@ -228,7 +225,7 @@ private final class DocModeler: Modeler {
         }
     }
 
-    func provideContextImpl(head: FlowContext, body: DocContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: DocContextBody) throws -> FlowContext {
         var flow = head
 
         for (idx, tm) in tuneModelers.enumerated() {
@@ -260,7 +257,7 @@ private final class TuneModeler: Modeler {
     var context: TuneContext!
     var lineContexts = [LineContext]()
 
-    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
@@ -286,7 +283,7 @@ private final class TuneModeler: Modeler {
         self.voiceModelersByLine = voiceModelersByLine
     }
 
-    func provideContextImpl(head: FlowContext, body: TuneContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: TuneContextBody) throws -> FlowContext {
         var flow = head
         // TODO: split flow per voice
 
@@ -324,7 +321,7 @@ private final class HeaderModeler: LeafModeler {
 
     let header: Header
 
-    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
@@ -340,14 +337,14 @@ private final class HeaderModeler: LeafModeler {
 
         guard possibleComposers.count <= 1 else { throw ModelParseError.duplicateComposers }
 
-        let style = try styleField.asStyle()
+        let style = try styleField.value.toTuneStyle()
 
         header = Header(
             title: title,
             style: style,
             composer: try possibleComposers.first ?! ModelParseError.missingTuneComposer,
             noteLength: (try? fields[.note]?.asDuration()) ?? Duration.eighth,
-            timeSignature: try (try? fields[.time]?.asTimeSignature()) ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
+            timeSignature: try (try? fields[.time]?.value.toTimeSignature()) ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
             tempo: try fields[.tempo]?.asTempo())
     }
 
@@ -360,7 +357,7 @@ private final class FieldModeler: LeafModeler {
 
     let field: Field
 
-    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
@@ -385,7 +382,7 @@ private final class VoiceModeler: Modeler {
     var context: VoiceContext!
     var isHarmony: Bool { leadingField?.label == .h }
 
-    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
@@ -410,7 +407,7 @@ private final class VoiceModeler: Modeler {
         }
     }
 
-    func provideContextImpl(head: FlowContext, body: VoiceContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: VoiceContextBody) throws -> FlowContext {
         var flow = FlowContext(from: head, variation: leadingField?.label == .v ? leadingField!.asVariation() : nil)
 
         for (idx, barModeler) in barModelers.enumerated() {
@@ -437,7 +434,7 @@ private final class BarModeler: Modeler {
 
     var context: BarContext!
 
-    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
@@ -461,13 +458,13 @@ private final class BarModeler: Modeler {
         }
     }
 
-    func provideContextImpl(head: FlowContext, body: BarContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: BarContextBody) throws -> FlowContext {
         var flow = head
 
         for (idx, clusterModeler) in clusterModelers.enumerated() {
             if let field = fieldsByClusterIndex[idx] {
                 switch field.label {
-                case .time: flow = FlowContext(from: flow, timeSignature: try field.asTimeSignature())
+                case .time: flow = FlowContext(from: flow, timeSignature: try field.value.toTimeSignature())
                 case .note: flow = FlowContext(from: flow, noteLength: try field.asDuration())
                 case .v: flow = FlowContext(from: flow, variation: field.asVariation())
                 case .tempo: flow = FlowContext(from: flow, tempo: try field.asTempo())
@@ -497,7 +494,7 @@ private final class ClusterModeler: Modeler {
 
     var context: ClusterContext!
 
-    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
@@ -508,7 +505,7 @@ private final class ClusterModeler: Modeler {
         }
     }
 
-    func provideContextImpl(head: FlowContext, body: ClusterContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: ClusterContextBody) throws -> FlowContext {
         var flow = head
 
         var tupletSizes = [Int]()
@@ -566,7 +563,7 @@ private final class NoteModeler: Modeler {
     var duration: Duration!
     var context: NoteContext!
 
-    init(node: Node, textSource: any NodeSourceTextProvider, impl _: Bool) throws {
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
@@ -580,7 +577,7 @@ private final class NoteModeler: Modeler {
         slurred = connector == "~"
     }
 
-    func provideContextImpl(head: FlowContext, body: NoteContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: NoteContextBody) throws -> FlowContext {
         embellishment = if let embellishmentStr = try children.optional(.embellishment)?.text(from: textSource) {
             try Embellishment(string: embellishmentStr, from: head.previousPitch, on: pitch)
         } else { nil }

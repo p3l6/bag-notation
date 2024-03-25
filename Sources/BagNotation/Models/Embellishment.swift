@@ -55,10 +55,21 @@ enum EmbellishmentType {
 
     // TODO: cadence, halfcadence
     // TODO: cadences should be `e4` timing
-    // TODO: other stuff from top of Notes.swift
     // crun a mach, toar a mach?
     // crun with low g's
+    // TODO: other stuff
+    // uxxd: e{fde}d ? No. 24, 63
+    // ttg: g{ege}g ? No. 64 (double tap on the piob high g)
+    // low g variation crunluath ?
+    // uw: taorluath a mach ? (on bcd)
+    // uww: crunluath a mach ? (on bcd)
+    // ?z: {geAfA}e ?
+    // ?z: {afege}f ? in No. 64
+}
 
+// MARK: Create from strings
+
+extension EmbellishmentType {
     static func from(string: String) throws -> EmbellishmentType {
         if let literal = parseLiteral(string) {
             return .literal(pitches: literal)
@@ -90,6 +101,10 @@ enum EmbellishmentType {
         default: throw NoteParseError.unknownEmbellishment
         }
     }
+}
+
+extension String {
+    func toEmbellishmentType() throws -> EmbellishmentType { try EmbellishmentType.from(string: self) }
 }
 
 // MARK: Embellishment Map Table
