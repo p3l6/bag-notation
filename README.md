@@ -88,3 +88,15 @@ tt: birl. the short one, as if from already on low a.
         xtt: with a high g gracenote at the beginning
         
 a full list of the possible semantic embellishments and what they will yeild can be found on a different page. For now, see Sources/BagNotation/Models/Embellishment.swift 
+
+
+# CLI
+
+## format command
+
+formatting aligns barlines in consecutive voice lines.
+an empty line will "reset" the formatting, and the next group of lines will be aligned independently of what came before.
+
+the formatter adds two blank lines between tunes, and a blank line after the tune header.
+
+it removes trailing whitespace.

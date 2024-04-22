@@ -4,6 +4,8 @@
 //
 
 import ArgumentParser
+import BagNotation
+import SwiftTreeSitter
 
 struct Format: AsyncParsableCommand {
     static var configuration = CommandConfiguration(
@@ -16,6 +18,16 @@ struct Format: AsyncParsableCommand {
     var inPlace: Bool = false
 
     mutating func run() async throws {
-        print("TODO: implementation")
+        guard let input = try? String(contentsOfFile: options.inputFile) else {
+            throw RuntimeError.couldNotRead(file: options.inputFile)
+        }
+
+        let output = try BagFormatter(input).formattedSource()
+
+        if inPlace {
+            print("TODO: implementation")
+        } else {
+            print(output)
+        }
     }
 }
