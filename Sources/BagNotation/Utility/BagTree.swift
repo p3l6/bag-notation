@@ -1,8 +1,6 @@
 //
-//  File.swift
-//  
-//
-//  Created by Paul Landers on 3/25/24.
+//  BagTree.swift
+//  Bag Notation
 //
 
 import SwiftTreeSitter
@@ -22,7 +20,7 @@ public class BagTree: NodeSourceTextProvider {
 
     var rootNode: Node { tree.rootNode! }
 
-    internal func modelDebug() {
+    func modelDebug() {
         let node = rootNode
         let cur = node.treeCursor
         var indent = ""
@@ -46,7 +44,7 @@ public class BagTree: NodeSourceTextProvider {
         }
     }
 
-    internal func text(at range: TSRange) -> String {
+    func text(at range: TSRange) -> String {
         let buf: [UInt16] = Array(source.utf16)
         let hmm = buf[Int(range.bytes.lowerBound / 2) ..< Int(range.bytes.upperBound / 2)]
         return String(utf16CodeUnits: Array(hmm), count: hmm.count).trimmingCharacters(in: .whitespaces)
@@ -57,7 +55,7 @@ public class BagTree: NodeSourceTextProvider {
     }
 }
 
-internal struct NodeChildren {
+struct NodeChildren {
     let all: [Node]
     private let byType: [NodeType: [Node]]
 
@@ -106,7 +104,7 @@ internal struct NodeChildren {
     }
 }
 
-internal enum NodeType: String {
+enum NodeType: String {
     case file
     case tune
     case voice
@@ -128,11 +126,11 @@ internal enum NodeType: String {
     case fieldValue = "field_value"
 }
 
-internal protocol NodeSourceTextProvider {
+protocol NodeSourceTextProvider {
     func text(of: Node) -> String
 }
 
-internal extension Node {
+extension Node {
     func text(from source: NodeSourceTextProvider) -> String { source.text(of: self) }
 
     func type() throws -> NodeType {

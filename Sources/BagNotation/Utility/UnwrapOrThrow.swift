@@ -8,7 +8,7 @@
 infix operator ?!: NilCoalescingPrecedence
 
 /// Throws the right hand side error if the left hand side optional is `nil`.
-internal func ?! <T>(value: T?, error: @autoclosure () -> Error) throws -> T {
+func ?! <T>(value: T?, error: @autoclosure () -> Error) throws -> T {
     guard let value else {
         throw error()
     }

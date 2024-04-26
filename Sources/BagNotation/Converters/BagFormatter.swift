@@ -1,8 +1,6 @@
 //
-//  File.swift
-//  
-//
-//  Created by Paul Landers on 3/26/24.
+//  BagFormatter.swift
+//  Bag Notation
 //
 
 import Foundation
@@ -16,12 +14,15 @@ public struct BagFormatter {
     public init(_ source: String) { self.source = source }
 
     public func modifiedRanges() throws -> [SpaceBlock] {
-        // TODO:  add hints for "voice line indexes" and "voices with pickups"
+        // TODO: add hints for "voice line indexes" and "voices with pickups"
 //        let doc = try BagReader(source).makeModel()
 
         let groups = source
             .split(separator: "\n\n")
-        // TODO: middle line could be whitespace only? maybe takes two formatting passes, first removing trailng whitespace. test case for this.
+            // TODO: middle line could be whitespace only? maybe takes two formatting passes, first removing trailng whitespace. test case for this.
+            // While re-working spaceblock to act on TSRanges, just get all the spaceblocks for the whole file.
+            // Then group and sort them by consecutive line indexes.
+            // Filter on the type of line
             .map {
                 FormatGroup($0
                     .split(separator: "\n")
@@ -31,28 +32,31 @@ public struct BagFormatter {
                 )
             }
 
-        return groups.flatMap{$0.spaceBlocks}
+        return groups.flatMap(\.spaceBlocks)
     }
 
     public func formattedSource() throws -> String {
         let ranges = try modifiedRanges()
 
-        return ranges.reversed().reduce(source) { (formatted, range) -> String in
+        return try ranges.reversed().reduce(source) { formatted, range -> String in
             guard range.newWidth != range.origWidth else { return formatted }
+            guard formatted[range.origStart ..< range.origEnd].trimmingCharacters(in: .whitespaces).isEmpty else { throw FormattingError.rangeIsNotWhitespace }
             let padding = String(Array(repeating: " ", count: range.newWidth))
-            // TODO: sanity check: range only contains whitespace, or throw
-            return formatted.replacingCharacters(in: range.origStart..<range.origEnd, with: padding)
+            return formatted.replacingCharacters(in: range.origStart ..< range.origEnd, with: padding)
         }
     }
 }
 
+enum FormattingError: Error {
+    case rangeIsNotWhitespace
+}
+
 // TODO: adjust newlines to be header, blank, body, blank, blank, header, blank, body, (trailing newline)
-// TODO: unit tests for formatting
 
 struct AlignmentGuide {
     let guideWidths: [SpaceBlock.Alignment: Int]
 
-    init(guides: [SpaceBlock.Alignment: Int]) { self.guideWidths = guides}
+    init(guides: [SpaceBlock.Alignment: Int]) { guideWidths = guides }
 
     init(_ spaceBlocks: [SpaceBlock]) {
         var m = [SpaceBlock.Alignment: Int]()
@@ -102,15 +106,16 @@ public struct SpaceBlock {
         case firstTrueNote
         case barline(index: Int)
     }
-    var alignmentColumn: Alignment? = nil
+
+    var alignmentColumn: Alignment?
 }
 
-func allSpaceBlocks(in str: any StringProtocol ) -> [SpaceBlock] {
+func allSpaceBlocks(in str: any StringProtocol) -> [SpaceBlock] {
     // StringProtocol doesn't have regexes, and converting to
     // String won't retain the relative indexes into the full string
 
     var blocks = [SpaceBlock]()
-    var activeStart: String.Index? = nil
+    var activeStart: String.Index?
     var width = 0
     var preceedingWidth = 0
     for idx in str.indices {
@@ -147,7 +152,7 @@ func allSpaceBlocks(in str: any StringProtocol ) -> [SpaceBlock] {
 struct FormatGroup {
     var lines: [[SpaceBlock]]
     let alignmentGuide: AlignmentGuide
-    var spaceBlocks: [SpaceBlock] { lines.flatMap{$0}}
+    var spaceBlocks: [SpaceBlock] { lines.flatMap { $0 }}
 
     init(_ lines: [String.SubSequence]) {
         self.lines = lines.map { str in
@@ -158,26 +163,26 @@ struct FormatGroup {
             var barlineIndex = 0
             var foundNotesYet = false
 
-            for idx in 1..<spaceBlocks.count {
-                let interStr = str[spaceBlocks[idx-1].origEnd..<spaceBlocks[idx].origStart]
-                // TODO:  consider leading fields, spaces, etc
+            for idx in 1 ..< spaceBlocks.count {
+                let interStr = str[spaceBlocks[idx - 1].origEnd ..< spaceBlocks[idx].origStart]
+                // TODO: consider leading fields, spaces, etc
                 if !foundNotesYet && interStr.contains("x") { // TODO: better regex
                     foundNotesYet = true
-                    spaceBlocks[idx-1].alignmentColumn = .firstTrueNote
+                    spaceBlocks[idx - 1].alignmentColumn = .firstTrueNote
                 } else if interStr.contains("|") { // TODO: do better here. try! Regex("[|:]+") or CharacterSet(["|",":"])
-                    spaceBlocks[idx-1].alignmentColumn = .barline(index: barlineIndex)
+                    spaceBlocks[idx - 1].alignmentColumn = .barline(index: barlineIndex)
                     barlineIndex += 1
                 }
             }
 
             // trailing barline
-            spaceBlocks[spaceBlocks.count-1].alignmentColumn = .barline(index: barlineIndex)
+            spaceBlocks[spaceBlocks.count - 1].alignmentColumn = .barline(index: barlineIndex)
 
             // TODO: consider and remove trailing whitespace, if any after the final barline
             return spaceBlocks
         }
         alignmentGuide = self.lines.map(AlignmentGuide.init).reduce(AlignmentGuide([]), AlignmentGuide.maxPer)
-        for idx in 0..<self.lines.count {
+        for idx in 0 ..< self.lines.count {
             alignmentGuide.alignBlocks(&self.lines[idx])
         }
     }
