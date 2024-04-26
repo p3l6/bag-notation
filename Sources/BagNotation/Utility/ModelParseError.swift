@@ -70,7 +70,7 @@ public enum ModelParseError: Error, LocalizedError {
 
 public struct LocatedModelParseError: Error, LocalizedError {
     let base: ModelParseError
-    let location: String
+    let location: String // TODO: just set the TSRange, and convert here. show start and stop.
 
     public var errorDescription: String? {
         "\(location): \(base.errorDescription!)"

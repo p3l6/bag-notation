@@ -21,21 +21,30 @@ public class BagTree: NodeSourceTextProvider {
     var rootNode: Node { tree.rootNode! }
 
     func modelDebug() {
-        let node = rootNode
-        let cur = node.treeCursor
         var indent = ""
-        while let currentNode = cur.currentNode {
+        walk { currentNode in
             if currentNode.childCount == 0 {
                 print("\(indent)\(currentNode.nodeType!.trimmingCharacters(in: .whitespacesAndNewlines)) \(currentNode.pointRange) \(text(of: currentNode).trimmingCharacters(in: .whitespacesAndNewlines))")
             } else {
                 print("\(indent)\(currentNode.nodeType!) \(currentNode.pointRange)")
             }
-            if cur.goToFirstChild() {
-                indent += " "
+        } onDecend: {
+            indent += " "
+        } onAscend: {
+            indent.removeLast()
+        }
+    }
+
+    func walk(onNode: (Node) -> Void, onDecend: (()->Void)? = nil, onAscend: (()->Void)? = nil) {
+        let cursor = rootNode.treeCursor
+        while let currentNode = cursor.currentNode {
+            onNode(currentNode)
+            if cursor.goToFirstChild() {
+                onDecend?()
             } else {
-                while !cur.gotoNextSibling() {
-                    if cur.gotoParent() {
-                        indent.removeLast()
+                while !cursor.gotoNextSibling() {
+                    if cursor.gotoParent() {
+                        onAscend?()
                     } else {
                         return
                     }
@@ -70,6 +79,7 @@ struct NodeChildren {
                 continue
             }
             guard verifyingTypes.contains(nodeType) else {
+                // TODO: Should throw located error, located on child, for both cases
                 throw ModelParseError.unexpectedNodeType(type: nodeType.rawValue)
             }
             guard nodeType != .error else {
