@@ -8,14 +8,20 @@ import TreeSitterBagNotation
 
 public class BagTree: NodeSourceTextProvider {
     let source: String
-    public init(_ source: String) { self.source = source }
+    let config: LanguageConfiguration
+    let sourceLines: [String.SubSequence]
+
+    public init(_ source: String) {
+        self.source = source
+        sourceLines = source.split(separator: "\n", omittingEmptySubsequences: false)
+        config = try! LanguageConfiguration(tree_sitter_BagNotation(), name: "BagNotation", bundleName: "Bag Notation_TreeSitterBagNotation")
+    }
 
     lazy var tree: Tree = {
-        let language = Language(language: tree_sitter_BagNotation())
         let parser = Parser()
-        try? parser.setLanguage(language)
+        try? parser.setLanguage(config.language)
         let tree = parser.parse(source)
-        return tree!
+        return tree!.copy()!
     }()
 
     var rootNode: Node { tree.rootNode! }
@@ -53,14 +59,37 @@ public class BagTree: NodeSourceTextProvider {
         }
     }
 
-    func text(at range: TSRange) -> String {
-        let buf: [UInt16] = Array(source.utf16)
-        let hmm = buf[Int(range.bytes.lowerBound / 2) ..< Int(range.bytes.upperBound / 2)]
-        return String(utf16CodeUnits: Array(hmm), count: hmm.count).trimmingCharacters(in: .whitespaces)
+    func executeQuery(_ queryString: String) throws -> QueryCursor {
+        let query = try Query(language: config.language, data: queryString.data(using: .utf8)!)
+        return query.execute(in: tree)
+    }
+
+    func stringIndexes(for range: InlineRange) -> Range<String.Index> {
+        let line = sourceLines[range.line]
+        return line.index(line.startIndex, offsetBy: range.lowerBound) ..< line.index(line.startIndex, offsetBy: range.upperBound)
+    }
+
+    func text(for range: InlineRange) -> String {
+        return String(source[stringIndexes(for: range)])
     }
 
     func text(of node: Node) -> String {
-        text(at: node.tsRange)
+        return String(source[stringIndexes(for: node.inlineRange)])
+    }
+}
+
+/// Like `Range<Point>`, except:
+/// - The range exists on a single line
+/// - The bounds are in reference to characters, not bytes
+struct InlineRange {
+    let line: Int
+    let lowerBound: Int
+    let upperBound: Int
+
+    var width: Int { upperBound - lowerBound }
+
+    func rangeFor(relativeRange insideRange: Range<Int>) -> InlineRange {
+        InlineRange(line: line, lowerBound: lowerBound + insideRange.lowerBound, upperBound: lowerBound + insideRange.upperBound)
     }
 }
 
@@ -137,11 +166,20 @@ enum NodeType: String {
 }
 
 protocol NodeSourceTextProvider {
+    func stringIndexes(for: InlineRange) -> Range<String.Index>
+    func text(for range: InlineRange) -> String
     func text(of: Node) -> String
 }
 
 extension Node {
-    func text(from source: NodeSourceTextProvider) -> String { source.text(of: self) }
+    var inlineRange: InlineRange {
+    // TODO: guard that this node is on a single line
+        InlineRange(line: Int(pointRange.lowerBound.row),
+                    lowerBound: Int(pointRange.lowerBound.column)/2,
+                    upperBound: Int(pointRange.upperBound.column)/2)
+    }
+
+    func trimmedText(from source: NodeSourceTextProvider) -> String { source.text(of: self).trimmingCharacters(in: .whitespacesAndNewlines) }
 
     func type() throws -> NodeType {
         guard let nodeTypeStr = nodeType else {

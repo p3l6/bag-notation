@@ -28,7 +28,7 @@ module.exports = grammar({
     _bar_content: $ => choice(prec(-1, $._inline_field), $.cluster),
 
     //// Notes and clusters
-    cluster: $ => seq(repeat1($.note), /[ \t]/),
+    cluster: $ => seq(repeat1($.note), /[ \t]/), // TODO: `note|` doesnt parse right, maybe token.immediate would help here?
     note: $ => seq(
                  optional($.embellishment),
                  $.pitch,

@@ -10,7 +10,7 @@ let package = Package(
         .library(name: "TreeSitterBagNotation", targets: ["TreeSitterBagNotation"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", from: "0.7.2"),
+        .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", "0.8.0"..<"0.9.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
     ],
     targets: [

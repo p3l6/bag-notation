@@ -221,8 +221,8 @@ private final class FieldModeler: LeafModeler {
 
         let children = try node.childrenVerifying(typeIs: .field, childrenAre: [.fieldLabel, .fieldValue])
 
-        let label = try children.unique(.fieldLabel).text(from: textSource)
-        let value = try children.optional(.fieldValue)?.text(from: textSource)
+        let label = try children.unique(.fieldLabel).trimmedText(from: textSource)
+        let value = try children.optional(.fieldValue)?.trimmedText(from: textSource)
         field = try Field(label: label, value: value)
     }
 
@@ -246,7 +246,7 @@ private final class VoiceModeler: Modeler {
 
         let children = try node.childrenVerifying(typeIs: .voice, childrenAre: [.barline, .bar, .field])
 
-        if let barline = try children.optional(.barline)?.text(from: textSource).toBarline() {
+        if let barline = try children.optional(.barline)?.trimmedText(from: textSource).toBarline() {
             leadingBarline = barline == .double ? .partStart : barline
         } else { leadingBarline = nil }
 
@@ -298,7 +298,7 @@ private final class BarModeler: Modeler {
 
         let children = try node.childrenVerifying(typeIs: .bar, childrenAre: [.cluster, .barline, .field])
 
-        barline = try children.unique(.barline).text(from: textSource).toBarline()
+        barline = try children.unique(.barline).trimmedText(from: textSource).toBarline()
 
         for child in children.all {
             switch try child.type() {
@@ -427,20 +427,20 @@ private final class NoteModeler: Modeler {
 
         children = try node.childrenVerifying(typeIs: .note, childrenAre: [.embellishment, .pitch, .duration, .connector])
 
-        pitch = try children.unique(.pitch).text(from: textSource).toPitch()
+        pitch = try children.unique(.pitch).trimmedText(from: textSource).toPitch()
 
-        let connector = try children.optional(.connector)?.text(from: textSource)
+        let connector = try children.optional(.connector)?.trimmedText(from: textSource)
         tied = connector == "_"
         continuesTuplet = connector == "-"
         slurred = connector == "~"
     }
 
     func provideContext(private head: FlowContext, body: NoteContextBody) throws -> FlowContext {
-        embellishment = if let embellishmentStr = try children.optional(.embellishment)?.text(from: textSource) {
+        embellishment = if let embellishmentStr = try children.optional(.embellishment)?.trimmedText(from: textSource) {
             try Embellishment(string: embellishmentStr, from: head.previousPitch, on: pitch)
         } else { nil }
 
-        duration = try children.optional(.duration)?.text(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
+        duration = try children.optional(.duration)?.trimmedText(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
 
         context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch))
         return context.tail
