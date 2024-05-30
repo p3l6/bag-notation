@@ -66,6 +66,7 @@ public enum FieldLabel: String {
     case trad
     case h
     case v
+    case rev
 
     var requiresValue: Bool {
         switch self {

@@ -43,10 +43,6 @@ public class AbcWriter {
 
         // TODO: Option to enable landscape
         // %% landscape 1
-        // TODO: Argument to add date footer (optional param, default now)
-        // %% dateformat "%e %b %Y"
-        // %% footerfont * 12
-        // %% footer "(rev: $D)\t\t"
     }
 }
 
@@ -71,6 +67,8 @@ extension Header: AbcSourceConverting {
         }
         let arranger = if let arranger { ", arr. \(arranger)" } else { "" }
 
+        let revisionLines = if let revision { "%% footerfont * 12\n%% footer \"(rev: \(revision))\t\t\"" } else {"% no rev"}
+
         return """
             X:1
             T:\(title)
@@ -79,6 +77,7 @@ extension Header: AbcSourceConverting {
             M:\(timeSignature.abcSource())
             L:1/8
             \(tempoLine)
+            \(revisionLines)
             K:HP
             """
     }

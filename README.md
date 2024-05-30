@@ -41,8 +41,10 @@ all fields are listed as labels and require values, unless listed with parenthes
   - time: required, unless implied by a recognized valid [[tune style]]
   - note: set the base note length, ususally ommited for the default of eighth
   - tempo: set the tunes tempo. should be an integer in bpm
+  - rev: set a revision date or version, placed in the footer
 - inline fields:
   - (h): harmony line. only valid at the very beginning of a line
+    - this has a shorthand, which is a single `&` at the beginning of the line
   - note: change the base note length
   - time: change the time signature
   - tempo: change the tempo
@@ -58,6 +60,7 @@ tsnxvr | semantic embellishment markers
 (label: value) | inline field
 (value) | inline field without label
 label: value | field, when inside header
+& | shorthand field for harmony lines
 `---` | header begin and end marker
 `|:` | barline
 % | comment marker

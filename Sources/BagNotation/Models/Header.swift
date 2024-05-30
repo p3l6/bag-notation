@@ -11,6 +11,7 @@ public struct Header {
     let noteLength: Duration
     let timeSignature: TimeSignature
     let tempo: Int?
+    let revision: String?
 }
 
 public enum TuneStyle {

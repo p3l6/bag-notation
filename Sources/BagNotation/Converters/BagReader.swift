@@ -203,7 +203,9 @@ private final class HeaderModeler: LeafModeler {
             arranger: fields[.arr]?.value,
             noteLength: (try? fields[.note]?.asDuration()) ?? Duration.eighth,
             timeSignature: try (try? fields[.time]?.value.toTimeSignature()) ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
-            tempo: try fields[.tempo]?.asTempo())
+            tempo: try fields[.tempo]?.asTempo(),
+            revision: fields[.rev]?.value
+        )
     }
 
     func model() -> Header { header }
