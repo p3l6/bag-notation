@@ -28,6 +28,14 @@ public struct Field {
         _value = value
     }
 
+    init(shorthand: String) throws {
+        label = switch shorthand {
+        case "&": .h
+        default: throw ModelParseError.invalidField
+        }
+        _value = nil
+    }
+
     func asVariation() -> Variation {
         _value == nil ? .none : .other(label: _value!)
     }

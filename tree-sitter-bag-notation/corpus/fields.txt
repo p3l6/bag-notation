@@ -93,3 +93,31 @@ Leading inline field
         (cluster (note (embellishment) (pitch)))
         (cluster (note (embellishment) (pitch)))
         (barline)))))
+
+=====>>
+Shorthand fields
+=====>>
+
+---
+---
+
+& xa xc |
+| xa & xc |
+
+----->>
+
+(file (tune
+  (header)
+    (voice
+      (field (shorthand_label))
+      (bar
+        (cluster (note (embellishment) (pitch)))
+        (cluster (note (embellishment) (pitch)))
+        (barline)))
+    (voice
+      (barline)
+      (bar
+        (cluster (note (embellishment) (pitch)))
+        (field (shorthand_label))
+        (cluster (note (embellishment) (pitch)))
+        (barline)))))

@@ -219,11 +219,15 @@ private final class FieldModeler: LeafModeler {
         self.node = node
         self.textSource = textSource
 
-        let children = try node.childrenVerifying(typeIs: .field, childrenAre: [.fieldLabel, .fieldValue])
+        let children = try node.childrenVerifying(typeIs: .field, childrenAre: [.fieldLabel, .fieldValue, .shorthandLabel])
 
-        let label = try children.unique(.fieldLabel).trimmedText(from: textSource)
-        let value = try children.optional(.fieldValue)?.trimmedText(from: textSource)
-        field = try Field(label: label, value: value)
+        if let shorthand = try children.optional(.shorthandLabel)?.trimmedText(from: textSource) {
+            field = try Field(shorthand: shorthand)
+        } else {
+            let label = try children.unique(.fieldLabel).trimmedText(from: textSource)
+            let value = try children.optional(.fieldValue)?.trimmedText(from: textSource)
+            field = try Field(label: label, value: value)
+        }
     }
 
     func model() -> Field { field }

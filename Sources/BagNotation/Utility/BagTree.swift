@@ -163,6 +163,7 @@ enum NodeType: String {
     case connector
     case fieldLabel = "field_label"
     case fieldValue = "field_value"
+    case shorthandLabel = "shorthand_label"
 }
 
 protocol NodeSourceTextProvider {

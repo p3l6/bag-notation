@@ -18,8 +18,8 @@ module.exports = grammar({
     //// Header and fields
     header: $ => seq("---\n", repeat(seq($._header_field, "\n")), "---\n"),
     _header_field: $ => alias($._field_parts, $.field),
-    field: $ => seq("(", $._field_parts, ")"),
-//    shorthand_field: $ => /[&]/,
+    field: $ => choice(seq("(", $._field_parts, ")"), $.shorthand_label),
+    shorthand_label: $ => /[&]/,
     _field_parts: $ => seq($.field_label, optional(seq(":", $.field_value))),
     field_label: $ => /[ a-zA-Z0-9\/,']+/,
     field_value: $ => /[ a-zA-Z0-9\/,']+/,
