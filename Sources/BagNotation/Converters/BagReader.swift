@@ -216,11 +216,10 @@ private final class FieldModeler: LeafModeler {
     let field: Field
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
-        let realFieldNode = try node.type() == .inlineField ? node.namedChild(at: 0)! : node
-        self.node = realFieldNode
+        self.node = node
         self.textSource = textSource
 
-        let children = try realFieldNode.childrenVerifying(typeIs: .field, childrenAre: [.fieldLabel, .fieldValue])
+        let children = try node.childrenVerifying(typeIs: .field, childrenAre: [.fieldLabel, .fieldValue])
 
         let label = try children.unique(.fieldLabel).trimmedText(from: textSource)
         let value = try children.optional(.fieldValue)?.trimmedText(from: textSource)
@@ -245,13 +244,13 @@ private final class VoiceModeler: Modeler {
         self.node = node
         self.textSource = textSource
 
-        let children = try node.childrenVerifying(typeIs: .voice, childrenAre: [.barline, .bar, .inlineField])
+        let children = try node.childrenVerifying(typeIs: .voice, childrenAre: [.barline, .bar, .field])
 
         if let barline = try children.optional(.barline)?.trimmedText(from: textSource).toBarline() {
             leadingBarline = barline == .double ? .partStart : barline
         } else { leadingBarline = nil }
 
-        if let fieldNode = try children.optional(.inlineField) {
+        if let fieldNode = try children.optional(.field) {
             let field = try FieldModeler(node: fieldNode, textSource: textSource).model()
             leadingField = field
             if field.label != .h && field.label != .v {
@@ -297,7 +296,7 @@ private final class BarModeler: Modeler {
         self.node = node
         self.textSource = textSource
 
-        let children = try node.childrenVerifying(typeIs: .bar, childrenAre: [.cluster, .barline, .inlineField])
+        let children = try node.childrenVerifying(typeIs: .bar, childrenAre: [.cluster, .barline, .field])
 
         barline = try children.unique(.barline).trimmedText(from: textSource).toBarline()
 
@@ -308,7 +307,7 @@ private final class BarModeler: Modeler {
             case .cluster:
                 let clusterModeler = try ClusterModeler(node: child, textSource: textSource)
                 clusterModelers.append(clusterModeler)
-            case .inlineField:
+            case .field:
                 let field = try FieldModeler(node: child, textSource: textSource).model()
                 // TODO: handle multiple fields between clusters
                 fieldsByClusterIndex[clusterModelers.count] = field

@@ -101,18 +101,57 @@ final class FormattingTests: XCTestCase {
         let source2 = """
             \(commonHeader)
             xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+            xrpxce | xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+            xr-b-c  | xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+            xe+++ | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+            nxf+. xxe+. | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+            c++ xd++ | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
             """
         let formatted2 = """
             \(commonHeader)
-            xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+                     xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+            xrpxce | xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+            xr-b-c | xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+                     xe+++                 | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+                     nxf+. xxe+.           | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+                     c++ xd++              | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
             """
         XCTAssertEqual(try BagFormatter(source2).formattedSource(), formatted2)
     }
 
-    // TODO: func testExtraSpacesWithinBar() throws {}
-    // TODO: func testMissingSpaces() throws {}
+    func testExtraAndMissingSpaces() throws {
+        let source = """
+            \(commonHeader)
+            || xa+ vza.b/ xxcza xxce    | xxh+ th+ vhe xxcza    | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
+               xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza    | xxb+ xa.b/ ta+ xxce ||
+            ||xxh+ th+ vhe xxcza | xxh+    th+ vhe xxce | xxh+ th.g/ xf+ h.g/ | xfh tgf xed xcb |
+               xa+    vza.b/ xxcza xxce |xxh+ th+ vhe xxcza | rd+    xf.d/ xxce xxcza | xxb+ xa.b/ ta+. ||
+            """
+        XCTAssertEqual(try BagFormatter(source).formattedSource(), commonTarget)
+        // TODO: Fix case where nodes cannot parse adjacent to a following barline, ie `xxce|`
+    }
+
+    func testGroups() throws {
+        let source = """
+            \(commonHeader)
+            || xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
+            xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
+
+            || xxh+ th+ vhe xxcza | xxh+ th+ vhe | xxh+ th.g/ xf+ h.g/ | xfh tgf xed xcb |
+            xa+ vza.b/ xxcza | xxh+ th+ vhe          | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+. ||
+            """
+        let formatted = """
+            \(commonHeader)
+            || xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
+               xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce           ||
+
+            || xxh+ th+ vhe xxcza | xxh+ th+ vhe | xxh+ th.g/ xf+ h.g/  | xfh tgf xed xcb  |
+               xa+ vza.b/ xxcza   | xxh+ th+ vhe | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+. ||
+            """
+        XCTAssertEqual(try BagFormatter(source).formattedSource(), formatted)
+    }
+
     // TODO: func testTrailingSpaces() throws {}
-    // TODO: func testGroups() throws {}
     // TODO: func testNewlines() throws {}
     // TODO: func testFields() throws {}
 }

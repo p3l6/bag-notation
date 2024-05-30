@@ -22,6 +22,8 @@ Tuplets must be within a cluster.
 
 All barlines are `|` or `||` or `:|` or `|:`. Beginning and end of parts should use the double barline.
 
+whitespace is required between final cluster and barline, or a cluster and a field paren.
+
 ## not rules, but suggestions
 
 Notes should be clustered by beat.

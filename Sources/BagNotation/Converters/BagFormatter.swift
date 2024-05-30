@@ -16,8 +16,6 @@ public struct BagFormatter {
     }
 
     public func modifiedRanges() throws -> [ModifiedRange] {
-        // TODO: if it fully compiles, add hint for "voices with pickups"
-
         let treeMatches = try tree.executeQuery(BagTree.formattingQuery)
 
         let matches = try treeMatches.flatMap { x in
@@ -46,7 +44,7 @@ public struct BagFormatter {
                         pendingLeadingField = nil
                     }
                     let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
-                    let pickup = m.node.parent!.childCount <= 2 // TODO: only count clusters
+                    let pickup = isLikelyPickup(node: m.node)
                     let type: Block.BlockType = pickup ? .pickup : .bar(index: barCount)
                     items.append(Block(type: type, range: range, textProvider: tree, paddingHint: pickup ? .absoluteStart : .lastFlex))
                     if !pickup { barCount += 1 }
@@ -71,6 +69,15 @@ public struct BagFormatter {
             return formatted.replacingCharacters(in: indexes, with: mod.newText)
         }
     }
+}
+
+private func isLikelyPickup(node barlineNode: Node) -> Bool {
+    // TODO: if it fully compiles, add hint for "voices with pickups"
+    let barNode = barlineNode.parent!
+    let voiceNode = barNode.parent!
+    let clusters = (0 ..< barNode.childCount).compactMap(barNode.child(at:)).filter{ $0.nodeType == NodeType.cluster.rawValue }.count
+    let bars = (0 ..< voiceNode.childCount).compactMap(voiceNode.child(at:)).filter{ $0.nodeType == NodeType.bar.rawValue }.count
+    return clusters <= 1 && bars > 4
 }
 
 enum FormattingError: Error {
@@ -156,7 +163,8 @@ struct Block {
         var midSize = if paddingHint == .lastFlex { extraPadding + 1}
         else { 1 }
 
-        if type == .bar(index: 0) {
+        switch type {
+        case .bar(index: 0):
             var shift = idealRange.lowerBound - actualStartCol
             if leadingSize == 0 && idealRange.lowerBound != 0 { shift += 1 }
             guard shift >= 0 else { throw FormattingError.negativeWidth }
@@ -164,6 +172,12 @@ struct Block {
                 leadingSize += shift
                 midSize -= shift
             }
+        case .bar:
+            if leadingSize == 0 {
+                leadingSize += 1
+                midSize -= 1
+            }
+        default: break
         }
 
         if let mod = try ModifiedRange(range: leadingFlex, replacement: .spaces(count: leadingSize)) {
@@ -231,17 +245,15 @@ struct FormatGroup {
             .sorted() { $0.index < $1.index }
 
         var groups = [FormatGroup]()
-        var group: FormatGroup! = nil
+        var group = FormatGroup()
         for line in lines {
-            if group == nil { group = FormatGroup() }
-            if group.acceptsLine(line) {
-                group.addLine(line)
-            } else {
+            if !group.acceptsLine(line) {
                 groups.append(group)
-                group = nil
+                group = FormatGroup()
             }
+            group.addLine(line)
         }
-        if group != nil { groups.append(group) }
+        if group.lines.count != 0 { groups.append(group) }
         return groups
     }
 }

@@ -3,7 +3,7 @@
 
 (voice
   .
-  (inline_field)? @leadingField
+  (field)? @leadingField
   .
   (barline)? @leadingBarline
   .
