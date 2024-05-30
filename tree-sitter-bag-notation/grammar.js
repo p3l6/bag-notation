@@ -9,7 +9,7 @@ module.exports = grammar({
     tune: $ => seq($.header, optional($._body)),
     _body: $ => repeat1(choice($._blank_line, $.voice)),
     voice: $ => seq(
-                 optional($._inline_field),
+                 optional($.inline_field),
                  optional($.barline),
                  repeat1($.bar),
                  optional($.tail_comment),
@@ -17,7 +17,8 @@ module.exports = grammar({
 
     //// Header and fields
     header: $ => seq("---\n", repeat(seq($.field, "\n")), "---\n"),
-    _inline_field: $ => seq("(", $.field, ")"),
+    inline_field: $ => seq("(", $.field, ")"),
+//    shorthand_field: $ => /[&]/,
     field: $ => seq($.field_label, optional(seq(":", $.field_value))),
     field_label: $ => /[ a-zA-Z0-9\/,']+/,
     field_value: $ => /[ a-zA-Z0-9\/,']+/,
@@ -25,7 +26,7 @@ module.exports = grammar({
     //// Bars
     bar: $ => seq(repeat($._bar_content), prec(-1, $.barline)),
     barline: $ => /:?\|+:?/,
-    _bar_content: $ => choice(prec(-1, $._inline_field), $.cluster),
+    _bar_content: $ => choice(prec(-1, $.inline_field), $.cluster),
 
     //// Notes and clusters
     cluster: $ => seq(repeat1($.note), /[ \t]/), // TODO: `note|` doesnt parse right, maybe token.immediate would help here?

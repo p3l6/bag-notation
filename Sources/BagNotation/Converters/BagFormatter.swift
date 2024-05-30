@@ -27,24 +27,29 @@ public struct BagFormatter {
                 a.node.pointRange.lowerBound.column < b.node.pointRange.lowerBound.column
             }
 
+            var pendingLeadingField: InlineRange? = nil
             var items = [Block]()
             for m in markers {
                 let markerRange = m.node.inlineRange
-                let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
                 switch m.nameComponents.first! {
                 case "leadingField":
-                    items.append(Block(type: .leadingField, range: range, textProvider: tree))
-                    column = markerRange.upperBound + 2 //TODO: wierd plus two here, for trailing paren. probs wont work
+                    pendingLeadingField = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
                 case "leadingBarline":
-                    items.append(Block(type: .leadingBarline, range: range, textProvider: tree))
+                    let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
+                    items.append(Block(type: .leading, range: range, textProvider: tree, paddingHint: pendingLeadingField == nil ? .absoluteStart : .lastFlex))
                     column = markerRange.upperBound
-                case "firstNote":
-                    let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.lowerBound)
-                    items.append(Block(type: .firstNote, range: range, textProvider: tree))
-                    column = markerRange.lowerBound
+                    pendingLeadingField = nil
                 case "normalBarline":
-                    items.append(Block(type: .bar(index: barCount), range: range, textProvider: tree))
-                    barCount += 1
+                    if let range = pendingLeadingField {
+                        items.append(Block(type: .leading, range: range, textProvider: tree, paddingHint: .absoluteEnd))
+                        column = range.upperBound
+                        pendingLeadingField = nil
+                    }
+                    let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
+                    let pickup = m.node.parent!.childCount <= 2 // TODO: only count clusters
+                    let type: Block.BlockType = pickup ? .pickup : .bar(index: barCount)
+                    items.append(Block(type: type, range: range, textProvider: tree, paddingHint: pickup ? .absoluteStart : .lastFlex))
+                    if !pickup { barCount += 1 }
                     column = markerRange.upperBound
                 default: throw FormattingError.unexpectedCaptureType
                 }
@@ -54,7 +59,6 @@ public struct BagFormatter {
 
 
         let groups = FormatGroup.groups(from: matches)
-        print(groups.first!.ideal)
         return try groups.flatMap{try $0.modifications()}.sorted()
     }
 
@@ -78,11 +82,18 @@ enum FormattingError: Error {
 
 struct Block {
     enum BlockType: Hashable, Comparable {
+        case leading
         case leadingField
         case leadingBarline
         case pickup
-        case firstNote
         case bar(index: Int)
+    }
+
+    enum PaddingHint {
+        case absoluteStart
+        case lastFlex
+        // TODO: afterColumn(index: Int)
+        case absoluteEnd
     }
 
     let type: BlockType
@@ -90,10 +101,12 @@ struct Block {
     let text: String
     let flexibleRanges: [InlineRange]
     let idealWidth: Int
+    let paddingHint: PaddingHint
 
-    init(type: BlockType, range: InlineRange, textProvider: NodeSourceTextProvider) {
+    init(type: BlockType, range: InlineRange, textProvider: NodeSourceTextProvider, paddingHint: PaddingHint) {
         self.type = type
         self.range = range
+        self.paddingHint = paddingHint
         let text = textProvider.text(for: range)
         self.text = text
 
@@ -107,16 +120,65 @@ struct Block {
 
     var originalWidth: Int { text.count }
 
-    func modification(for ideal: AlignmentGuide, actualStartCol: Int) throws -> ModifiedRange? {
-        let target = ideal.range(of: type).upperBound
+    func modifications(for ideal: AlignmentGuide, actualStartCol: Int) throws -> [ModifiedRange] {
+        // TODO: this function is a bit long and could use some simplification refactors
+        let idealRange = ideal.range(of: type)
+        let target = idealRange.upperBound
+        let extraPadding = target - (actualStartCol + idealWidth)
 
-        let difference = target - (actualStartCol + originalWidth)
-        if difference != 0, let replaceRange = flexibleRanges.last  {
-            let width = replaceRange.width + difference
-            guard width > 0 else { throw FormattingError.negativeWidth }
-            return ModifiedRange(range: replaceRange, replacement: .spaces(count: width))
+        var flexes = flexibleRanges
+        var leadingFlex =  InlineRange(line: range.line, lowerBound: range.lowerBound, upperBound: range.lowerBound)
+        if let first = flexes.first, first.lowerBound == range.lowerBound {
+            leadingFlex = flexes.removeFirst()
         }
-        return nil
+        var trailingFlex = InlineRange(line: range.line, lowerBound: range.upperBound, upperBound: range.upperBound)
+        if let last = flexes.last, last.upperBound == range.upperBound {
+            trailingFlex = flexes.removeLast()
+        }
+
+        let midFlex = flexes.isEmpty ? nil : flexes.removeLast()
+
+        var modifications = try flexes.compactMap { flex in
+            try ModifiedRange(range: flex, replacement: .spaces(count: 1))
+        }
+
+        // TODO: test case where bar0 is longer than the pickup line pushing it out
+
+        var leadingSize = if paddingHint == .absoluteStart { extraPadding + (leadingFlex.width == 0 ? 0 : 1)}
+        else if paddingHint == .lastFlex && midFlex == nil { extraPadding + (leadingFlex.width == 0 ? 0 : 1) }
+        else if leadingFlex.width == 0 { 0 }
+        else { 1 }
+
+        let trailingSize = if paddingHint == .absoluteEnd {extraPadding + (trailingFlex.width == 0 ? 0 : 1) }
+        else if trailingFlex.width == 0 { 0 }
+        else { 1 }
+
+        var midSize = if paddingHint == .lastFlex { extraPadding + 1}
+        else { 1 }
+
+        if type == .bar(index: 0) {
+            var shift = idealRange.lowerBound - actualStartCol
+            if leadingSize == 0 && idealRange.lowerBound != 0 { shift += 1 }
+            guard shift >= 0 else { throw FormattingError.negativeWidth }
+            if shift > 0 {
+                leadingSize += shift
+                midSize -= shift
+            }
+        }
+
+        if let mod = try ModifiedRange(range: leadingFlex, replacement: .spaces(count: leadingSize)) {
+            modifications.append(mod)
+        }
+
+        if let midFlex, let mod = try ModifiedRange(range: midFlex, replacement: .spaces(count: midSize)) {
+            modifications.append(mod)
+        } 
+
+        if let mod = try ModifiedRange(range: trailingFlex, replacement: .spaces(count: trailingSize)) {
+            modifications.append(mod)
+        }
+
+        return modifications
     }
 
 }
@@ -129,17 +191,17 @@ struct FormatGroup {
 
         init(blocks: [Block], index: Int) {
             self.index = index
-            self.blocks = blocks
+            self.blocks = blocks.sorted(by: { $0.type < $1.type }) 
             self.guide = blocks.reduce(into: AlignmentGuide()) { $0.require(width: $1.idealWidth, for: $1.type)}
         }
 
         func modifications(for ideal: AlignmentGuide) throws -> [ModifiedRange] {
             var totalDiffs = 0
-            return try blocks.compactMap {
+            return try blocks.flatMap {
                 let column = $0.range.lowerBound + totalDiffs
-                let mod = try $0.modification(for: ideal, actualStartCol: column)
-                totalDiffs += mod?.diff ?? 0
-                return mod
+                let mods = try $0.modifications(for: ideal, actualStartCol: column)
+                totalDiffs += mods.reduce(0, { $0 + $1.diff })
+                return mods
             }
         }
     }
@@ -186,11 +248,9 @@ struct FormatGroup {
 
 struct AlignmentGuide {
     // (h) || xxh | th+ vhe xxcza | xxh+ th+
-    // ^--^  ^----^^-----bar------^^-----bar--...
-    //  |  ^^  |    ^-first true note
-    //  |  |   pickup
-    //  |  leading barline
-    //  leading field
+    // ^----^^----^^-----bar------^^-----bar--...
+    //  |      pickup
+    //  leading
 
     private var widths = [Block.BlockType: Int]()
     private var ranges: [Block.BlockType: Range<Int>] = [:]
@@ -229,6 +289,14 @@ public struct ModifiedRange: CustomStringConvertible, Comparable {
 
     let range: InlineRange
     let replacement: Replacement
+    
+    init?(range: InlineRange, replacement: Replacement) throws {
+        if case let .spaces(count) = replacement, count == range.width { return nil }
+        if case let .spaces(count) = replacement, count <= 0 { throw FormattingError.negativeWidth }
+
+        self.range = range
+        self.replacement = replacement
+    }
 
     var newText: String {
         switch replacement {

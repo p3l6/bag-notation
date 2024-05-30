@@ -149,6 +149,7 @@ enum NodeType: String {
     case voice
     case header
     case field
+    case inlineField = "inline_field"
     case body
     case bar
     case barline

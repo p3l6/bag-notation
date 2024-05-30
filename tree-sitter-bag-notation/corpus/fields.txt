@@ -14,7 +14,7 @@ xa (meter: 6/8) xc |
   (voice
     (bar
       (cluster (note (embellishment) (pitch)))
-      (field (field_label) (field_value))
+      (inline_field (field  (field_label) (field_value)))
       (cluster (note (embellishment) (pitch)))
       (barline)))))
 
@@ -35,7 +35,7 @@ xa (triplet) xc |
   (voice
     (bar
       (cluster (note (embellishment) (pitch)))
-      (field (field_label))
+      (inline_field (field (field_label)))
       (cluster (note (embellishment) (pitch)))
       (barline)))))
 
@@ -60,9 +60,9 @@ xa (valueless label) xc (space label: value words) |
   (voice
     (bar
       (cluster (note (embellishment) (pitch)))
-      (field (field_label))
+      (inline_field (field (field_label)))
       (cluster (note (embellishment) (pitch)))
-      (field (field_label) (field_value))
+      (inline_field (field (field_label) (field_value)))
       (barline)))))
 
 
@@ -81,13 +81,13 @@ Leading inline field
 (file (tune
   (header)
     (voice
-      (field (field_label))
+      (inline_field (field (field_label)))
       (bar
         (cluster (note (embellishment) (pitch)))
         (cluster (note (embellishment) (pitch)))
         (barline)))
     (voice
-      (field (field_label))
+      (inline_field (field (field_label)))
       (barline)
       (bar
         (cluster (note (embellishment) (pitch)))
