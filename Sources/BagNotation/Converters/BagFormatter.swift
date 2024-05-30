@@ -44,7 +44,7 @@ public struct BagFormatter {
                         pendingLeadingField = nil
                     }
                     let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
-                    let pickup = isLikelyPickup(node: m.node)
+                    let pickup = barCount == 0 && isLikelyPickup(node: m.node)
                     let type: Block.BlockType = pickup ? .pickup : .bar(index: barCount)
                     items.append(Block(type: type, range: range, textProvider: tree, paddingHint: pickup ? .absoluteStart : .lastFlex))
                     if !pickup { barCount += 1 }
@@ -344,6 +344,5 @@ public struct ModifiedRange: CustomStringConvertible, Comparable {
 
 // TODO: add spaces near barlines
 // TODO: remove spaces inside and touching field parens; leading label colons
-// TODO: align something before first block? snap to front? if stuff is before notes
 // TODO: consider and remove trailing whitespace, if any after the final barline
 // TODO: adjust newlines to be header, blank, body, blank, blank, header, blank, body, (trailing newline)

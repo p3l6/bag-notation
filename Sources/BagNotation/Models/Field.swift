@@ -36,11 +36,6 @@ public struct Field {
         try Int(value) ?! ModelParseError.invalidTempo
     }
 
-    func asTitle() -> (title: String, byline: String?) {
-        let titleParts = value.split(separator: " by ").map(String.init)
-        return (titleParts[0], titleParts.count > 1 ? titleParts[1] : nil)
-    }
-
     func asDuration() throws -> Duration {
         switch value.lowercased() {
         case "sixteenth": .sixteenth
@@ -54,7 +49,8 @@ public struct Field {
 
 public enum FieldLabel: String {
     case title
-    case composer
+    case by
+    case arr
     case style
     case note
     case time

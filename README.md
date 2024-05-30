@@ -34,9 +34,9 @@ all fields are listed as labels and require values, unless listed with parenthes
 
 - header:
   - title: required
-  - composer: required
-    - composer may also be included in the title field, with 'by'
+  - by: required
     - `trad` may also be listed by itself to specify the tune as trad, without a known composer
+  - arr: an arranger
   - style: required
   - time: required, unless implied by a recognized valid [[tune style]]
   - note: set the base note length, ususally ommited for the default of eighth

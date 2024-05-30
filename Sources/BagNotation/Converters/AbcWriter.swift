@@ -69,11 +69,12 @@ extension Header: AbcSourceConverting {
         } else {
             "% no tempo"
         }
+        let arranger = if let arranger { ", arr. \(arranger)" } else { "" }
 
         return """
             X:1
             T:\(title)
-            C:\(composer)
+            C:\(composer)\(arranger)
             R:\(style.abcSource())
             M:\(timeSignature.abcSource())
             L:1/8

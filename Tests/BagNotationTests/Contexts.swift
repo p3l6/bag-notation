@@ -9,7 +9,8 @@ import XCTest
 final class Contexts: XCTestCase {
     let source = """
         ---
-        title: First by trad
+        title: First 
+        trad
         style: jig
         ---
         |: abc def | (note: quarter) abc def | abc def  |
@@ -17,7 +18,8 @@ final class Contexts: XCTestCase {
         || abc def | abc (v: 1) abc (v: 2) def (v) abc | abc def ||
 
         ---
-        title: Second by trad
+        title: Second 
+        trad
         style: 6/8 March
         ---
             || abc def | abc def | abc def |

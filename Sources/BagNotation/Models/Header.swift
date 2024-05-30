@@ -7,6 +7,7 @@ public struct Header {
     let title: String
     let style: TuneStyle
     let composer: String
+    let arranger: String?
     let noteLength: Duration
     let timeSignature: TimeSignature
     let tempo: Int?

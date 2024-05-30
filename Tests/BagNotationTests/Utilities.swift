@@ -26,7 +26,8 @@ func makeHeader(from fragment: String) throws -> Header {
 func makeLineVoice(from fragment: String) throws -> Voice {
     try makeFile(from: """
         ---
-        title: test by test
+        title: test
+        by: test
         style: 4/4 March
         ---
         \(fragment)
@@ -39,7 +40,8 @@ func makeLineVoice(from fragment: String) throws -> Voice {
 func makeBar(from fragment: String) throws -> Bar {
     try makeFile(from: """
         ---
-        title: test by test
+        title: test 
+        by: test
         style: 4/4 March
         ---
         | abcd | \(fragment)
@@ -53,7 +55,8 @@ func makeBar(from fragment: String) throws -> Bar {
 func makeCluster(from fragment: String) throws -> [Note] {
     try makeFile(from: """
         ---
-        title: test by test
+        title: test
+        by: test
         style: 4/4 March
         ---
         | \(fragment) abcd |

@@ -97,7 +97,6 @@ final class FormattingTests: XCTestCase {
             """
         XCTAssertEqual(try BagFormatter(source).formattedSource(), formatted)
 
-        // TODO: put in this one many of the types of pickups that caused format comments in the previous system
         let source2 = """
             \(commonHeader)
             xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||

@@ -10,13 +10,15 @@ final class TuneStructure: XCTestCase {
     func testMultipleTunes() throws {
         let source = """
             ---
-            title: First by trad
+            title: First 
+            trad
             style: jig
             ---
             |: abc def :|
 
             ---
-            title: Second by trad
+            title: Second 
+            trad
             style: 6/8 March
             ---
             || abc def ||
@@ -32,7 +34,8 @@ final class TuneStructure: XCTestCase {
 
 
             ---
-            title: First by trad
+            title: First 
+            trad
             style: jig
             ---
 
@@ -53,7 +56,8 @@ final class TuneStructure: XCTestCase {
     func testTunesWithoutNotes() throws {
         let source = """
             ---
-            title: First by trad
+            title: First 
+            trad
             style: jig
             ---
             """

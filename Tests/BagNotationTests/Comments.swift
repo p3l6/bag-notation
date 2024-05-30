@@ -12,7 +12,8 @@ final class Comments: XCTestCase {
             % top of file comment
             % another comment
             ---
-            title: First by trad
+            title: First 
+            trad
             style: jig
             ---
             |: abc def :|
@@ -28,7 +29,8 @@ final class Comments: XCTestCase {
     func testBodyComments() throws {
         let source = """
             ---
-            title: First by trad
+            title: First 
+            trad
             style: jig
             ---
             |: abc def :|
@@ -45,7 +47,8 @@ final class Comments: XCTestCase {
     func testTrailingLineComments() throws {
         let source = """
             ---
-            title: First by trad
+            title: First
+            trad
             style: jig
             ---
             |: abc def :|  % trailing comment
@@ -61,7 +64,8 @@ final class Comments: XCTestCase {
     func testCommentsBetweenTunes() throws {
         let source = """
             ---
-            title: First by trad
+            title: First 
+            trad
             style: jig
             ---
             |: abc def :|
@@ -74,7 +78,8 @@ final class Comments: XCTestCase {
 
 
             ---
-            title: Second by trad
+            title: Second 
+            trad
             style: jig
             ---
             |: abc def :|

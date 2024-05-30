@@ -25,7 +25,7 @@ struct Format: AsyncParsableCommand {
         let output = try BagFormatter(input).formattedSource()
 
         if inPlace {
-            print("TODO: implementation")
+            try output.write(toFile: options.inputFile, atomically: true, encoding: .utf8)
         } else {
             print(output)
         }

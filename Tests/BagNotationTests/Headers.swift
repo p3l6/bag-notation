@@ -10,7 +10,7 @@ final class Headers: XCTestCase {
     func testTitle() throws {
         let source = """
             title: First tune
-            composer: trad
+            by: trad
             style: jig
             """
 
@@ -21,22 +21,11 @@ final class Headers: XCTestCase {
     func testComposer() throws {
         let source = """
             title: First
-            composer: trad
+            by: trad
             style: jig
             """
 
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.composer, "trad")
-    }
-
-    func testBylineComposer() throws {
-        let source = """
-            title: First tune by trad
-            style: jig
-            """
-
-        let header = try makeHeader(from: source)
-        XCTAssertEqual(header.title, "First tune")
         XCTAssertEqual(header.composer, "trad")
     }
 
@@ -55,7 +44,7 @@ final class Headers: XCTestCase {
     func testTimeSignature() throws {
         let source = """
             title: First
-            composer: trad
+            by: trad
             style: jig
             time: 4/4
             """
@@ -67,7 +56,7 @@ final class Headers: XCTestCase {
     func testNoteLength() throws {
         let source = """
             title: First
-            composer: trad
+            by: trad
             style: jig
             time: 4/4
             note: quarter
@@ -79,7 +68,7 @@ final class Headers: XCTestCase {
     func testImpliedTimeSignature() throws {
         let source = """
             title: First
-            composer: trad
+            by: trad
             style: jig
             """
 
@@ -91,7 +80,7 @@ final class Headers: XCTestCase {
 
     func testMissingTitle() throws {
         let source = """
-            composer: trad
+            by: trad
             style: jig
             """
 
@@ -110,6 +99,7 @@ final class Headers: XCTestCase {
     func testMissingStyle() throws {
         let source = """
             title: First
+            by: trad
             time: 4/4
             """
 
@@ -119,7 +109,7 @@ final class Headers: XCTestCase {
     func testMissingTimeSignature() throws {
         let source = """
             title: First
-            composer: trad
+            by: trad
             style: style_without_inferred_time
             """
 
@@ -129,7 +119,7 @@ final class Headers: XCTestCase {
     func testDuplicateFields() throws {
         XCTAssertThrowsError(try makeHeader(from: """
             title: First
-            composer: trad
+            by: trad
             title: Second
             style: jig
             """))
@@ -137,20 +127,15 @@ final class Headers: XCTestCase {
         XCTAssertThrowsError(try makeHeader(from: """
             style: march
             title: First
-            composer: trad
+            by: trad
             style: jig
             """))
     }
 
     func testConflictingComposers() throws {
         XCTAssertThrowsError(try makeHeader(from: """
-            title: First by someone
-            composer: someone else
-            style: jig
-            """))
-
-        XCTAssertThrowsError(try makeHeader(from: """
-            title: Firs by someone
+            title: First
+            by: someone
             trad
             style: jig
             """))

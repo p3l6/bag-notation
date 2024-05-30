@@ -190,17 +190,17 @@ private final class HeaderModeler: LeafModeler {
         guard let titleField = fields[.title] else { throw ModelParseError.missingTuneTitle }
         guard let styleField = fields[.style] else { throw ModelParseError.missingTuneStyle }
 
-        let (title, byline) = titleField.asTitle()
-        let possibleComposers = [fields[.composer]?.value, byline, fields[.trad] != nil ? "trad" : nil].compactMap { $0 }
+        let possibleComposers = [fields[.by]?.value, fields[.trad] != nil ? "trad" : nil].compactMap { $0 }
 
         guard possibleComposers.count <= 1 else { throw ModelParseError.duplicateComposers }
 
         let style = try styleField.value.toTuneStyle()
 
         header = Header(
-            title: title,
+            title: titleField.value,
             style: style,
             composer: try possibleComposers.first ?! ModelParseError.missingTuneComposer,
+            arranger: fields[.arr]?.value,
             noteLength: (try? fields[.note]?.asDuration()) ?? Duration.eighth,
             timeSignature: try (try? fields[.time]?.value.toTimeSignature()) ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
             tempo: try fields[.tempo]?.asTempo())
