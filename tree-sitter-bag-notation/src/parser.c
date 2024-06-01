@@ -30,7 +30,7 @@ enum {
   sym_pitch = 11,
   sym_duration = 12,
   sym_connector = 13,
-  anon_sym_PERCENT = 14,
+  anon_sym_POUND = 14,
   aux_sym_comment_token1 = 15,
   sym_file = 16,
   sym_tune = 17,
@@ -72,7 +72,7 @@ static const char * const ts_symbol_names[] = {
   [sym_pitch] = "pitch",
   [sym_duration] = "duration",
   [sym_connector] = "connector",
-  [anon_sym_PERCENT] = "%",
+  [anon_sym_POUND] = "#",
   [aux_sym_comment_token1] = "comment_token1",
   [sym_file] = "file",
   [sym_tune] = "tune",
@@ -114,7 +114,7 @@ static const TSSymbol ts_symbol_map[] = {
   [sym_pitch] = sym_pitch,
   [sym_duration] = sym_duration,
   [sym_connector] = sym_connector,
-  [anon_sym_PERCENT] = anon_sym_PERCENT,
+  [anon_sym_POUND] = anon_sym_POUND,
   [aux_sym_comment_token1] = aux_sym_comment_token1,
   [sym_file] = sym_file,
   [sym_tune] = sym_tune,
@@ -198,7 +198,7 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .visible = true,
     .named = true,
   },
-  [anon_sym_PERCENT] = {
+  [anon_sym_POUND] = {
     .visible = true,
     .named = false,
   },
@@ -386,7 +386,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
     case 0:
       if (eof) ADVANCE(9);
       if (lookahead == '\n') ADVANCE(10);
-      if (lookahead == '%') ADVANCE(27);
+      if (lookahead == '#') ADVANCE(27);
       if (lookahead == '&') ADVANCE(14);
       if (lookahead == '(') ADVANCE(12);
       if (lookahead == ')') ADVANCE(13);
@@ -451,7 +451,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
     case 8:
       if (eof) ADVANCE(9);
       if (lookahead == '\n') ADVANCE(10);
-      if (lookahead == '%') ADVANCE(27);
+      if (lookahead == '#') ADVANCE(27);
       if (lookahead == '&') ADVANCE(14);
       if (lookahead == '(') ADVANCE(12);
       if (lookahead == '-') ADVANCE(4);
@@ -544,7 +544,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '-') ADVANCE(5);
       END_STATE();
     case 27:
-      ACCEPT_TOKEN(anon_sym_PERCENT);
+      ACCEPT_TOKEN(anon_sym_POUND);
       END_STATE();
     case 28:
       ACCEPT_TOKEN(aux_sym_comment_token1);
@@ -642,7 +642,7 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [sym_pitch] = ACTIONS(1),
     [sym_duration] = ACTIONS(1),
     [sym_connector] = ACTIONS(1),
-    [anon_sym_PERCENT] = ACTIONS(1),
+    [anon_sym_POUND] = ACTIONS(1),
   },
   [1] = {
     [sym_file] = STATE(58),
@@ -654,7 +654,7 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [aux_sym_file_repeat2] = STATE(28),
     [anon_sym_LF] = ACTIONS(3),
     [anon_sym_DASH_DASH_DASH_LF] = ACTIONS(5),
-    [anon_sym_PERCENT] = ACTIONS(7),
+    [anon_sym_POUND] = ACTIONS(7),
   },
   [2] = {
     [aux_sym__body] = STATE(2),
@@ -677,7 +677,7 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [sym_barline] = ACTIONS(20),
     [sym_embellishment] = ACTIONS(23),
     [sym_pitch] = ACTIONS(26),
-    [anon_sym_PERCENT] = ACTIONS(29),
+    [anon_sym_POUND] = ACTIONS(29),
   },
   [3] = {
     [aux_sym__body] = STATE(4),
@@ -700,7 +700,7 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [sym_barline] = ACTIONS(40),
     [sym_embellishment] = ACTIONS(42),
     [sym_pitch] = ACTIONS(44),
-    [anon_sym_PERCENT] = ACTIONS(7),
+    [anon_sym_POUND] = ACTIONS(7),
   },
   [4] = {
     [aux_sym__body] = STATE(2),
@@ -723,7 +723,7 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [sym_barline] = ACTIONS(40),
     [sym_embellishment] = ACTIONS(42),
     [sym_pitch] = ACTIONS(44),
-    [anon_sym_PERCENT] = ACTIONS(7),
+    [anon_sym_POUND] = ACTIONS(7),
   },
 };
 
@@ -742,7 +742,7 @@ static const uint16_t ts_small_parse_table[] = {
     ACTIONS(52), 1,
       sym_barline,
     ACTIONS(54), 1,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
     STATE(55), 1,
       sym_tail_comment,
     STATE(9), 2,
@@ -768,7 +768,7 @@ static const uint16_t ts_small_parse_table[] = {
     ACTIONS(52), 1,
       sym_barline,
     ACTIONS(54), 1,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
     ACTIONS(56), 1,
       anon_sym_LF,
     STATE(60), 1,
@@ -796,7 +796,7 @@ static const uint16_t ts_small_parse_table[] = {
     ACTIONS(52), 1,
       sym_barline,
     ACTIONS(54), 1,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
     ACTIONS(58), 1,
       anon_sym_LF,
     STATE(53), 1,
@@ -825,7 +825,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
     ACTIONS(60), 2,
       anon_sym_LF,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
     STATE(7), 2,
       sym_bar,
       aux_sym_voice_repeat1,
@@ -850,7 +850,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_pitch,
     ACTIONS(62), 2,
       anon_sym_LF,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
     STATE(9), 2,
       sym_bar,
       aux_sym_voice_repeat1,
@@ -875,7 +875,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
     ACTIONS(60), 2,
       anon_sym_LF,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
     STATE(6), 2,
       sym_bar,
       aux_sym_voice_repeat1,
@@ -957,7 +957,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [313] = 1,
     ACTIONS(99), 9,
       ts_builtin_sym_end,
@@ -968,7 +968,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [325] = 1,
     ACTIONS(101), 9,
       ts_builtin_sym_end,
@@ -979,7 +979,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [337] = 1,
     ACTIONS(103), 9,
       ts_builtin_sym_end,
@@ -990,7 +990,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [349] = 1,
     ACTIONS(105), 9,
       ts_builtin_sym_end,
@@ -1001,7 +1001,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [361] = 1,
     ACTIONS(107), 9,
       ts_builtin_sym_end,
@@ -1012,12 +1012,12 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [373] = 6,
     ACTIONS(5), 1,
       anon_sym_DASH_DASH_DASH_LF,
     ACTIONS(7), 1,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
     ACTIONS(109), 1,
       anon_sym_LF,
     STATE(3), 1,
@@ -1039,7 +1039,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [407] = 1,
     ACTIONS(60), 7,
       anon_sym_LF,
@@ -1048,7 +1048,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [417] = 1,
     ACTIONS(113), 7,
       anon_sym_LF,
@@ -1057,7 +1057,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_barline,
       sym_embellishment,
       sym_pitch,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
   [427] = 6,
     ACTIONS(115), 1,
       anon_sym_DASH_DASH_DASH_LF,
@@ -1077,7 +1077,7 @@ static const uint16_t ts_small_parse_table[] = {
     ACTIONS(123), 1,
       anon_sym_DASH_DASH_DASH_LF,
     ACTIONS(125), 1,
-      anon_sym_PERCENT,
+      anon_sym_POUND,
     STATE(25), 3,
       sym__blank_line,
       sym_comment,

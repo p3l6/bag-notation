@@ -21,6 +21,7 @@ public struct BagFormatter {
         let matches = try treeMatches.flatMap { x in
             var column = 0
             var barCount = 0
+            var pickupAlreadyFound = false
             let markers = x.captures.sorted { a, b in
                 a.node.pointRange.lowerBound.column < b.node.pointRange.lowerBound.column
             }
@@ -44,10 +45,10 @@ public struct BagFormatter {
                         pendingLeadingField = nil
                     }
                     let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
-                    let pickup = barCount == 0 && isLikelyPickup(node: m.node)
+                    let pickup = barCount == 0 && !pickupAlreadyFound && isLikelyPickup(node: m.node)
                     let type: Block.BlockType = pickup ? .pickup : .bar(index: barCount)
                     items.append(Block(type: type, range: range, textProvider: tree, paddingHint: pickup ? .absoluteStart : .lastFlex))
-                    if !pickup { barCount += 1 }
+                    if !pickup { barCount += 1 } else {pickupAlreadyFound = true}
                     column = markerRange.upperBound
                 default: throw FormattingError.unexpectedCaptureType
                 }

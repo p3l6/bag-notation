@@ -5,9 +5,9 @@ Full line comments
 ---
 ---
 
-% this is a comment
+# this is a comment
 xa |
-% this is also a comment
+# this is also a comment
 
 ----->>
 
@@ -28,7 +28,7 @@ Trailing comments
 ---
 ---
 
-xa | % xb
+xa | # xb
 xa |
 
 ----->>

@@ -43,7 +43,7 @@ module.exports = grammar({
 
     //// Other
     _blank_line: $ => choice("\n", $.comment),
-    comment: $ => seq("%", /[^\n]*/, "\n"),
-    tail_comment: $ => seq("%", /[^\n]*/)
+    comment: $ => seq("#", /[^\n]*/, "\n"),
+    tail_comment: $ => seq("#", /[^\n]*/)
   }
 });

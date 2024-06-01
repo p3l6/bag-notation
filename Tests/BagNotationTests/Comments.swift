@@ -9,8 +9,8 @@ import XCTest
 final class Comments: XCTestCase {
     func testLeadingComments() throws {
         let source = """
-            % top of file comment
-            % another comment
+            # top of file comment
+            # another comment
             ---
             title: First 
             trad
@@ -18,7 +18,7 @@ final class Comments: XCTestCase {
             ---
             |: abc def :|
 
-            % end of file comment
+            # end of file comment
             """
 
         let doc = try makeFile(from: source)
@@ -34,7 +34,7 @@ final class Comments: XCTestCase {
             style: jig
             ---
             |: abc def :|
-            % body comment
+            # body comment
             |: abc def :|
 
             """
@@ -51,7 +51,7 @@ final class Comments: XCTestCase {
             trad
             style: jig
             ---
-            |: abc def :|  % trailing comment
+            |: abc def :|  # trailing comment
             |: abc def :|
 
             """
@@ -71,10 +71,10 @@ final class Comments: XCTestCase {
             |: abc def :|
             |: abc def :|
 
-            % between comment
+            # between comment
 
-            % another
-            % comment
+            # another
+            # comment
 
 
             ---
