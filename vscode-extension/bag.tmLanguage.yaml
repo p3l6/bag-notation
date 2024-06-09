@@ -8,13 +8,13 @@ uuid: bf9f47d0-6435-46f2-bcad-e3eb0a454a74
 patterns:
   - include: '#migrationFailure'
   - include: '#header'
+  - include: '#comment'
   - include: '#field-inline'
   - include: '#field-short'
   - include: '#barline'
   - include: '#embellishment'
   - include: '#pitch'
   - include: '#duration'
-  - include: '#comment'
 
 repository:
   header:
@@ -45,7 +45,7 @@ repository:
 
   comment:
     name: comment.line.percentage.bag
-    begin: '(?:^\s*)?%'
+    begin: '(?:^\s*)?#'
     end: $
 
   pitch:
