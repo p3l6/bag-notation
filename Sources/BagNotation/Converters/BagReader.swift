@@ -202,7 +202,7 @@ private final class HeaderModeler: LeafModeler {
             composer: try possibleComposers.first ?! ModelParseError.missingTuneComposer,
             arranger: fields[.arr]?.value,
             noteLength: (try? fields[.note]?.asDuration()) ?? Duration.eighth,
-            timeSignature: try (try? fields[.time]?.value.toTimeSignature()) ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
+            timeSignature: try fields[.time]?.value.toTimeSignature() ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
             tempo: try fields[.tempo]?.asTempo(),
             revision: fields[.rev]?.value
         )
@@ -278,6 +278,11 @@ private final class VoiceModeler: Modeler {
             let barBody = BarContextBody(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count)
             flow = try barModeler.provideContext(head: flow, body: barBody)
         }
+
+        if flow.variation != .none {
+            flow = FlowContext(from: flow, variation: Variation.none)
+        }
+
         context = VoiceContext(head: head, body: body, tail: flow)
         return flow
     }
@@ -316,6 +321,7 @@ private final class BarModeler: Modeler {
             case .field:
                 let field = try FieldModeler(node: child, textSource: textSource).model()
                 // TODO: handle multiple fields between clusters
+                // Also, handle a field that is past the final cluster
                 fieldsByClusterIndex[clusterModelers.count] = field
             default: throw ModelParseError.unexpectedNodeType(type: child.nodeType!)
             }

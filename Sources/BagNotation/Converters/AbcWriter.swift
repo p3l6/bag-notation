@@ -94,6 +94,9 @@ extension TuneStyle: AbcSourceConverting {
         case .slowAir: "Slow Air"
         case .slowMarch: "Slow March"
         case .piob: "Piobaireachd"
+        case .waulk: "Waulking Song"
+        case .waltz: "Waltz"
+        case .hymn: "Hymn"
         }
     }
 }
@@ -103,9 +106,11 @@ extension TimeSignature: AbcSourceConverting {
         switch self {
         case .time22: "2/2"
         case .time24: "2/4"
+        case .time32: "3/2"
         case .time34: "3/4"
         case .time44: "4/4"
         case .time54: "5/4"
+        case .time64: "6/4"
         case .time68: "6/8"
         case .time98: "9/8"
         case .time128: "12/8"
@@ -133,6 +138,8 @@ extension Voice: AbcSourceConverting {
         abc += leadingBarline?.abcSource() ?? ""
         abc += " "
         abc += bars.mapToAbc(joined: " ")
+        // ends a possible variation here
+        activeFlow = context.tail
         return abc
     }
 }
@@ -161,6 +168,9 @@ extension FlowContext: AbcSourceConverting {
         }
         if let tempo, tempo != activeFlow.tempo {
             abc += "[Q:\(timeSignature.beatLength.representedNote())=\(tempo)]"
+        }
+        if timeSignature != activeFlow.timeSignature {
+            abc += "[M:\(timeSignature.abcSource())]"
         }
         activeFlow = self
         return abc

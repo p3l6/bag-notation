@@ -58,7 +58,7 @@ public enum ModelParseError: Error, LocalizedError {
         case .invalidStyle: "Invalid style"
         case .invalidTimeSignature: "Invalid time signature"
         case .invalidBarline: "Invalid barline"
-        case .invalidNoteLength: "Invalid note length"
+        case let .invalidNoteLength(reason): "Invalid note length: \(reason)"
         case .invalidField: "Invalid field"
         case .invalidTempo: "Invalid tempo"
         case .invalidNoteConnector: "Invalid note connector"

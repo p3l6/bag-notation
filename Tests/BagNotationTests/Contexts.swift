@@ -89,4 +89,22 @@ final class Contexts: XCTestCase {
         XCTAssertEqual(doc.tunes[1].lines[2].voices.count, 3)
         XCTAssertEqual(doc.tunes[1].lines[3].voices.count, 3)
     }
+
+    func testVoiceEndsAtLine() throws {
+        let source = """
+            ---
+            title: First
+            trad
+            style: jig
+            ---
+            (v: 1) |: abc def | abc def | abc def  |
+                      abc def | abc def | abc def :|
+            """
+
+        let doc = try makeFile(from: source)
+        XCTAssertEqual(doc.tunes[0].lines[0].voices[0].bars[0].context.head.variation, .other(label: "1"))
+        XCTAssertEqual(doc.tunes[0].lines[0].voices[0].bars[2].notes[5].context.tail.variation, .other(label: "1"))
+        XCTAssertEqual(doc.tunes[0].lines[0].voices[0].context.tail.variation, .none)
+        XCTAssertEqual(doc.tunes[0].lines[1].voices[0].bars[0].context.head.variation, .none)
+    }
 }
