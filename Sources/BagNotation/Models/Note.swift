@@ -11,16 +11,7 @@ public struct Note {
     let tiedToNext: Bool
     let slurredToNext: Bool
     let annotation: String?
-
-    init(context: NoteContext, pitch: Pitch, embellishment: Embellishment?, duration: Duration, tied: Bool, slurred: Bool, annotation: String?) {
-        self.context = context
-        self.pitch = pitch
-        self.embellishment = embellishment
-        self.duration = duration
-        tiedToNext = tied
-        slurredToNext = slurred
-        self.annotation = annotation
-    }
+    let fermata: Bool
 }
 
 public enum Pitch: Comparable {

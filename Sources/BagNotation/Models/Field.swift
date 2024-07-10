@@ -68,10 +68,11 @@ public enum FieldLabel: String {
     case v
     case rev
     case text
+    case hold
 
     var requiresValue: Bool {
         switch self {
-        case .trad, .h, .v:
+        case .trad, .h, .v, .hold:
             false
         default:
             true

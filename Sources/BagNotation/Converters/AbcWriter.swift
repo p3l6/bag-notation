@@ -216,6 +216,11 @@ extension Note: AbcSourceConverting {
         if let embellishment {
             abc += "{\(embellishment.pitches.mapToAbc())}"
         }
+
+        if fermata {
+            abc += "H"
+        }
+        
         abc += pitch.abcSource()
         abc += duration.abcSource()
         if tiedToNext {

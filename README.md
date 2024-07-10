@@ -51,6 +51,7 @@ all fields are listed as labels and require values, unless listed with parenthes
   - time: change the time signature
   - tempo: change the tempo
   - text: add an annotation to the following note
+  - hold: insert a fermata on next note
   
   
 ## language symbols

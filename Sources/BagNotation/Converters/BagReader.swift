@@ -14,7 +14,7 @@ public class BagReader {
         // tree.modelDebug()
         let docModeler = try DocModeler(node: tree.rootNode, textSource: tree)
         // docFlow is essentially ignored
-        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: .none, upcomingAnnotation: nil)
+        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: .none, upcomingAnnotation: nil, upcomingFermata: false)
         let docContext = DocContextBody(tuneCount: docModeler.tuneModelers.count)
         _ = try docModeler.provideContext(head: docFlow, body: docContext)
         return docModeler.model()
@@ -97,7 +97,8 @@ private final class DocModeler: Modeler {
                                          previousPitch: .e,
                                          tempo: tm.header.tempo,
                                          variation: .none,
-                                         upcomingAnnotation: nil)
+                                         upcomingAnnotation: nil,
+                                         upcomingFermata: false)
             flow = try tm.provideContext(head: headerFlow, body: tuneContext)
         }
 
@@ -350,6 +351,7 @@ private final class BarModeler: Modeler {
                 case .v: flow = FlowContext(from: flow, variation: field.asVariation())
                 case .tempo: flow = FlowContext(from: flow, tempo: try field.asTempo())
                 case .text: flow = FlowContext(from: flow, upcomingAnnotation: field.value)
+                case .hold: flow = FlowContext(from: flow, upcomingFermata: true)
                 default: throw ModelParseError.unexpectedField(label: field.label)
                 }
             case let .cluster(modeler):
@@ -467,7 +469,7 @@ private final class NoteModeler: Modeler {
 
         duration = try children.optional(.duration)?.trimmedText(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
 
-        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAnnotation: true))
+        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAnnotation: true, upcomingFermata: false))
         return context.tail
     }
 
@@ -476,8 +478,9 @@ private final class NoteModeler: Modeler {
              pitch: pitch,
              embellishment: embellishment,
              duration: duration,
-             tied: tied,
-             slurred: slurred,
-             annotation: context.head.upcomingAnnotation)
+             tiedToNext: tied,
+             slurredToNext: slurred,
+             annotation: context.head.upcomingAnnotation,
+             fermata: context.head.upcomingFermata)
     }
 }
