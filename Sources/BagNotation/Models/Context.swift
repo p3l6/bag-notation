@@ -17,18 +17,23 @@ public struct FlowContext {
     let noteLength: Duration
     let tempo: Int?
     let variation: Variation
+    
     let previousPitch: Pitch
+
+    let upcomingAnnotation: String?
 
     init(timeSignature: TimeSignature,
          noteLength: Duration,
          previousPitch: Pitch,
          tempo: Int?,
-         variation: Variation) {
+         variation: Variation,
+         upcomingAnnotation: String?) {
         self.timeSignature = timeSignature
         self.noteLength = noteLength
         self.previousPitch = previousPitch
         self.tempo = tempo
         self.variation = variation
+        self.upcomingAnnotation = upcomingAnnotation
     }
 
     init(from base: FlowContext,
@@ -36,12 +41,14 @@ public struct FlowContext {
          noteLength: Duration? = nil,
          previousPitch: Pitch? = nil,
          tempo: Int? = nil,
-         variation: Variation? = nil) {
+         variation: Variation? = nil,
+         upcomingAnnotation: String? = nil, clearingAnnotation: Bool = false) {
         self.timeSignature = timeSignature ?? base.timeSignature
         self.noteLength = noteLength ?? base.noteLength
         self.previousPitch = previousPitch ?? base.previousPitch
         self.tempo = tempo ?? base.tempo
         self.variation = variation ?? base.variation
+        self.upcomingAnnotation = clearingAnnotation ? nil : upcomingAnnotation ?? base.upcomingAnnotation
     }
 }
 

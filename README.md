@@ -24,6 +24,8 @@ All barlines are `|` or `||` or `:|` or `|:`. Beginning and end of parts should 
 
 whitespace is required between final cluster and barline, or a cluster and a field paren.
 
+Inline fields cannot be on a line by themselves, they must be mixed into a bar.
+
 ## not rules, but suggestions
 
 Notes should be clustered by beat.
@@ -41,13 +43,14 @@ all fields are listed as labels and require values, unless listed with parenthes
   - time: required, unless implied by a recognized valid [[tune style]]
   - note: set the base note length, ususally ommited for the default of eighth
   - tempo: set the tunes tempo. should be an integer in bpm
-  - rev: set a revision date or version, placed in the footer
+  - rev: set a revision date or version, placed in the footer (todo: clarify behavior when there are multiple pages and multiple tunes)
 - inline fields:
   - (h): harmony line. only valid at the very beginning of a line
     - this has a shorthand, which is a single `&` at the beginning of the line
   - note: change the base note length
   - time: change the time signature
   - tempo: change the tempo
+  - text: add an annotation to the following note
   
   
 ## language symbols

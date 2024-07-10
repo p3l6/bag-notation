@@ -14,7 +14,7 @@ public class BagReader {
         // tree.modelDebug()
         let docModeler = try DocModeler(node: tree.rootNode, textSource: tree)
         // docFlow is essentially ignored
-        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: .none)
+        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: .none, upcomingAnnotation: nil)
         let docContext = DocContextBody(tuneCount: docModeler.tuneModelers.count)
         _ = try docModeler.provideContext(head: docFlow, body: docContext)
         return docModeler.model()
@@ -96,7 +96,8 @@ private final class DocModeler: Modeler {
                                          noteLength: tm.header.noteLength,
                                          previousPitch: .e,
                                          tempo: tm.header.tempo,
-                                         variation: .none)
+                                         variation: .none,
+                                         upcomingAnnotation: nil)
             flow = try tm.provideContext(head: headerFlow, body: tuneContext)
         }
 
@@ -259,7 +260,7 @@ private final class VoiceModeler: Modeler {
         if let fieldNode = try children.optional(.field) {
             let field = try FieldModeler(node: fieldNode, textSource: textSource).model()
             leadingField = field
-            if field.label != .h && field.label != .v {
+            if field.label != .h && field.label != .v && field.label != .text {
                 throw ModelParseError.unexpectedField(label: field.label)
             }
         } else {
@@ -272,7 +273,8 @@ private final class VoiceModeler: Modeler {
     }
 
     func provideContext(private head: FlowContext, body: VoiceContextBody) throws -> FlowContext {
-        var flow = FlowContext(from: head, variation: leadingField?.label == .v ? leadingField!.asVariation() : nil)
+        var flow = FlowContext(from: head, variation: leadingField?.label == .v ? leadingField!.asVariation() : nil, upcomingAnnotation:
+                                leadingField?.label == .text ? leadingField!.value : "")
 
         for (idx, barModeler) in barModelers.enumerated() {
             let barBody = BarContextBody(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count)
@@ -298,8 +300,16 @@ private final class BarModeler: Modeler {
     let textSource: NodeSourceTextProvider
 
     var barline: Barline
-    var clusterModelers = [ClusterModeler]()
-    var fieldsByClusterIndex = [Int: Field]()
+
+    enum BarElement {
+        case cluster(modeler: ClusterModeler)
+        case field(field: Field)
+    }
+
+    var elements = [BarElement]()
+    var clusterModelers: [ClusterModeler] {
+        elements.compactMap { if case let .cluster(modeler) = $0 { modeler } else { nil } }
+    }
 
     var context: BarContext!
 
@@ -317,12 +327,10 @@ private final class BarModeler: Modeler {
                 break
             case .cluster:
                 let clusterModeler = try ClusterModeler(node: child, textSource: textSource)
-                clusterModelers.append(clusterModeler)
+                elements.append(.cluster(modeler: clusterModeler))
             case .field:
                 let field = try FieldModeler(node: child, textSource: textSource).model()
-                // TODO: handle multiple fields between clusters
-                // Also, handle a field that is past the final cluster
-                fieldsByClusterIndex[clusterModelers.count] = field
+                elements.append(.field(field: field))
             default: throw ModelParseError.unexpectedNodeType(type: child.nodeType!)
             }
         }
@@ -330,20 +338,25 @@ private final class BarModeler: Modeler {
 
     func provideContext(private head: FlowContext, body: BarContextBody) throws -> FlowContext {
         var flow = head
+        var number  = 0
 
-        for (idx, clusterModeler) in clusterModelers.enumerated() {
-            if let field = fieldsByClusterIndex[idx] {
+        for element in elements {
+            switch element {
+            case let .field(field):
+                // TODO: move this logic into flowcontext, or field. maybe take in allowed field labels?
                 switch field.label {
                 case .time: flow = FlowContext(from: flow, timeSignature: try field.value.toTimeSignature())
                 case .note: flow = FlowContext(from: flow, noteLength: try field.asDuration())
                 case .v: flow = FlowContext(from: flow, variation: field.asVariation())
                 case .tempo: flow = FlowContext(from: flow, tempo: try field.asTempo())
+                case .text: flow = FlowContext(from: flow, upcomingAnnotation: field.value)
                 default: throw ModelParseError.unexpectedField(label: field.label)
                 }
+            case let .cluster(modeler):
+                number += 1
+                let clusterBody = ClusterContextBody(bar: body, clusterNumber: number)
+                flow = try modeler.provideContext(head: flow, body: clusterBody)
             }
-
-            let clusterBody = ClusterContextBody(bar: body, clusterNumber: idx + 1)
-            flow = try clusterModeler.provideContext(head: flow, body: clusterBody)
         }
 
         context = BarContext(head: head, body: body, tail: flow)
@@ -454,7 +467,7 @@ private final class NoteModeler: Modeler {
 
         duration = try children.optional(.duration)?.trimmedText(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
 
-        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch))
+        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAnnotation: true))
         return context.tail
     }
 
@@ -464,6 +477,7 @@ private final class NoteModeler: Modeler {
              embellishment: embellishment,
              duration: duration,
              tied: tied,
-             slurred: slurred)
+             slurred: slurred,
+             annotation: context.head.upcomingAnnotation)
     }
 }

@@ -201,6 +201,10 @@ extension Note: AbcSourceConverting {
 
     fileprivate func abcSource() -> String {
         var abc = ""
+        if let annotation {
+            abc += " \"\(annotation)\" "
+        }
+
         if slurredToNext {
             abc += "("
         }
