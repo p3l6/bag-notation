@@ -53,6 +53,18 @@ public struct Field {
         default: throw ModelParseError.invalidNoteLength(why: "Not a recognized note length: sixteenth, eighth, quarter, half")
         }
     }
+
+    func asRest(baseDuration: Duration) throws -> Bar.BarContent {
+        switch (label, _value) {
+        case (.rest, "bar"): .barRest
+        case (.spacer, "bar"): .barSpacer
+        case (.rest, nil): .rest(duration: baseDuration)
+        case (.spacer, nil): .spacer(duration: baseDuration)
+        case let (.rest, value): try .rest(duration: value!.toDuration(modifying: baseDuration))
+        case let (.spacer, value): try .spacer(duration: value!.toDuration(modifying: baseDuration))
+        default: throw ModelParseError.invalidNoteLength(why: "Could not determine length of rest")
+        }
+    }
 }
 
 public enum FieldLabel: String {
@@ -69,10 +81,12 @@ public enum FieldLabel: String {
     case rev
     case text
     case hold
+    case rest
+    case spacer
 
     var requiresValue: Bool {
         switch self {
-        case .trad, .h, .v, .hold:
+        case .trad, .h, .v, .hold, .rest, .spacer:
             false
         default:
             true

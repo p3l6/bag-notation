@@ -108,3 +108,14 @@ final class Contexts: XCTestCase {
         XCTAssertEqual(doc.tunes[0].lines[1].voices[0].bars[0].context.head.variation, .none)
     }
 }
+
+private extension Bar {
+    var notes: [Note] {
+        contents.flatMap {
+            switch $0 {
+            case let .cluster(cluster): cluster.notes
+            default: [Note]()
+            }
+        }
+    }
+}

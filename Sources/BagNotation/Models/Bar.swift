@@ -5,19 +5,28 @@
 
 public struct Bar {
     let context: BarContext
+    
+    enum BarContent {
+        case cluster(cluster: Cluster)
+        case rest(duration: Duration)
+        case barRest
+        /// A non-printing rest
+        case spacer(duration: Duration)
+        case barSpacer
+    }
 
-    let clusters: [Cluster]
+    let contents: [BarContent]
     let trailingBarline: Barline
 
-    init(context: BarContext, clusters: [Cluster], trailingBarline: Barline) {
+    init(context: BarContext, contents: [BarContent], trailingBarline: Barline) {
         self.context = context
-        self.clusters = clusters
+        self.contents = contents
         self.trailingBarline = trailingBarline == .double && context.body.barNumber == context.body.voice.barCount ? .partEnd : trailingBarline
     }
 
-    var notes: [Note] { Array(clusters.map(\.notes).joined()) }
     var isPickup: Bool {
-        context.body.barNumber == 1 && clusters.count < context.tail.timeSignature.beatsPerBar
+        // TODO: improve logic when contents is only rests
+        context.body.barNumber == 1 && contents.count < context.tail.timeSignature.beatsPerBar
     }
 }
 

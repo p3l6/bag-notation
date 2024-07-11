@@ -36,7 +36,7 @@ final class LineStructure: XCTestCase {
 
     func testClusters() throws {
         let line = try makeLineVoice(from: "| abc def | abcdef | ab cd ef |")
-        XCTAssertEqual(line.bars.map(\.clusters.count), [2, 1, 3])
+        XCTAssertEqual(line.bars.map(\.contents.count), [2, 1, 3])
     }
 
     func testMissingTrailingBarline() throws {

@@ -22,7 +22,7 @@ module.exports = grammar({
     shorthand_label: $ => /[&]/,
     _field_parts: $ => seq($.field_label, optional(seq(":", $.field_value))),
     field_label: $ => /[ a-zA-Z']+/,
-    field_value: $ => /[ a-zA-Z0-9\/,.'-]+/,
+    field_value: $ => /[^\)\n]+/,
 
     //// Bars
     bar: $ => seq(repeat($._bar_content), prec(-1, $.barline)),

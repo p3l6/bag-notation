@@ -275,7 +275,7 @@ private final class VoiceModeler: Modeler {
 
     func provideContext(private head: FlowContext, body: VoiceContextBody) throws -> FlowContext {
         var flow = FlowContext(from: head, variation: leadingField?.label == .v ? leadingField!.asVariation() : nil, upcomingAnnotation:
-                                leadingField?.label == .text ? leadingField!.value : "")
+                                leadingField?.label == .text ? leadingField!.value : nil)
 
         for (idx, barModeler) in barModelers.enumerated() {
             let barBody = BarContextBody(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count)
@@ -305,6 +305,7 @@ private final class BarModeler: Modeler {
     enum BarElement {
         case cluster(modeler: ClusterModeler)
         case field(field: Field)
+        case rest(modeler: RestModeler)
     }
 
     var elements = [BarElement]()
@@ -331,7 +332,11 @@ private final class BarModeler: Modeler {
                 elements.append(.cluster(modeler: clusterModeler))
             case .field:
                 let field = try FieldModeler(node: child, textSource: textSource).model()
-                elements.append(.field(field: field))
+                if field.label == .rest || field.label == .spacer {
+                    elements.append(.rest(modeler: try RestModeler(node: child, textSource: textSource)))
+                } else {
+                    elements.append(.field(field: field))
+                }
             default: throw ModelParseError.unexpectedNodeType(type: child.nodeType!)
             }
         }
@@ -354,6 +359,8 @@ private final class BarModeler: Modeler {
                 case .hold: flow = FlowContext(from: flow, upcomingFermata: true)
                 default: throw ModelParseError.unexpectedField(label: field.label)
                 }
+            case let .rest(modeler):
+                flow = try modeler.provideContext(head: flow, body: ())
             case let .cluster(modeler):
                 number += 1
                 let clusterBody = ClusterContextBody(bar: body, clusterNumber: number)
@@ -366,8 +373,14 @@ private final class BarModeler: Modeler {
     }
 
     func model() -> Bar {
-        let clusters = clusterModelers.map { $0.model() }
-        return Bar(context: context, clusters: clusters, trailingBarline: barline)
+        let contents = elements.compactMap { element in
+            switch element {
+            case let .cluster(modeler): Bar.BarContent.cluster(cluster: modeler.model())
+            case let .rest(modeler): modeler.model()
+            case .field: nil
+            }
+        }
+        return Bar(context: context, contents: contents, trailingBarline: barline)
     }
 }
 
@@ -431,6 +444,31 @@ private final class ClusterModeler: Modeler {
         return Cluster(context: context, notes: notes)
     }
 }
+
+private final class RestModeler: Modeler {
+    let node: Node
+    let textSource: NodeSourceTextProvider
+
+    let field: Field
+    var content: Bar.BarContent!
+
+    init(private node: Node, textSource: any NodeSourceTextProvider) throws {
+        self.node = node
+        self.textSource = textSource
+
+        field = try FieldModeler(node: node, textSource: textSource).model()
+    }
+
+    func provideContext(private head: FlowContext, body: Void) throws -> FlowContext {
+        content = try field.asRest(baseDuration: head.noteLength)
+        return head
+    }
+
+    func model() -> Bar.BarContent {
+        content
+    }
+}
+
 
 private final class NoteModeler: Modeler {
     let node: Node

@@ -52,6 +52,10 @@ all fields are listed as labels and require values, unless listed with parenthes
   - tempo: change the tempo
   - text: add an annotation to the following note
   - hold: insert a fermata on next note
+  - rest: insert a rest
+    - value can be a duration, same as would follow a note pitch, eg `+` or `//` or `+.`
+    - value can also be `bar`, to rest the whole bar. (Don't put other notes in the bar though)
+  - spacer: like a rest, but doesn't print the rest symbol. Useful for filling out underful harmony bars.
   
   
 ## language symbols

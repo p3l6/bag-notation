@@ -53,7 +53,7 @@ func makeBar(from fragment: String) throws -> Bar {
 }
 
 func makeCluster(from fragment: String) throws -> [Note] {
-    try makeFile(from: """
+    let content = try makeFile(from: """
         ---
         title: test
         by: test
@@ -65,6 +65,14 @@ func makeCluster(from fragment: String) throws -> [Note] {
     .lines[0]
     .melody
     .bars[0]
-    .clusters[0]
-    .notes
+    .contents[0]
+
+    switch content {
+    case let .cluster(cluster): return cluster.notes
+    default: throw TestingHelperError.barContentIsNotCluster
+    }
+}
+
+enum TestingHelperError: Error {
+    case barContentIsNotCluster
 }

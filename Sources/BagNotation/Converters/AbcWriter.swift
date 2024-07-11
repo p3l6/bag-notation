@@ -146,10 +146,14 @@ extension Voice: AbcSourceConverting {
 
 extension Bar: AbcSourceConverting {
     fileprivate func abcSource() -> String {
-        var abc = clusters.map {
-            var abc = $0.context.head.abcSource()
-            abc += $0.abcSource()
-            return abc
+        var abc = contents.map { element in
+            switch element {
+            case .cluster(let cluster): cluster.context.head.abcSource() + cluster.abcSource()
+            case .rest(let duration): "z" + duration.abcSource()
+            case .barRest: "Z"
+            case .spacer(let duration): "x" + duration.abcSource()
+            case .barSpacer: "X"
+            }
         }.joined(separator: " ")
         abc += " "
         abc += trailingBarline.abcSource()

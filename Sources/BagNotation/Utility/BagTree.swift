@@ -192,11 +192,15 @@ extension Node {
         return nodeType
     }
 
-    func childrenVerifying(typeIs expectedType: NodeType, childrenAre expectedChildTypes: [NodeType]) throws -> NodeChildren {
+    func verify(typeIs expectedType: NodeType) throws {
         let type = try type()
         guard type == expectedType else {
             throw ModelParseError.unexpectedNodeType(type: type.rawValue)
         }
+    }
+
+    func childrenVerifying(typeIs expectedType: NodeType, childrenAre expectedChildTypes: [NodeType]) throws -> NodeChildren {
+        try verify(typeIs: expectedType)
         return try NodeChildren(node: self, verifyingTypes: expectedChildTypes)
     }
 }
