@@ -52,6 +52,7 @@ all fields are listed as labels and require values, unless listed with parenthes
   - tempo: change the tempo
   - text: add an annotation to the following note
   - hold: insert a fermata on next note
+    - this has a shortand, `^`, which can also appear inside clusters, before the embellishment
   - rest: insert a rest
     - value can be a duration, same as would follow a note pitch, eg `+` or `//` or `+.`
     - value can also be `bar`, to rest the whole bar. (Don't put other notes in the bar though)

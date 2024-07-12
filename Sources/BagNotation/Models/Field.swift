@@ -31,6 +31,7 @@ public struct Field {
     init(shorthand: String) throws {
         label = switch shorthand {
         case "&": .h
+        case "^": .hold
         default: throw ModelParseError.invalidField
         }
         _value = nil

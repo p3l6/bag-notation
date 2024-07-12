@@ -103,6 +103,7 @@ Shorthand fields
 
 & xa xc |
 | xa & xc |
+| xa^xc |
 
 ----->>
 
@@ -120,4 +121,11 @@ Shorthand fields
         (cluster (note (embellishment) (pitch)))
         (field (shorthand_label))
         (cluster (note (embellishment) (pitch)))
+        (barline)))
+    (voice
+      (barline)
+      (bar
+        (cluster
+          (note (embellishment) (pitch))
+          (note  (shorthand_label) (embellishment) (pitch)))
         (barline)))))

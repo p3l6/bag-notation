@@ -484,13 +484,14 @@ private final class NoteModeler: Modeler {
 
     var embellishment: Embellishment?
     var duration: Duration!
+    var fermata: Bool
     var context: NoteContext!
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
         self.textSource = textSource
 
-        children = try node.childrenVerifying(typeIs: .note, childrenAre: [.embellishment, .pitch, .duration, .connector])
+        children = try node.childrenVerifying(typeIs: .note, childrenAre: [.embellishment, .pitch, .duration, .connector, .shorthandLabel])
 
         pitch = try children.unique(.pitch).trimmedText(from: textSource).toPitch()
 
@@ -498,6 +499,8 @@ private final class NoteModeler: Modeler {
         tied = connector == "_"
         continuesTuplet = connector == "-"
         slurred = connector == "~"
+        
+        fermata = false
     }
 
     func provideContext(private head: FlowContext, body: NoteContextBody) throws -> FlowContext {
@@ -506,6 +509,15 @@ private final class NoteModeler: Modeler {
         } else { nil }
 
         duration = try children.optional(.duration)?.trimmedText(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
+        fermata = head.upcomingFermata
+
+        if let shorthand = try children.optional(.shorthandLabel)?.trimmedText(from: textSource) {
+            let field = try Field(shorthand: shorthand)
+            switch field.label {
+            case .hold: fermata = true
+            default: throw ModelParseError.unexpectedField(label: field.label)
+            }
+        }
 
         context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAnnotation: true, upcomingFermata: false))
         return context.tail
@@ -519,6 +531,6 @@ private final class NoteModeler: Modeler {
              tiedToNext: tied,
              slurredToNext: slurred,
              annotation: context.head.upcomingAnnotation,
-             fermata: context.head.upcomingFermata)
+             fermata: fermata)
     }
 }

@@ -18,8 +18,8 @@ module.exports = grammar({
     //// Header and fields
     header: $ => seq("---\n", repeat(seq($._header_field, "\n")), "---\n"),
     _header_field: $ => alias($._field_parts, $.field),
-    field: $ => choice(seq("(", $._field_parts, ")"), $.shorthand_label),
-    shorthand_label: $ => /[&]/,
+    field: $ => choice(seq("(", $._field_parts, ")"), prec(1, $.shorthand_label)),
+    shorthand_label: $ => /[&^]/,
     _field_parts: $ => seq($.field_label, optional(seq(":", $.field_value))),
     field_label: $ => /[ a-zA-Z']+/,
     field_value: $ => /[^\)\n]+/,
@@ -32,6 +32,7 @@ module.exports = grammar({
     //// Notes and clusters
     cluster: $ => seq(repeat1($.note), /[ \t]/), // TODO: `note|` doesn't parse as valid. try to remove this hard whitespace for that case.
     note: $ => seq(
+                 optional($.shorthand_label),
                  optional($.embellishment),
                  $.pitch,
                  optional($.duration),
