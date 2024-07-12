@@ -12,6 +12,7 @@ public struct Note {
     let slurredToNext: Bool
     let annotation: String?
     let fermata: Bool
+    let accidental: Accidental?
 }
 
 public enum Pitch: Comparable {
@@ -24,6 +25,10 @@ public enum Pitch: Comparable {
     case f
     case highG
     case highA
+}
+
+public enum Accidental {
+    case sharp, flat, natural
 }
 
 public enum NoteParseError: Error {

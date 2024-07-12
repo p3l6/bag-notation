@@ -224,7 +224,16 @@ extension Note: AbcSourceConverting {
         if fermata {
             abc += "H"
         }
-        
+
+        if let accidental {
+            let abcAccidental = switch accidental {
+            case .sharp: "^"
+            case .flat: "_"
+            case .natural: "="
+            }
+            abc += abcAccidental
+        }
+
         abc += pitch.abcSource()
         abc += duration.abcSource()
         if tiedToNext {

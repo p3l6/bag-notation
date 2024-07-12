@@ -57,7 +57,13 @@ all fields are listed as labels and require values, unless listed with parenthes
     - value can be a duration, same as would follow a note pitch, eg `+` or `//` or `+.`
     - value can also be `bar`, to rest the whole bar. (Don't put other notes in the bar though)
   - spacer: like a rest, but doesn't print the rest symbol. Useful for filling out underful harmony bars.
-  
+  - sharp: marks the next note as sharp
+    - the shorthand is apostrophe `'` and can appear inside clusters before embellishments
+  - flat: marks the next note as flat
+    - the shorthand is comma `,` and can appear inside clusters before embellishments
+  - nat: makrs the next note as natural
+    - the shorthand is equals `=` and can appear inside clusters before embellishments
+      
   
 ## language symbols
 

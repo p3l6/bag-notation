@@ -14,7 +14,7 @@ public class BagReader {
         // tree.modelDebug()
         let docModeler = try DocModeler(node: tree.rootNode, textSource: tree)
         // docFlow is essentially ignored
-        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: .none, upcomingAnnotation: nil, upcomingFermata: false)
+        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: .none, upcomingAnnotation: nil, upcomingFermata: false, upcomingAccidental: nil)
         let docContext = DocContextBody(tuneCount: docModeler.tuneModelers.count)
         _ = try docModeler.provideContext(head: docFlow, body: docContext)
         return docModeler.model()
@@ -98,7 +98,8 @@ private final class DocModeler: Modeler {
                                          tempo: tm.header.tempo,
                                          variation: .none,
                                          upcomingAnnotation: nil,
-                                         upcomingFermata: false)
+                                         upcomingFermata: false,
+                                         upcomingAccidental: nil)
             flow = try tm.provideContext(head: headerFlow, body: tuneContext)
         }
 
@@ -357,6 +358,9 @@ private final class BarModeler: Modeler {
                 case .tempo: flow = FlowContext(from: flow, tempo: try field.asTempo())
                 case .text: flow = FlowContext(from: flow, upcomingAnnotation: field.value)
                 case .hold: flow = FlowContext(from: flow, upcomingFermata: true)
+                case .sharp: flow = FlowContext(from: flow, upcomingAccidental: .sharp)
+                case .flat: flow = FlowContext(from: flow, upcomingAccidental: .flat)
+                case .nat: flow = FlowContext(from: flow, upcomingAccidental: .natural)
                 default: throw ModelParseError.unexpectedField(label: field.label)
                 }
             case let .rest(modeler):
@@ -485,6 +489,7 @@ private final class NoteModeler: Modeler {
     var embellishment: Embellishment?
     var duration: Duration!
     var fermata: Bool
+    var accidental: Accidental?
     var context: NoteContext!
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
@@ -500,6 +505,7 @@ private final class NoteModeler: Modeler {
         continuesTuplet = connector == "-"
         slurred = connector == "~"
         
+        accidental = nil
         fermata = false
     }
 
@@ -510,16 +516,20 @@ private final class NoteModeler: Modeler {
 
         duration = try children.optional(.duration)?.trimmedText(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
         fermata = head.upcomingFermata
+        accidental = head.upcomingAccidental
 
         if let shorthand = try children.optional(.shorthandLabel)?.trimmedText(from: textSource) {
             let field = try Field(shorthand: shorthand)
             switch field.label {
             case .hold: fermata = true
+            case .sharp: accidental = .sharp
+            case .flat: accidental = .flat
+            case .nat: accidental = .natural
             default: throw ModelParseError.unexpectedField(label: field.label)
             }
         }
 
-        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAnnotation: true, upcomingFermata: false))
+        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAnnotation: true, upcomingFermata: false, clearingAccidental: true))
         return context.tail
     }
 
@@ -531,6 +541,7 @@ private final class NoteModeler: Modeler {
              tiedToNext: tied,
              slurredToNext: slurred,
              annotation: context.head.upcomingAnnotation,
-             fermata: fermata)
+             fermata: fermata,
+             accidental: accidental)
     }
 }

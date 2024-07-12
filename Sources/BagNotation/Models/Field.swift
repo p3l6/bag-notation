@@ -32,6 +32,9 @@ public struct Field {
         label = switch shorthand {
         case "&": .h
         case "^": .hold
+        case "'": .sharp
+        case ",": .flat
+        case "=": .nat
         default: throw ModelParseError.invalidField
         }
         _value = nil
@@ -84,10 +87,13 @@ public enum FieldLabel: String {
     case hold
     case rest
     case spacer
+    case sharp
+    case flat
+    case nat
 
     var requiresValue: Bool {
         switch self {
-        case .trad, .h, .v, .hold, .rest, .spacer:
+        case .trad, .h, .v, .hold, .rest, .spacer, .sharp, .flat, .nat:
             false
         default:
             true

@@ -22,6 +22,7 @@ public struct FlowContext {
 
     let upcomingAnnotation: String?
     let upcomingFermata: Bool
+    let upcomingAccidental: Accidental?
 
     init(timeSignature: TimeSignature,
          noteLength: Duration,
@@ -29,7 +30,8 @@ public struct FlowContext {
          tempo: Int?,
          variation: Variation,
          upcomingAnnotation: String?,
-         upcomingFermata: Bool) {
+         upcomingFermata: Bool,
+         upcomingAccidental: Accidental?) {
         self.timeSignature = timeSignature
         self.noteLength = noteLength
         self.previousPitch = previousPitch
@@ -37,6 +39,7 @@ public struct FlowContext {
         self.variation = variation
         self.upcomingAnnotation = upcomingAnnotation
         self.upcomingFermata = upcomingFermata
+        self.upcomingAccidental = upcomingAccidental
     }
 
     init(from base: FlowContext,
@@ -46,7 +49,8 @@ public struct FlowContext {
          tempo: Int? = nil,
          variation: Variation? = nil,
          upcomingAnnotation: String? = nil, clearingAnnotation: Bool = false,
-         upcomingFermata: Bool? = nil) {
+         upcomingFermata: Bool? = nil,
+         upcomingAccidental: Accidental? = nil, clearingAccidental: Bool = false) {
         self.timeSignature = timeSignature ?? base.timeSignature
         self.noteLength = noteLength ?? base.noteLength
         self.previousPitch = previousPitch ?? base.previousPitch
@@ -54,6 +58,7 @@ public struct FlowContext {
         self.variation = variation ?? base.variation
         self.upcomingAnnotation = clearingAnnotation ? nil : upcomingAnnotation ?? base.upcomingAnnotation
         self.upcomingFermata = upcomingFermata ?? base.upcomingFermata
+        self.upcomingAccidental = clearingAccidental ? nil : upcomingAccidental ?? base.upcomingAccidental
     }
 }
 
