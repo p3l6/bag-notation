@@ -43,7 +43,8 @@ all fields are listed as labels and require values, unless listed with parenthes
   - time: required, unless implied by a recognized valid [[tune style]]
   - note: set the base note length, ususally ommited for the default of eighth
   - tempo: set the tunes tempo. should be an integer in bpm
-  - rev: set a revision date or version, placed in the footer (todo: clarify behavior when there are multiple pages and multiple tunes)
+  - rev: set a revision date or version, placed in the footer
+    - note: only one revision is used globally per file. If more than one tune has revision field, only the first will be used, on all pages. 
 - inline fields:
   - (h): harmony line. only valid at the very beginning of a line
     - this has a shorthand, which is a single `&` at the beginning of the line

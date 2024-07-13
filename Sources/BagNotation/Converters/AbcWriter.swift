@@ -18,7 +18,14 @@ public class AbcWriter {
     }
 
     func formatSpecs() -> String {
-        """
+        let revision = doc.tunes.compactMap { $0.header.revision }.first
+        let revisionLines = if let revision {
+            "%% footerfont * 12\n%% footer \"(rev: \(revision))\t\t\"" }
+        else {
+            "% no rev"
+        }
+
+        return """
         %%writefields R
         %%infoname R
         %%titlefont Coronet 32
@@ -38,6 +45,7 @@ public class AbcWriter {
         %%nowrap 1
         %%gracespace 10 6 10
         %%flatbeamgracing 1
+        \(revisionLines)
 
         """
 
@@ -67,7 +75,6 @@ extension Header: AbcSourceConverting {
         }
         let arranger = if let arranger { ", arr. \(arranger)" } else { "" }
 
-        let revisionLines = if let revision { "%% footerfont * 12\n%% footer \"(rev: \(revision))\t\t\"" } else {"% no rev"}
 
         return """
             X:1
@@ -77,7 +84,6 @@ extension Header: AbcSourceConverting {
             M:\(timeSignature.abcSource())
             L:1/8
             \(tempoLine)
-            \(revisionLines)
             K:HP
             """
     }
