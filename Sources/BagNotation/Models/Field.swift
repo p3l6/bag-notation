@@ -90,10 +90,11 @@ public enum FieldLabel: String {
     case sharp
     case flat
     case nat
+    case newpage
 
     var requiresValue: Bool {
         switch self {
-        case .trad, .h, .v, .hold, .rest, .spacer, .sharp, .flat, .nat:
+        case .trad, .h, .v, .hold, .rest, .spacer, .sharp, .flat, .nat, .newpage:
             false
         default:
             true

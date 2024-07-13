@@ -45,6 +45,7 @@ all fields are listed as labels and require values, unless listed with parenthes
   - tempo: set the tunes tempo. should be an integer in bpm
   - rev: set a revision date or version, placed in the footer
     - note: only one revision is used globally per file. If more than one tune has revision field, only the first will be used, on all pages. 
+  - newpage: force placing this tune on a new page
 - inline fields:
   - (h): harmony line. only valid at the very beginning of a line
     - this has a shorthand, which is a single `&` at the beginning of the line

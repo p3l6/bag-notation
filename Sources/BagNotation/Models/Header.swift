@@ -12,6 +12,7 @@ public struct Header {
     let timeSignature: TimeSignature
     let tempo: Int?
     let revision: String?
+    let forceNewPage: Bool
 }
 
 public enum TuneStyle {

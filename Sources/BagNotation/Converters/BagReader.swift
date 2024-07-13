@@ -207,7 +207,8 @@ private final class HeaderModeler: LeafModeler {
             noteLength: (try? fields[.note]?.asDuration()) ?? Duration.eighth,
             timeSignature: try fields[.time]?.value.toTimeSignature() ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
             tempo: try fields[.tempo]?.asTempo(),
-            revision: fields[.rev]?.value
+            revision: fields[.rev]?.value,
+            forceNewPage: fields[.newpage] != nil
         )
     }
 

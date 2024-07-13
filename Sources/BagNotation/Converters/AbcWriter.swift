@@ -75,8 +75,10 @@ extension Header: AbcSourceConverting {
         }
         let arranger = if let arranger { ", arr. \(arranger)" } else { "" }
 
+        let pageBreak = if forceNewPage { "%%newpage" } else { "% no forced page break" }
 
         return """
+            \(pageBreak)
             X:1
             T:\(title)
             C:\(composer)\(arranger)
