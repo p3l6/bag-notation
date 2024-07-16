@@ -4,9 +4,9 @@
 //
 
 @testable import BagNotation
-import XCTest
+import Testing
 
-final class FormattingTests: XCTestCase {
+struct FormattingTests {
     let commonHeader = """
         ---
         title: Scotland the Brave
@@ -26,7 +26,8 @@ final class FormattingTests: XCTestCase {
            xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+.               ||
         """
 
-    func testBarAlignment() throws {
+    @Test
+    func barAlignment() throws {
         let source = """
             \(commonHeader)
             || xa+ vza.b/ xxcza xxce    | xxh+ th+ vhe xxcza    | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
@@ -34,10 +35,11 @@ final class FormattingTests: XCTestCase {
             || xxh+ th+ vhe xxcza | xxh+ th+ vhe xxce | xxh+ th.g/ xf+ h.g/ | xfh tgf xed xcb |
                xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+. ||
             """
-        XCTAssertEqual(try BagFormatter(source).formattedSource(), commonTarget)
+        #expect(try BagFormatter(source).formattedSource() == commonTarget)
     }
 
-    func testRaggedStart() throws {
+    @Test
+    func raggedStart() throws {
         let source = """
             \(commonHeader)
             ||    xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
@@ -45,10 +47,11 @@ final class FormattingTests: XCTestCase {
             ||xxh+ th+ vhe xxcza    | xxh+ th+ vhe xxce  | xxh+ th.g/ xf+ h.g/  | xfh tgf xed xcb                |
                      xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+.               ||
             """
-        XCTAssertEqual(try BagFormatter(source).formattedSource(), commonTarget)
+        #expect(try BagFormatter(source).formattedSource() == commonTarget)
     }
 
-    func testLeadingField() throws {
+    @Test
+    func leadingField() throws {
         let source = """
             \(commonHeader)
             || xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
@@ -63,8 +66,8 @@ final class FormattingTests: XCTestCase {
             (h) || xxh+ th+ vhe xxcza    | xxh+ th+ vhe xxce  | xxh+ th.g/ xf+ h.g/  | xfh tgf xed xcb                |
             (h)    xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+.               ||
             """
-        XCTAssertEqual(try BagFormatter(source).formattedSource(), formatted)
-        
+        #expect(try BagFormatter(source).formattedSource() == formatted)
+
         let source2 = """
             \(commonHeader)
             || xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
@@ -77,10 +80,11 @@ final class FormattingTests: XCTestCase {
             (h) xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+.               ||
             &   xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+.               ||
             """
-        XCTAssertEqual(try BagFormatter(source2).formattedSource(), formatted2)
+        #expect(try BagFormatter(source2).formattedSource() == formatted2)
     }
 
-    func testPickups() throws {
+    @Test
+    func pickups() throws {
         let source = """
             \(commonHeader)
             || xfdb | xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
@@ -97,7 +101,7 @@ final class FormattingTests: XCTestCase {
                   xf | xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+.               ||
             (h)   xf | xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+.               ||
             """
-        XCTAssertEqual(try BagFormatter(source).formattedSource(), formatted)
+        #expect(try BagFormatter(source).formattedSource() == formatted)
 
         let source2 = """
             \(commonHeader)
@@ -117,10 +121,11 @@ final class FormattingTests: XCTestCase {
                      nxf+. xxe+.           | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
                      c++ xd++              | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+ xxce ||
             """
-        XCTAssertEqual(try BagFormatter(source2).formattedSource(), formatted2)
+        #expect(try BagFormatter(source2).formattedSource() == formatted2)
     }
 
-    func testExtraAndMissingSpaces() throws {
+    @Test
+    func extraAndMissingSpaces() throws {
         let source = """
             \(commonHeader)
             || xa+ vza.b/ xxcza xxce    | xxh+ th+ vhe xxcza    | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
@@ -128,11 +133,12 @@ final class FormattingTests: XCTestCase {
             ||xxh+ th+ vhe xxcza | xxh+    th+ vhe xxce | xxh+ th.g/ xf+ h.g/ | xfh tgf xed xcb |
                xa+    vza.b/ xxcza xxce |xxh+ th+ vhe xxcza | rd+    xf.d/ xxce xxcza | xxb+ xa.b/ ta+. ||
             """
-        XCTAssertEqual(try BagFormatter(source).formattedSource(), commonTarget)
+        #expect(try BagFormatter(source).formattedSource() == commonTarget)
         // TODO: Fix case where nodes cannot parse adjacent to a following barline, ie `xxce|`
     }
 
-    func testGroups() throws {
+    @Test
+    func groups() throws {
         let source = """
             \(commonHeader)
             || xa+ vza.b/ xxcza xxce | xxh+ th+ vhe xxcza | rd+ xf.d/ xxce xxcza | xxb+ xxe+ te.f/ xe/.d//xc/.b// |
@@ -149,7 +155,7 @@ final class FormattingTests: XCTestCase {
             || xxh+ th+ vhe xxcza | xxh+ th+ vhe | xxh+ th.g/ xf+ h.g/  | xfh tgf xed xcb  |
                xa+ vza.b/ xxcza   | xxh+ th+ vhe | rd+ xf.d/ xxce xxcza | xxb+ xa.b/ ta+. ||
             """
-        XCTAssertEqual(try BagFormatter(source).formattedSource(), formatted)
+        #expect(try BagFormatter(source).formattedSource() == formatted)
     }
 
     // TODO: func testTrailingSpaces() throws {}

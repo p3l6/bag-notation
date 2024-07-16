@@ -4,10 +4,11 @@
 //
 
 @testable import BagNotation
-import XCTest
+import Testing
 
-final class TuneStructure: XCTestCase {
-    func testMultipleTunes() throws {
+struct TuneStructure {
+    @Test
+    func multipleTunes() throws {
         let source = """
             ---
             title: First 
@@ -25,10 +26,11 @@ final class TuneStructure: XCTestCase {
             """
 
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes.count, 2)
+        #expect(doc.tunes.count == 2)
     }
 
-    func testBlankLines() throws {
+    @Test
+    func blankLines() throws {
         let source = """
 
 
@@ -49,11 +51,12 @@ final class TuneStructure: XCTestCase {
             """
 
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes.count, 1)
-        XCTAssertEqual(doc.tunes[0].lines.count, 4)
+        #expect(doc.tunes.count == 1)
+        #expect(doc.tunes[0].lines.count == 4)
     }
 
-    func testTunesWithoutNotes() throws {
+    @Test
+    func tunesWithoutNotes() throws {
         let source = """
             ---
             title: First 
@@ -63,7 +66,7 @@ final class TuneStructure: XCTestCase {
             """
 
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes.count, 1)
-        XCTAssertEqual(doc.tunes[0].lines.count, 0)
+        #expect(doc.tunes.count == 1)
+        #expect(doc.tunes[0].lines.count == 0)
     }
 }

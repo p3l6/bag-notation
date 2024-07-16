@@ -4,10 +4,11 @@
 //
 
 @testable import BagNotation
-import XCTest
+import Testing
 
-final class Comments: XCTestCase {
-    func testLeadingComments() throws {
+struct Comments {
+    @Test
+    func leadingComments() throws {
         let source = """
             # top of file comment
             # another comment
@@ -22,11 +23,12 @@ final class Comments: XCTestCase {
             """
 
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes.count, 1)
-        XCTAssertEqual(doc.tunes[0].lines.count, 1)
+        #expect(doc.tunes.count == 1)
+        #expect(doc.tunes[0].lines.count == 1)
     }
 
-    func testBodyComments() throws {
+    @Test
+    func bodyComments() throws {
         let source = """
             ---
             title: First 
@@ -40,11 +42,12 @@ final class Comments: XCTestCase {
             """
 
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes.count, 1)
-        XCTAssertEqual(doc.tunes[0].lines.count, 2)
+        #expect(doc.tunes.count == 1)
+        #expect(doc.tunes[0].lines.count == 2)
     }
 
-    func testTrailingLineComments() throws {
+    @Test
+    func trailingLineComments() throws {
         let source = """
             ---
             title: First
@@ -57,11 +60,12 @@ final class Comments: XCTestCase {
             """
 
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes.count, 1)
-        XCTAssertEqual(doc.tunes[0].lines.count, 2)
+        #expect(doc.tunes.count == 1)
+        #expect(doc.tunes[0].lines.count == 2)
     }
 
-    func testCommentsBetweenTunes() throws {
+    @Test
+    func commentsBetweenTunes() throws {
         let source = """
             ---
             title: First 
@@ -87,7 +91,7 @@ final class Comments: XCTestCase {
             """
 
         let doc = try makeFile(from: source)
-        XCTAssertEqual(doc.tunes.count, 2)
-        XCTAssertEqual(doc.tunes[0].lines.count, 2)
+        #expect(doc.tunes.count == 2)
+        #expect(doc.tunes[0].lines.count == 2)
     }
 }

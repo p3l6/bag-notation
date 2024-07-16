@@ -4,10 +4,11 @@
 //
 
 @testable import BagNotation
-import XCTest
+import Testing
 
-final class Headers: XCTestCase {
-    func testTitle() throws {
+struct Headers {
+    @Test
+    func title() throws {
         let source = """
             title: First tune
             by: trad
@@ -15,10 +16,11 @@ final class Headers: XCTestCase {
             """
 
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.title, "First tune")
+        #expect(header.title == "First tune")
     }
 
-    func testComposer() throws {
+    @Test
+    func composer() throws {
         let source = """
             title: First
             by: trad
@@ -26,10 +28,11 @@ final class Headers: XCTestCase {
             """
 
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.composer, "trad")
+        #expect(header.composer == "trad")
     }
 
-    func testTrad() throws {
+    @Test
+    func trad() throws {
         let source = """
             title: First tune
             trad
@@ -37,11 +40,12 @@ final class Headers: XCTestCase {
             """
 
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.title, "First tune")
-        XCTAssertEqual(header.composer, "trad")
+        #expect(header.title == "First tune")
+        #expect(header.composer == "trad")
     }
 
-    func testTimeSignature() throws {
+    @Test
+    func timeSignature() throws {
         let source = """
             title: First
             by: trad
@@ -50,10 +54,11 @@ final class Headers: XCTestCase {
             """
 
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.timeSignature, .time44)
+        #expect(header.timeSignature == .time44)
     }
 
-    func testNoteLength() throws {
+    @Test
+    func noteLength() throws {
         let source = """
             title: First
             by: trad
@@ -62,10 +67,11 @@ final class Headers: XCTestCase {
             note: quarter
             """
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.noteLength, .quarter)
+        #expect(header.noteLength == .quarter)
     }
 
-    func testImpliedTimeSignature() throws {
+    @Test
+    func impliedTimeSignature() throws {
         let source = """
             title: First
             by: trad
@@ -73,71 +79,77 @@ final class Headers: XCTestCase {
             """
 
         let header = try makeHeader(from: source)
-        XCTAssertEqual(header.timeSignature, .time68)
+        #expect(header.timeSignature == .time68)
 
 //    TODO: test the rest. let knownTypes = [..:..] ; for known: assertEqual
     }
 
-    func testMissingTitle() throws {
+    @Test
+    func missingTitle() throws {
         let source = """
             by: trad
             style: jig
             """
 
-        XCTAssertThrowsError(try makeHeader(from: source))
+        #expect(throws: LocatedModelParseError.self) { try makeHeader(from: source) }
     }
 
-    func testMissingComposer() throws {
+    @Test
+    func missingComposer() throws {
         let source = """
             title: First
             style: jig
             """
 
-        XCTAssertThrowsError(try makeHeader(from: source))
+        #expect(throws: LocatedModelParseError.self) { try makeHeader(from: source) }
     }
 
-    func testMissingStyle() throws {
+    @Test
+    func missingStyle() throws {
         let source = """
             title: First
             by: trad
             time: 4/4
             """
 
-        XCTAssertThrowsError(try makeHeader(from: source))
+        #expect(throws: LocatedModelParseError.self) { try makeHeader(from: source) }
     }
 
-    func testMissingTimeSignature() throws {
+    @Test
+    func missingTimeSignature() throws {
         let source = """
             title: First
             by: trad
             style: style_without_inferred_time
             """
 
-        XCTAssertThrowsError(try makeHeader(from: source))
+        #expect(throws: LocatedModelParseError.self) { try makeHeader(from: source) }
     }
 
-    func testDuplicateFields() throws {
-        XCTAssertThrowsError(try makeHeader(from: """
+    @Test
+    func duplicateFields() throws {
+        #expect(throws: LocatedModelParseError.self) { try makeHeader(from: """
             title: First
             by: trad
             title: Second
             style: jig
-            """))
+            """)}
 
-        XCTAssertThrowsError(try makeHeader(from: """
+        #expect(throws: LocatedModelParseError.self) { try makeHeader(from: """
             style: march
             title: First
             by: trad
             style: jig
-            """))
+            """)}
     }
-
-    func testConflictingComposers() throws {
-        XCTAssertThrowsError(try makeHeader(from: """
+    
+    @Test
+    func conflictingComposers() throws {
+        #expect(throws: LocatedModelParseError.self) { try makeHeader(from: """
             title: First
             by: someone
             trad
             style: jig
-            """))
+            """)}
     }
 }
