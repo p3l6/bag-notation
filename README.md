@@ -65,6 +65,8 @@ all fields are listed as labels and require values, unless listed with parenthes
     - the shorthand is comma `,` and can appear inside clusters before embellishments
   - nat: makrs the next note as natural
     - the shorthand is equals `=` and can appear inside clusters before embellishments
+  - chord: adds a pitch to the next note, in addition to the primary pitch already there
+    - for example, `(chord: c) xa++` creates a chord with A and C, where A is the primary note value used for determining gracenotes before and after the group
       
   
 ## language symbols

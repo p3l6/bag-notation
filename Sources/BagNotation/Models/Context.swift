@@ -23,23 +23,19 @@ public struct FlowContext {
     let upcomingAnnotation: String?
     let upcomingFermata: Bool
     let upcomingAccidental: Accidental?
+    let upcomingChord: Pitch?
 
-    init(timeSignature: TimeSignature,
-         noteLength: Duration,
-         previousPitch: Pitch,
-         tempo: Int?,
-         variation: Variation,
-         upcomingAnnotation: String?,
-         upcomingFermata: Bool,
-         upcomingAccidental: Accidental?) {
+    init(timeSignature: TimeSignature, noteLength: Duration, tempo: Int?) {
         self.timeSignature = timeSignature
         self.noteLength = noteLength
-        self.previousPitch = previousPitch
         self.tempo = tempo
-        self.variation = variation
-        self.upcomingAnnotation = upcomingAnnotation
-        self.upcomingFermata = upcomingFermata
-        self.upcomingAccidental = upcomingAccidental
+
+        self.previousPitch = .e
+        self.variation = .none
+        self.upcomingAnnotation = nil
+        self.upcomingFermata = false
+        self.upcomingAccidental = nil
+        self.upcomingChord = nil
     }
 
     init(from base: FlowContext,
@@ -48,17 +44,20 @@ public struct FlowContext {
          previousPitch: Pitch? = nil,
          tempo: Int? = nil,
          variation: Variation? = nil,
-         upcomingAnnotation: String? = nil, clearingAnnotation: Bool = false,
+         upcomingAnnotation: String? = nil,
          upcomingFermata: Bool? = nil,
-         upcomingAccidental: Accidental? = nil, clearingAccidental: Bool = false) {
+         upcomingAccidental: Accidental? = nil,
+         upcomingChord: Pitch? = nil,
+         clearingAllUpcoming: Bool = false) {
         self.timeSignature = timeSignature ?? base.timeSignature
         self.noteLength = noteLength ?? base.noteLength
         self.previousPitch = previousPitch ?? base.previousPitch
         self.tempo = tempo ?? base.tempo
         self.variation = variation ?? base.variation
-        self.upcomingAnnotation = clearingAnnotation ? nil : upcomingAnnotation ?? base.upcomingAnnotation
+        self.upcomingAnnotation = clearingAllUpcoming ? nil : upcomingAnnotation ?? base.upcomingAnnotation
         self.upcomingFermata = upcomingFermata ?? base.upcomingFermata
-        self.upcomingAccidental = clearingAccidental ? nil : upcomingAccidental ?? base.upcomingAccidental
+        self.upcomingAccidental = clearingAllUpcoming ? nil : upcomingAccidental ?? base.upcomingAccidental
+        self.upcomingChord = clearingAllUpcoming ? nil : upcomingChord ?? base.upcomingChord
     }
 }
 

@@ -242,8 +242,14 @@ extension Note: AbcSourceConverting {
             abc += abcAccidental
         }
 
-        abc += pitch.abcSource()
+        if let chord {
+            abc += "[\(pitch.abcSource())\(chord.abcSource())]"
+        } else {
+            abc += pitch.abcSource()
+        }
+
         abc += duration.abcSource()
+        
         if tiedToNext {
             abc += "-"
         }

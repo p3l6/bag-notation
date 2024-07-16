@@ -69,6 +69,22 @@ public struct Field {
         default: throw ModelParseError.invalidNoteLength(why: "Could not determine length of rest")
         }
     }
+
+    func reflow(context flow: FlowContext) throws -> FlowContext {
+        switch label {
+        case .time: FlowContext(from: flow, timeSignature: try value.toTimeSignature())
+        case .note: FlowContext(from: flow, noteLength: try asDuration())
+        case .v: FlowContext(from: flow, variation: asVariation())
+        case .tempo: FlowContext(from: flow, tempo: try asTempo())
+        case .text: FlowContext(from: flow, upcomingAnnotation: value)
+        case .hold: FlowContext(from: flow, upcomingFermata: true)
+        case .sharp: FlowContext(from: flow, upcomingAccidental: .sharp)
+        case .flat: FlowContext(from: flow, upcomingAccidental: .flat)
+        case .nat: FlowContext(from: flow, upcomingAccidental: .natural)
+        case .chord: FlowContext(from: flow, upcomingChord: try Pitch.from(string: value))
+        default: throw ModelParseError.unexpectedField(label: label)
+        }
+    }
 }
 
 public enum FieldLabel: String {
@@ -91,6 +107,7 @@ public enum FieldLabel: String {
     case flat
     case nat
     case newpage
+    case chord
 
     var requiresValue: Bool {
         switch self {

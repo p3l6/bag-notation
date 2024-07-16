@@ -34,6 +34,7 @@ public enum ModelParseError: Error, LocalizedError {
     case invalidTempo
     case invalidField
     case invalidNoteConnector
+    case invalidChord
 
     public var errorDescription: String? {
         switch self {
@@ -62,6 +63,7 @@ public enum ModelParseError: Error, LocalizedError {
         case .invalidField: "Invalid field"
         case .invalidTempo: "Invalid tempo"
         case .invalidNoteConnector: "Invalid note connector"
+        case .invalidChord: "Chord pitch may not be applied to itself"
         }
     }
 

@@ -14,7 +14,7 @@ public class BagReader {
         // tree.modelDebug()
         let docModeler = try DocModeler(node: tree.rootNode, textSource: tree)
         // docFlow is essentially ignored
-        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, previousPitch: .e, tempo: nil, variation: .none, upcomingAnnotation: nil, upcomingFermata: false, upcomingAccidental: nil)
+        let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, tempo: nil)
         let docContext = DocContextBody(tuneCount: docModeler.tuneModelers.count)
         _ = try docModeler.provideContext(head: docFlow, body: docContext)
         return docModeler.model()
@@ -94,12 +94,7 @@ private final class DocModeler: Modeler {
             let tuneContext = TuneContextBody(tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
             let headerFlow = FlowContext(timeSignature: tm.header.timeSignature,
                                          noteLength: tm.header.noteLength,
-                                         previousPitch: .e,
-                                         tempo: tm.header.tempo,
-                                         variation: .none,
-                                         upcomingAnnotation: nil,
-                                         upcomingFermata: false,
-                                         upcomingAccidental: nil)
+                                         tempo: tm.header.tempo)
             flow = try tm.provideContext(head: headerFlow, body: tuneContext)
         }
 
@@ -263,9 +258,6 @@ private final class VoiceModeler: Modeler {
         if let fieldNode = try children.optional(.field) {
             let field = try FieldModeler(node: fieldNode, textSource: textSource).model()
             leadingField = field
-            if field.label != .h && field.label != .v && field.label != .text {
-                throw ModelParseError.unexpectedField(label: field.label)
-            }
         } else {
             leadingField = nil
         }
@@ -276,8 +268,11 @@ private final class VoiceModeler: Modeler {
     }
 
     func provideContext(private head: FlowContext, body: VoiceContextBody) throws -> FlowContext {
-        var flow = FlowContext(from: head, variation: leadingField?.label == .v ? leadingField!.asVariation() : nil, upcomingAnnotation:
-                                leadingField?.label == .text ? leadingField!.value : nil)
+        var flow = if let leadingField, leadingField.label != .h {
+            try leadingField.reflow(context: head)
+        } else {
+            head
+        }
 
         for (idx, barModeler) in barModelers.enumerated() {
             let barBody = BarContextBody(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count)
@@ -351,19 +346,7 @@ private final class BarModeler: Modeler {
         for element in elements {
             switch element {
             case let .field(field):
-                // TODO: move this logic into flowcontext, or field. maybe take in allowed field labels?
-                switch field.label {
-                case .time: flow = FlowContext(from: flow, timeSignature: try field.value.toTimeSignature())
-                case .note: flow = FlowContext(from: flow, noteLength: try field.asDuration())
-                case .v: flow = FlowContext(from: flow, variation: field.asVariation())
-                case .tempo: flow = FlowContext(from: flow, tempo: try field.asTempo())
-                case .text: flow = FlowContext(from: flow, upcomingAnnotation: field.value)
-                case .hold: flow = FlowContext(from: flow, upcomingFermata: true)
-                case .sharp: flow = FlowContext(from: flow, upcomingAccidental: .sharp)
-                case .flat: flow = FlowContext(from: flow, upcomingAccidental: .flat)
-                case .nat: flow = FlowContext(from: flow, upcomingAccidental: .natural)
-                default: throw ModelParseError.unexpectedField(label: field.label)
-                }
+                flow = try field.reflow(context: flow)
             case let .rest(modeler):
                 flow = try modeler.provideContext(head: flow, body: ())
             case let .cluster(modeler):
@@ -491,6 +474,7 @@ private final class NoteModeler: Modeler {
     var duration: Duration!
     var fermata: Bool
     var accidental: Accidental?
+    var chord: Pitch?
     var context: NoteContext!
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
@@ -508,6 +492,7 @@ private final class NoteModeler: Modeler {
         
         accidental = nil
         fermata = false
+        chord = nil
     }
 
     func provideContext(private head: FlowContext, body: NoteContextBody) throws -> FlowContext {
@@ -518,6 +503,11 @@ private final class NoteModeler: Modeler {
         duration = try children.optional(.duration)?.trimmedText(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength
         fermata = head.upcomingFermata
         accidental = head.upcomingAccidental
+        chord = head.upcomingChord
+
+        if let chord, chord == pitch {
+            throw ModelParseError.invalidChord
+        }
 
         if let shorthand = try children.optional(.shorthandLabel)?.trimmedText(from: textSource) {
             let field = try Field(shorthand: shorthand)
@@ -530,7 +520,7 @@ private final class NoteModeler: Modeler {
             }
         }
 
-        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAnnotation: true, upcomingFermata: false, clearingAccidental: true))
+        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAllUpcoming: true))
         return context.tail
     }
 
@@ -543,6 +533,7 @@ private final class NoteModeler: Modeler {
              slurredToNext: slurred,
              annotation: context.head.upcomingAnnotation,
              fermata: fermata,
-             accidental: accidental)
+             accidental: accidental,
+             chord: chord)
     }
 }

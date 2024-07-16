@@ -13,6 +13,8 @@ public struct Note {
     let annotation: String?
     let fermata: Bool
     let accidental: Accidental?
+    /// A second pitch to display with the primary, as a chord
+    let chord: Pitch?
 }
 
 public enum Pitch: Comparable {
