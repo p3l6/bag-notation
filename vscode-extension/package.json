@@ -32,13 +32,11 @@
         "problemMatchers": [{
             "name": "bag-notation",
             "pattern": {
-                "regexp": "^(.*):(\\d+),(\\d+)-(\\d+):\\s+(warning|error|info):\\s+(.*)$",
-                "file": 1,
-                "line": 2,
-                "column": 3,
-                "endColumn": 4,
-                "severity": 5,
-                "message": 6
+                "regexp": "^Error:\\s+(\\d+)\\[(\\d+)-(\\d+)\\]:\\s+(.*)$",
+                "line": 1,
+                "column": 2,
+                "endColumn": 3,
+                "message": 4
             }
         }]
     },

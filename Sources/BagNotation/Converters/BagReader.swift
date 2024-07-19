@@ -36,8 +36,7 @@ extension LeafModeler {
     init(node: Node, textSource: NodeSourceTextProvider) throws {
         do { try self.init(private: node, textSource: textSource) }
         catch let error as ModelParseError {
-            let loc = node.pointRange
-            let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2) + 1)")
+            let locError = LocatedModelParseError(base: error, location: node.inlineRange)
             locError.log()
             throw locError
         }
@@ -58,8 +57,7 @@ extension Modeler {
     func provideContext(head: FlowContext, body: OutputContext) throws -> FlowContext {
         do { return try provideContext(private: head, body: body) }
         catch let error as ModelParseError {
-            let loc = node.pointRange
-            let locError = LocatedModelParseError(base: error, location: "line \(loc.lowerBound.row + 1) col \((loc.lowerBound.column / 2) + 1)")
+            let locError = LocatedModelParseError(base: error, location: node.inlineRange)
             locError.log()
             throw locError
         }

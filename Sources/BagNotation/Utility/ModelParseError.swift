@@ -72,10 +72,10 @@ public enum ModelParseError: Error, LocalizedError {
 
 public struct LocatedModelParseError: Error, LocalizedError {
     let base: ModelParseError
-    let location: String // TODO: just set the TSRange, and convert here. show start and stop.
+    let location: InlineRange
 
     public var errorDescription: String? {
-        "\(location): \(base.errorDescription!)"
+        "\(location.line+1)[\(location.lowerBound+1)-\(location.upperBound)]: \(base.errorDescription!)"
     }
 
     func log() { ModelParseError.logger.error("\(self.errorDescription!)") }
