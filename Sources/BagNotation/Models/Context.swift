@@ -55,7 +55,7 @@ public struct FlowContext {
         self.tempo = tempo ?? base.tempo
         self.variation = variation ?? base.variation
         self.upcomingAnnotation = clearingAllUpcoming ? nil : upcomingAnnotation ?? base.upcomingAnnotation
-        self.upcomingFermata = upcomingFermata ?? base.upcomingFermata
+        self.upcomingFermata = clearingAllUpcoming ? false : upcomingFermata ?? base.upcomingFermata
         self.upcomingAccidental = clearingAllUpcoming ? nil : upcomingAccidental ?? base.upcomingAccidental
         self.upcomingChord = clearingAllUpcoming ? nil : upcomingChord ?? base.upcomingChord
     }

@@ -53,18 +53,7 @@ enum EmbellishmentType {
     case birl(withLeadingGrace: Bool, withInitialA: Bool)
     case birlWithDGracenote
 
-    // TODO: cadence, halfcadence
-    // TODO: cadences should be `e4` timing
-    // crun a mach, toar a mach?
-    // crun with low g's
-    // TODO: other stuff
-    // uxxd: e{fde}d ? No. 24, 63
-    // ttg: g{ege}g ? No. 64 (double tap on the piob high g)
-    // low g variation crunluath ?
-    // uw: taorluath a mach ? (on bcd)
-    // uww: crunluath a mach ? (on bcd)
-    // ?z: {geAfA}e ?
-    // ?z: {afege}f ? in No. 64
+    // TODO: cadence literals should be `e4` timing
 }
 
 // MARK: Create from strings
@@ -147,10 +136,11 @@ private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) 
     case let (.odro(withLeadingGrace), _, .b): withLeadingGrace ? [.highG, .b, .lowG, .d, .lowG] : [.b, .lowG, .d, .lowG]
 
     case (.taorluath, .d, .lowA): [.lowG, .b, .lowG, .e]
-    case (.taorluath, _, .lowA ... .d): [.lowG, .d, .lowG, .e]
+    case (.taorluath, _, .lowG ... .d): [.lowG, .d, .lowG, .e]
     case (.crunluath, .d, .e): [.lowG, .b, .lowG, .e, .lowA, .f, .lowA]
     case (.crunluath, _, .e): [.lowG, .d, .lowG, .e, .lowA, .f, .lowA]
 
+    case (.anyThrow, .f, .highG): [.e, .highG, .e, .f, .e]
     case (.anyThrow, _, .highG): [.f, .e, .highG, .e, .f, .e]
     case (.anyThrow, _, .f): [.f, .e, .highG, .e]
     case (.anyThrow, _, .e): [.e, .lowA, .f, .lowA]
