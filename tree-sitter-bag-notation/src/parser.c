@@ -394,13 +394,13 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '+' ||
           lookahead == '.' ||
           lookahead == '/') ADVANCE(25);
-      if (lookahead == '&' ||
-          lookahead == '\'' ||
-          lookahead == ',' ||
-          lookahead == '=' ||
-          lookahead == '^') ADVANCE(14);
       if (('a' <= lookahead && lookahead <= 'h') ||
           lookahead == 'l') ADVANCE(24);
+      if (lookahead == '&' ||
+          lookahead == '\'' ||
+          (',' <= lookahead && lookahead <= '4') ||
+          lookahead == '=' ||
+          lookahead == '^') ADVANCE(14);
       if (('j' <= lookahead && lookahead <= 'v') ||
           ('x' <= lookahead && lookahead <= 'z')) ADVANCE(23);
       END_STATE();
@@ -433,13 +433,13 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '-' ||
           lookahead == '_' ||
           lookahead == '~') ADVANCE(26);
-      if (lookahead == '&' ||
-          lookahead == '\'' ||
-          lookahead == ',' ||
-          lookahead == '=' ||
-          lookahead == '^') ADVANCE(14);
       if (('a' <= lookahead && lookahead <= 'h') ||
           lookahead == 'l') ADVANCE(24);
+      if (lookahead == '&' ||
+          lookahead == '\'' ||
+          (',' <= lookahead && lookahead <= '4') ||
+          lookahead == '=' ||
+          lookahead == '^') ADVANCE(14);
       if (('j' <= lookahead && lookahead <= 'v') ||
           ('x' <= lookahead && lookahead <= 'z')) ADVANCE(23);
       END_STATE();
@@ -460,13 +460,14 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '|') ADVANCE(21);
       if (lookahead == '\t' ||
           lookahead == ' ') SKIP(8)
+      if (('a' <= lookahead && lookahead <= 'h') ||
+          lookahead == 'l') ADVANCE(24);
       if (lookahead == '&' ||
           lookahead == '\'' ||
           lookahead == ',' ||
+          ('0' <= lookahead && lookahead <= '4') ||
           lookahead == '=' ||
           lookahead == '^') ADVANCE(14);
-      if (('a' <= lookahead && lookahead <= 'h') ||
-          lookahead == 'l') ADVANCE(24);
       if (('j' <= lookahead && lookahead <= 'v') ||
           ('x' <= lookahead && lookahead <= 'z')) ADVANCE(23);
       END_STATE();

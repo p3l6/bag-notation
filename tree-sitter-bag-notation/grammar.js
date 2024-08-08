@@ -19,7 +19,7 @@ module.exports = grammar({
     header: $ => seq("---\n", repeat(seq($._header_field, "\n")), "---\n"),
     _header_field: $ => alias($._field_parts, $.field),
     field: $ => choice(seq("(", $._field_parts, ")"), prec(1, $.shorthand_label)),
-    shorthand_label: $ => /[&^',=]/,
+    shorthand_label: $ => /[&^',=01234]/,
     _field_parts: $ => seq($.field_label, optional(seq(":", $.field_value))),
     field_label: $ => /[ a-zA-Z']+/,
     field_value: $ => /[^\)\n]+/,

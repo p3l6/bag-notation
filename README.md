@@ -49,6 +49,9 @@ all fields are listed as labels and require values, unless listed with parenthes
 - inline fields:
   - (h): harmony line. only valid at the very beginning of a line
     - this has a shorthand, which is a single `&` at the beginning of the line
+  - (v: 2): variation. any string can be field value. such as "2" or "2 of 4". 
+    - a (v) by itself will signify the end of the variation, this is not needed if it ends at the end of a line.
+    - there are shorthands for the most common variation labels. `1 2 3 4` can be used by themselfs and `0` will end the variation.  
   - note: change the base note length
   - time: change the time signature
   - tempo: change the tempo
@@ -89,6 +92,9 @@ label: value | field, when inside header
 `+` | doubles attached note length
 `/` | cuts attached note length
 `.` | dots attached note length
+`^` | shorthand field to add fermata
+`',=` | shorthand accidentals
+`01234` | shorthand variations
 
 ## Semantic embellishments
 
@@ -112,7 +118,7 @@ tt: birl. the short one, as if from already on low a.
         xtt: with a high g gracenote at the beginning
         
 a full list of the possible semantic embellishments and what they will yeild can be found on a different page. For now, see Sources/BagNotation/Models/Embellishment.swift 
-
+TODO: document the following literals as well: crunluath a mach, crunluath with low g's, cadences
 
 # CLI
 
