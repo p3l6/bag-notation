@@ -14,6 +14,9 @@ struct Format: AsyncParsableCommand {
 
     @OptionGroup var options: Bag.Options
 
+    @Flag(help: "Does not print or wirte, but will exit with error if input is not already well formatted.")
+    var dryRun: Bool = false
+
     @Flag(name: .shortAndLong, help: "Overwrite the input file with the formatted output. Otherwise prints to stdout.")
     var inPlace: Bool = false
 
@@ -22,7 +25,16 @@ struct Format: AsyncParsableCommand {
             throw RuntimeError.couldNotRead(file: options.inputFile)
         }
 
-        let output = try BagFormatter(input).formattedSource()
+        let formatter = BagFormatter(input)
+        if dryRun {
+            let modifications = try formatter.modifiedRanges()
+            guard modifications.isEmpty else {
+                throw ExitCode(1)
+            }
+            return
+        }
+
+        let output = try formatter.formattedSource()
 
         if inPlace {
             try output.write(toFile: options.inputFile, atomically: true, encoding: .utf8)
