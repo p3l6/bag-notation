@@ -3,10 +3,6 @@
 //  Bag Notation
 //
 
-import os
-
-private let logger = Logger(subsystem: "bag", category: "AbcWriter")
-
 public class AbcWriter {
     let doc: Doc
     var abc = ""

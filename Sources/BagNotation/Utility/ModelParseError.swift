@@ -4,11 +4,8 @@
 //
 
 import Foundation
-import os
 
 public enum ModelParseError: Error, LocalizedError {
-    static let logger = Logger(subsystem: "BagNotation", category: "ModelParseError")
-
     case fileParseError
 
     case duplicateUniqueNodeChildren(type: String)
@@ -66,8 +63,6 @@ public enum ModelParseError: Error, LocalizedError {
         case .invalidChord: "Chord pitch may not be applied to itself"
         }
     }
-
-    func log() { Self.logger.error("\(self.errorDescription!)") }
 }
 
 public struct LocatedModelParseError: Error, LocalizedError {
@@ -77,6 +72,4 @@ public struct LocatedModelParseError: Error, LocalizedError {
     public var errorDescription: String? {
         "\(location.line+1)[\(location.lowerBound+1)-\(location.upperBound)]: \(base.errorDescription!)"
     }
-
-    func log() { ModelParseError.logger.error("\(self.errorDescription!)") }
 }

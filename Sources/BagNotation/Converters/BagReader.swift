@@ -37,7 +37,6 @@ extension LeafModeler {
         do { try self.init(private: node, textSource: textSource) }
         catch let error as ModelParseError {
             let locError = LocatedModelParseError(base: error, location: node.inlineRange)
-            locError.log()
             throw locError
         }
     }
@@ -58,7 +57,6 @@ extension Modeler {
         do { return try provideContext(private: head, body: body) }
         catch let error as ModelParseError {
             let locError = LocatedModelParseError(base: error, location: node.inlineRange)
-            locError.log()
             throw locError
         }
     }

@@ -12,9 +12,8 @@ public struct Field {
     var value: String {
         guard let _value else {
             // Don't want to have to mark this property as throws,
-            // So just log an error here and return the label.
-            // Alternatively this could be a forced unwrap, since it should not happen.
-            ModelParseError.logger.error("Tried to access field value of a label-only field")
+            // since that would complicate other code.
+            // So just return the label, since this should not happen.
             return label.rawValue
         }
         return _value
