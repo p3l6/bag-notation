@@ -33,8 +33,8 @@ struct Notes {
         notes = try makeCluster(from: "vzadvzavrevzue")
         #expect(notes.map(\.embellishment?.pitches) == [[.lowG, .d, .lowG, .e], nil, [.lowG, .b, .lowG, .e], [.lowG, .d, .lowG, .e, .lowA, .f, .lowA], [.lowG, .d, .lowG, .e, .lowA, .f, .lowA]])
 
-        notes = try makeCluster(from: "rdlrdrerfrg")
-        #expect(notes.map(\.embellishment?.pitches) == [[.lowG, .d, .c], nil, [.d, .c], [.e, .lowA, .f, .lowA], [.f, .e, .highG, .e], [.f, .e, .highG, .e, .f, .e]])
+        notes = try makeCluster(from: "rdlrdrerfrgrg")
+        #expect(notes.map(\.embellishment?.pitches) == [[.lowG, .d, .c], nil, [.d, .c], [.e, .lowA, .f, .lowA], [.f, .e, .highG, .e], [.e, .highG, .e, .f, .e], [.f, .e, .highG, .e, .f, .e]])
 
         notes = try makeCluster(from: "xtdxsdxxtd")
         #expect(notes.map(\.embellishment?.pitches) == [[.highG, .d, .lowG], [.highG, .d, .c], [.highG, .d, .e, .d, .lowG]])
