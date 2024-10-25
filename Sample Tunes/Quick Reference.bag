@@ -1,17 +1,33 @@
 ---
-title: Bag notation quick reference
-trad
+title: Bag Notation Quick Reference
+by: Selected Examples
 style: 4/4 March
 note: quarter
 ---
 
 # See this file's output in: `Documentation.docc/Resources/Quick Reference.pdf`
 
-|| (text: pitches) l a b c d e f g h | (text: grace literals) qa oq ja ka pa za ua ya ma ||
-|| (text: single/taps) xl xa xb xc xd xe xf xg | ta td sd te th ||
-|| (text: doublings) xxc xxg xxh | nxc ||
-|| (text: grip/odro) vc | nvc | xnvb ||
-|| (text: throw) rb rd re rf rg rg ||
-|| (text: birl) tta ntta xtta ptta ||
-|| (text: taor/crun) vza vzb vzc | vre ||
-|| (text: strikes/pelay) xtd xsd ntd nsd | xxtc xxsc  ||
+# pitches
+|| (text: l) l (text: a) a (text: b) b (text: c) c (text: d) d (text: e) e (text: f) f (text: g) g (text: h) h |
+
+# grace literals
+|| (text: qa) qa (text: oa) oa (text: ja) ja (text: ka) ka (text: pa) pa (text: za) za (text: ua) ua (text: ya) ya (text: ma) ma ||
+
+
+# single/taps
+|| (text: xl) xl (text: xa) xa (text: xe) xe (text: xf) xf (text: xg) xg | (text: ta) ta (text: td) td (text: sd) sd (text: te) te (text: th) th ||
+
+# doublings/grips
+|| (text: xxc) xxc (text: xxg) xxg (text: xxh) xxh | (text: nxc) nxc | (text: vc) vc d// (text: va) va | (text: nvc) nvc | (text: xnvb) xnvb ||
+
+# throw
+|| (text: rb) rb (text: rd) rd (text: re) re (text: rf) rf (text: rg) rg (text: rg) rg ||
+
+# birl
+||  (text: tta) tta (text: ntta) ntta (text: xtta) xtta (text: ptta) ptta ||
+
+# strikes/pelay
+||  (text: xtd) xtd (text: xsd) xsd (text: ntd) ntd (text: nsd) nsd | (text: xxtd) xxtd (text: xxsd) xxsd (text: xxtc) xxtc ||
+
+# taor/crun
+||  (text: vza) vza (text: vzb) vzb (text: vzc) vzc | (text: vre) vre ||

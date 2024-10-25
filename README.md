@@ -23,6 +23,7 @@ Some editors that support bag notation:
 ## Documentation
 
 [Documetation](Documentation.docc/Documentation.md)
+[Sample Tunes](Sample Tunes/)
 [Quick Reference](Documentation.docc/Resources/Quick Reference.pdf)
 
 ## Development
