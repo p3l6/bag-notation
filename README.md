@@ -22,7 +22,7 @@ Some editors that support bag notation:
 
 ## Documentation
 
-[Documetation](/Documentation.docc/Documentation.md)
+[Documentation](/Documentation.docc/Documentation.md)
 
 [Sample Tunes](/Sample%20Tunes/)
 

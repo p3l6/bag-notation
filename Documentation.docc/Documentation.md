@@ -14,7 +14,7 @@ Existing toolchains can then be used to convert the abc to a pdf. Converting str
 
 Primary notation format: ``Language``.
 
-[Quick Reference](/Documentation.docc/Resources/Quick Reference.pdf)
+[Quick Reference](/Documentation.docc/Resources/Quick%20Reference.pdf)
 
 A quick reference with examples (not exhaustive) of common notation. The source for this can be found in `repo/Sample Tunes/Quick Reference.bag`. 
 
