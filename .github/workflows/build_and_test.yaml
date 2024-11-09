@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: swift-actions/setup-swift@v2
+      - uses: swift-actions/setup-swift@736b146b8f26e7a66cbe3a89bc8d413ac0ea536e # v2 does not have swift 6 yet
         with:
           swift-version: "6.0"
       - name: Build
