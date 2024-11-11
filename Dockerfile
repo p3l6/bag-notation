@@ -17,7 +17,7 @@ ADD . /src/
 
 RUN (cd /src/ && swift build)
 
-RUN cp /src/.build/aarch64-unknown-linux-gnu/debug/bag /bin/bag
+RUN cp /src/$(swift build --show-bin-path -c debug)/bag /bin/bag
 RUN cp /src_abc/abcm2ps/abcm2ps /bin/abcm2ps
 
 COPY <<"EOF" /bin/make_pdf.sh
