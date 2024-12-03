@@ -6,6 +6,7 @@
 public class AbcWriter {
     let doc: Doc
     var abc = ""
+    public var landscape = false
 
     public init(_ doc: Doc) { self.doc = doc }
 
@@ -41,12 +42,10 @@ public class AbcWriter {
         %%nowrap 1
         %%gracespace 10 6 10
         %%flatbeamgracing 1
+        %% landscape \(landscape ? 1 : 0)
         \(revisionLines)
 
         """
-
-        // TODO: Option to enable landscape
-        // %% landscape 1
     }
 }
 

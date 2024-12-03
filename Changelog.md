@@ -9,7 +9,8 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
-_n/a_
+- New: Tree sitter highlight queries
+- New: CLI flag to format in landscape mode
 
 ## [0.1.0] - 11 Nov 2024
 
