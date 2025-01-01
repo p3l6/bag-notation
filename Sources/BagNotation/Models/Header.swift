@@ -112,11 +112,11 @@ extension TimeSignature {
         switch string {
         case "2/2": .time22
         case "2/4": .time24
-        case "3/2": .time22
+        case "3/2": .time32
         case "3/4": .time34
         case "4/4": .time44
         case "5/4": .time54
-        case "6/4": .time54
+        case "6/4": .time64
         case "6/8": .time68
         case "9/8": .time98
         case "12/8": .time128
