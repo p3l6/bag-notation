@@ -199,8 +199,7 @@ private final class HeaderModeler: LeafModeler {
             timeSignature: try fields[.time]?.value.toTimeSignature() ?? style.impliedTimeSignature ?! ModelParseError.missingTuneTimeSignature,
             tempo: try fields[.tempo]?.asTempo(),
             revision: fields[.rev]?.value,
-            forceNewPage: fields[.newpage] != nil
-        )
+            forceNewPage: fields[.newpage] != nil)
     }
 
     func model() -> Header { header }
@@ -337,7 +336,7 @@ private final class BarModeler: Modeler {
 
     func provideContext(private head: FlowContext, body: BarContextBody) throws -> FlowContext {
         var flow = head
-        var number  = 0
+        var number = 0
 
         for element in elements {
             switch element {
@@ -443,7 +442,7 @@ private final class RestModeler: Modeler {
         field = try FieldModeler(node: node, textSource: textSource).model()
     }
 
-    func provideContext(private head: FlowContext, body: Void) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body _: Void) throws -> FlowContext {
         content = try field.asRest(baseDuration: head.noteLength)
         return head
     }
@@ -452,7 +451,6 @@ private final class RestModeler: Modeler {
         content
     }
 }
-
 
 private final class NoteModeler: Modeler {
     let node: Node
@@ -485,7 +483,7 @@ private final class NoteModeler: Modeler {
         tied = connector == "_"
         continuesTuplet = connector == "-"
         slurred = connector == "~"
-        
+
         accidental = nil
         fermata = false
         chord = nil

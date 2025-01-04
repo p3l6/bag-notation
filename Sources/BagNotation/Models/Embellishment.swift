@@ -86,7 +86,6 @@ extension EmbellishmentType {
         case "ntt", "ntnt": .birl(withLeadingGrace: false, withInitialA: true)
         case "xtt", "xntnt": .birl(withLeadingGrace: true, withInitialA: true)
         case "ptt", "pntnt": .birlWithDGracenote
-
         default: throw NoteParseError.unknownEmbellishment
         }
     }
@@ -101,11 +100,11 @@ extension String {
 private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) throws -> [Pitch] {
     let pitchesWithNils: [Pitch?] = switch (emb, from, pitch) {
     case let (.literal(pitches), _, _): pitches
-
+    // singlings
     case (.singling, .highG, .lowG ... .f): [.highA]
     case (.singling, _, .lowG ... .f): [.highG]
     case (.singling, _, .highG): [.highA]
-
+    // taps
     case (.tap, _, .highA): [.highG]
     case let (.tap(soft), _, .highG): soft ? [.e] : [.f]
     case (.tap, _, .f): [.e]
@@ -114,7 +113,7 @@ private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) 
     case let (.tap(soft), _, .c): soft ? [.b] : [.lowG]
     case let (.tap(soft), _, .b): soft ? [.lowA] : [.lowG]
     case (.tap, _, .lowA): [.lowG]
-
+    // doublings
     case (.doubling, _, .highA): [.highA, .highG]
     case let (.doubling(half), _, .highG): half ? [.highG, .highA] : [.highG, .f]
     case let (.doubling(half), from, .f): half ? [.f, .highG] : [from == .highG ? .highA : .highG, .f, .highG]
@@ -124,7 +123,7 @@ private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) 
     case let (.doubling(half), from, .b): half ? [.b, .d] : [from == .highG ? .highA : .highG, .b, .d]
     case let (.doubling(half), from, .lowA): half ? [.lowA, .d] : [from == .highG ? .highA : .highG, .lowA, .d]
     case let (.doubling(half), from, .lowG): half ? [.lowG, .d] : [from == .highG ? .highA : .highG, .lowG, .d]
-
+    // grips
     case (.grip, _, .d): [.lowG, .e, .lowG]
     case (.grip, .d, .lowA): [.lowG, .b, .lowG]
     case (.grip, _, _): [.lowG, .d, .lowG]
@@ -134,12 +133,12 @@ private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) 
     case let (.odro(withLeadingGrace), _, .c): withLeadingGrace ? [.highG, .c, .lowG, .d, .lowG] : [.c, .lowG, .d, .lowG]
     case (.odro(true), .highG, .b): [.highA, .b, .lowG, .d, .lowG]
     case let (.odro(withLeadingGrace), _, .b): withLeadingGrace ? [.highG, .b, .lowG, .d, .lowG] : [.b, .lowG, .d, .lowG]
-
+    // "luaths"
     case (.taorluath, .d, .lowA): [.lowG, .b, .lowG, .e]
     case (.taorluath, _, .lowG ... .d): [.lowG, .d, .lowG, .e]
     case (.crunluath, .d, .e): [.lowG, .b, .lowG, .e, .lowA, .f, .lowA]
     case (.crunluath, _, .e): [.lowG, .d, .lowG, .e, .lowA, .f, .lowA]
-
+    // throws
     case (.anyThrow, .f, .highG): [.e, .highG, .e, .f, .e]
     case (.anyThrow, _, .highG): [.f, .e, .highG, .e, .f, .e]
     case (.anyThrow, _, .f): [.f, .e, .highG, .e]
@@ -147,7 +146,7 @@ private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) 
     case (.anyThrow, .lowG, .d): [.d, .c]
     case (.anyThrow, _, .d): [.lowG, .d, .c]
     case (.anyThrow, _, .b): [.lowG, .d, .lowG, .c, .lowG]
-
+    // strikes
     case (.strike(false, false), .highG, .f): [.highA, .f, .e]
     case (.strike(false, false), _, .f): [.highG, .f, .e]
     case (.strike(false, false), .highG, .e): [.highA, .e, .lowA]
@@ -160,19 +159,17 @@ private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) 
     case (.strike(let half, false), _, .b): [half ? nil : .highG, .b, .lowG]
     case (.strike(false, false), .highG, .lowA): [.highA, .lowA, .lowG]
     case (.strike(false, false), _, .lowA): [.highG, .lowA, .lowG]
-
     case let (.pelay(light), .highG, .d): [.highA, .d, .e, light ? .c : .d, .lowG]
     case let (.pelay(light), _, .d): [.highG, .d, .e, light ? .c : .d, .lowG]
     case (.pelay, .highG, .c): [.highA, .c, .e, .c, .lowG]
     case (.pelay, _, .c): [.highG, .c, .e, .c, .lowG]
     case (.pelay, .highG, .b): [.highA, .b, .e, .b, .lowG]
     case (.pelay, _, .b): [.highG, .b, .e, .b, .lowG]
-
+    // birls
     case (.birl(true, _), .highG, .lowA): [.highA, .lowA, .lowG, .lowA, .lowG]
     case (.birl(true, _), _, .lowA): [.highG, .lowA, .lowG, .lowA, .lowG]
     case (.birl(false, let withInitialA), _, .lowA): [withInitialA ? .lowA : nil, .lowG, .lowA, .lowG]
     case (.birlWithDGracenote, _, .lowA): [.d, .lowA, .lowG, .lowA, .lowG]
-
     default: throw ModelParseError.invalidEmbellishment
     }
 

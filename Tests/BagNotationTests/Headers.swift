@@ -133,16 +133,16 @@ struct Headers {
             by: trad
             title: Second
             style: jig
-            """)}
+            """) }
 
         #expect(throws: LocatedModelParseError.self) { try makeHeader(from: """
             style: march
             title: First
             by: trad
             style: jig
-            """)}
+            """) }
     }
-    
+
     @Test
     func conflictingComposers() throws {
         #expect(throws: LocatedModelParseError.self) { try makeHeader(from: """
@@ -150,6 +150,6 @@ struct Headers {
             by: someone
             trad
             style: jig
-            """)}
+            """) }
     }
 }

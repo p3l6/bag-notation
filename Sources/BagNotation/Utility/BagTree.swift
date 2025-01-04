@@ -41,7 +41,7 @@ public class BagTree: NodeSourceTextProvider {
         }
     }
 
-    func walk(onNode: (Node) -> Void, onDecend: (()->Void)? = nil, onAscend: (()->Void)? = nil) {
+    func walk(onNode: (Node) -> Void, onDecend: (() -> Void)? = nil, onAscend: (() -> Void)? = nil) {
         let cursor = rootNode.treeCursor
         while let currentNode = cursor.currentNode {
             onNode(currentNode)
@@ -70,11 +70,11 @@ public class BagTree: NodeSourceTextProvider {
     }
 
     func text(for range: InlineRange) -> String {
-        return String(source[stringIndexes(for: range)])
+        String(source[stringIndexes(for: range)])
     }
 
     func text(of node: Node) -> String {
-        return String(source[stringIndexes(for: node.inlineRange)])
+        String(source[stringIndexes(for: node.inlineRange)])
     }
 }
 
@@ -174,10 +174,10 @@ protocol NodeSourceTextProvider {
 
 extension Node {
     var inlineRange: InlineRange {
-    // TODO: guard that this node is on a single line
+        // TODO: guard that this node is on a single line
         InlineRange(line: Int(pointRange.lowerBound.row),
-                    lowerBound: Int(pointRange.lowerBound.column)/2,
-                    upperBound: Int(pointRange.upperBound.column)/2)
+                    lowerBound: Int(pointRange.lowerBound.column) / 2,
+                    upperBound: Int(pointRange.upperBound.column) / 2)
     }
 
     func trimmedText(from source: NodeSourceTextProvider) -> String { source.text(of: self).trimmingCharacters(in: .whitespacesAndNewlines) }

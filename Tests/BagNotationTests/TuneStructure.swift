@@ -67,6 +67,6 @@ struct TuneStructure {
 
         let doc = try makeFile(from: source)
         #expect(doc.tunes.count == 1)
-        #expect(doc.tunes[0].lines.count == 0)
+        #expect(doc.tunes[0].lines.isEmpty)
     }
 }

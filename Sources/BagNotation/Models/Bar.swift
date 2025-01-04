@@ -5,7 +5,7 @@
 
 public struct Bar {
     let context: BarContext
-    
+
     enum BarContent {
         case cluster(cluster: Cluster)
         case rest(duration: Duration)

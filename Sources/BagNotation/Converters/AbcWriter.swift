@@ -15,37 +15,37 @@ public class AbcWriter {
     }
 
     func formatSpecs() -> String {
-        let revision = doc.tunes.compactMap { $0.header.revision }.first
+        let revision = doc.tunes.compactMap(\.header.revision).first
         let revisionLines = if let revision {
-            "%% footerfont * 12\n%% footer \"(rev: \(revision))\t\t\"" }
-        else {
+            "%% footerfont * 12\n%% footer \"(rev: \(revision))\t\t\""
+        } else {
             "% no rev"
         }
 
         return """
-        %%writefields R
-        %%infoname R
-        %%titlefont Coronet 32
-        %%composerfont Arial 14
-        %%equalbars 1
-        %%notespacingfactor 1.5
-        %%tuplets 2 1 0 1
-        %%slurheight 2
-        %%rbmax 5
-        %%rightmargin 0.8cm
-        %%leftmargin 0.8cm
-        %%topmargin 0.8cm
-        %%bottommargin 0.8cm
-        %%maxshrink 1
-        %%linewarn 0
-        %%linebreak <EOL>
-        %%nowrap 1
-        %%gracespace 10 6 10
-        %%flatbeamgracing 1
-        %% landscape \(landscape ? 1 : 0)
-        \(revisionLines)
+            %%writefields R
+            %%infoname R
+            %%titlefont Coronet 32
+            %%composerfont Arial 14
+            %%equalbars 1
+            %%notespacingfactor 1.5
+            %%tuplets 2 1 0 1
+            %%slurheight 2
+            %%rbmax 5
+            %%rightmargin 0.8cm
+            %%leftmargin 0.8cm
+            %%topmargin 0.8cm
+            %%bottommargin 0.8cm
+            %%maxshrink 1
+            %%linewarn 0
+            %%linebreak <EOL>
+            %%nowrap 1
+            %%gracespace 10 6 10
+            %%flatbeamgracing 1
+            %% landscape \(landscape ? 1 : 0)
+            \(revisionLines)
 
-        """
+            """
     }
 }
 
@@ -151,10 +151,10 @@ extension Bar: AbcSourceConverting {
     fileprivate func abcSource() -> String {
         var abc = contents.map { element in
             switch element {
-            case .cluster(let cluster): cluster.context.head.abcSource() + cluster.abcSource()
-            case .rest(let duration): "z" + duration.abcSource()
+            case let .cluster(cluster): cluster.context.head.abcSource() + cluster.abcSource()
+            case let .rest(duration): "z" + duration.abcSource()
             case .barRest: "Z"
-            case .spacer(let duration): "x" + duration.abcSource()
+            case let .spacer(duration): "x" + duration.abcSource()
             case .barSpacer: "X"
             }
         }.joined(separator: " ")
@@ -244,7 +244,7 @@ extension Note: AbcSourceConverting {
         }
 
         abc += duration.abcSource()
-        
+
         if tiedToNext {
             abc += "-"
         }

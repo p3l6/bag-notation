@@ -36,14 +36,11 @@ public enum ModelParseError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .fileParseError: "File parsing error"
-
         case let .duplicateUniqueNodeChildren(type): "Node has duplicate children of type: \(type)"
         case .duplicateHeaderFields: "Duplicate header fields"
         case .duplicateComposers: "Duplicate composers"
-
         case let .unexpectedNodeType(type): "Unexpected node type: \(type)"
         case let .unexpectedField(label): "A field with this label was unexpected here: \(label.rawValue)"
-
         case .missingNodeChild: "Node is missing a required child"
         case .missingFunctionImplementation: "Internal error: function implementation is missing"
         case .missingFieldValue: "Field is missing value"
@@ -51,7 +48,6 @@ public enum ModelParseError: Error, LocalizedError {
         case .missingTuneComposer: "Tune missing composer"
         case .missingTuneStyle: "Tune missing style"
         case .missingTuneTimeSignature: "Tune missing time signature"
-
         case .invalidEmbellishment: "Invalid embellishment"
         case .invalidStyle: "Invalid style"
         case .invalidTimeSignature: "Invalid time signature"
@@ -70,6 +66,6 @@ public struct LocatedModelParseError: Error, LocalizedError {
     let location: InlineRange
 
     public var errorDescription: String? {
-        "\(location.line+1)[\(location.lowerBound+1)-\(location.upperBound)]: \(base.errorDescription!)"
+        "\(location.line + 1)[\(location.lowerBound + 1)-\(location.upperBound)]: \(base.errorDescription!)"
     }
 }

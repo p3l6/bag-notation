@@ -79,6 +79,7 @@ public enum TimeSignature {
 extension TuneStyle {
     static func from(string: String) throws -> TuneStyle {
         switch string.lowercased() {
+        // marches
         case "march": .march(timeSig: nil)
         case "2/4 march": .march(timeSig: .time24)
         case "3/4 march": .march(timeSig: .time34)
@@ -88,14 +89,14 @@ extension TuneStyle {
         case "6/8 march": .march(timeSig: .time68)
         case "9/8 march": .march(timeSig: .time98)
         case "12/8 march": .march(timeSig: .time128)
-
+        // dances
         case "strathspey": .strathspey
         case "reel": .reel
         case "hornpipe": .hornpipe
         case "jig": .jig(timeSig: .time68)
         case "9/8 jig": .jig(timeSig: .time98)
         case "12/8 jig": .jig(timeSig: .time128)
-
+        // misc
         case "slow air": .slowAir
         case "slow march": .slowMarch
         case "piob", "piobaireachd": .piob

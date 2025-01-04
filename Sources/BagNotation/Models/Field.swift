@@ -37,13 +37,12 @@ public struct Field {
         case "0", "1", "2", "3", "4": .v
         default: throw ModelParseError.invalidField
         }
-        
+
         _value = switch shorthand {
         case "0": nil
         case "1", "2", "3", "4": shorthand
         default: nil
         }
-
     }
 
     func asVariation() -> Variation {

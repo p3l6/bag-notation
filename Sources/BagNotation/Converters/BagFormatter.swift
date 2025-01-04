@@ -10,7 +10,7 @@ public struct BagFormatter {
     let source: String
     let tree: BagTree
 
-    public init(_ source: String) { 
+    public init(_ source: String) {
         self.source = source
         tree = BagTree(source)
     }
@@ -29,7 +29,7 @@ public struct BagFormatter {
                 a.node.pointRange.lowerBound.column < b.node.pointRange.lowerBound.column
             }
 
-            var pendingLeadingField: InlineRange? = nil
+            var pendingLeadingField: InlineRange?
             for m in markers {
                 let markerRange = m.node.inlineRange
                 switch m.nameComponents.first! {
@@ -53,7 +53,7 @@ public struct BagFormatter {
                     let type: Block.BlockType = pickup ? .pickup : .bar(index: barCount)
                     alignmentBlocks.append(Block(type: type, range: range, textProvider: tree, paddingHint: pickup ? .absoluteStart : .lastFlex))
                     barlineRanges.append(markerRange)
-                    if !pickup { barCount += 1 } else {pickupAlreadyFound = true}
+                    if !pickup { barCount += 1 } else { pickupAlreadyFound = true }
                     column = markerRange.upperBound
                 default: throw FormattingError.unexpectedCaptureType
                 }
@@ -91,8 +91,8 @@ private func isLikelyPickup(node barlineNode: Node) -> Bool {
     // TODO: if it fully compiles, add hint for "voices with pickups"
     let barNode = barlineNode.parent!
     let voiceNode = barNode.parent!
-    let clusters = (0 ..< barNode.childCount).count { barNode.child(at:$0)?.nodeType == NodeType.cluster.rawValue }
-    let bars = (0 ..< voiceNode.childCount).count { voiceNode.child(at:$0)?.nodeType == NodeType.bar.rawValue }
+    let clusters = (0 ..< barNode.childCount).count { barNode.child(at: $0)?.nodeType == NodeType.cluster.rawValue }
+    let bars = (0 ..< voiceNode.childCount).count { voiceNode.child(at: $0)?.nodeType == NodeType.bar.rawValue }
     return clusters <= 1 && bars > 4
 }
 
@@ -133,8 +133,8 @@ struct Block {
 
         let spaces = try! text.ranges(of: Regex(" +"))
         flexibleRanges = spaces
-            .map{ $0.lowerBound.utf16Offset(in: text)  ..< $0.upperBound.utf16Offset(in: text) }
-            .map{ range.rangeFor(relativeRange: $0) }
+            .map { $0.lowerBound.utf16Offset(in: text) ..< $0.upperBound.utf16Offset(in: text) }
+            .map { range.rangeFor(relativeRange: $0) }
 
         idealWidth = flexibleRanges.reduce(text.count) { fullWidth, flex in fullWidth - (flex.width - 1) }
     }
@@ -148,7 +148,7 @@ struct Block {
         let extraPadding = target - (actualStartCol + idealWidth)
 
         var flexes = flexibleRanges
-        var leadingFlex =  InlineRange(line: range.line, lowerBound: range.lowerBound, upperBound: range.lowerBound)
+        var leadingFlex = InlineRange(line: range.line, lowerBound: range.lowerBound, upperBound: range.lowerBound)
         if let first = flexes.first, first.lowerBound == range.lowerBound {
             leadingFlex = flexes.removeFirst()
         }
@@ -165,16 +165,16 @@ struct Block {
 
         // TODO: test case where bar0 is longer than the pickup line pushing it out
 
-        var leadingSize = if paddingHint == .absoluteStart { extraPadding + (leadingFlex.width == 0 ? 0 : 1)}
+        var leadingSize = if paddingHint == .absoluteStart { extraPadding + (leadingFlex.width == 0 ? 0 : 1) }
         else if paddingHint == .lastFlex && midFlex == nil { extraPadding + (leadingFlex.width == 0 ? 0 : 1) }
         else if leadingFlex.width == 0 { 0 }
         else { 1 }
 
-        let trailingSize = if paddingHint == .absoluteEnd {extraPadding + (trailingFlex.width == 0 ? 0 : 1) }
+        let trailingSize = if paddingHint == .absoluteEnd { extraPadding + (trailingFlex.width == 0 ? 0 : 1) }
         else if trailingFlex.width == 0 { 0 }
         else { 1 }
 
-        var midSize = if paddingHint == .lastFlex { extraPadding + 1}
+        var midSize = if paddingHint == .lastFlex { extraPadding + 1 }
         else { 1 }
 
         switch type {
@@ -200,7 +200,7 @@ struct Block {
 
         if let midFlex, let mod = try ModifiedRange(range: midFlex, replacement: .spaces(count: midSize)) {
             modifications.append(mod)
-        } 
+        }
 
         if let mod = try ModifiedRange(range: trailingFlex, replacement: .spaces(count: trailingSize)) {
             modifications.append(mod)
@@ -208,7 +208,6 @@ struct Block {
 
         return modifications
     }
-
 }
 
 struct FormatGroup {
@@ -219,8 +218,8 @@ struct FormatGroup {
 
         init(blocks: [Block], index: Int) {
             self.index = index
-            self.blocks = blocks.sorted(by: { $0.type < $1.type }) 
-            self.guide = blocks.reduce(into: AlignmentGuide()) { $0.require(width: $1.idealWidth, for: $1.type)}
+            self.blocks = blocks.sorted(by: { $0.type < $1.type })
+            guide = blocks.reduce(into: AlignmentGuide()) { $0.require(width: $1.idealWidth, for: $1.type) }
         }
 
         func modifications(for ideal: AlignmentGuide) throws -> [ModifiedRange] {
@@ -228,35 +227,36 @@ struct FormatGroup {
             return try blocks.flatMap {
                 let column = $0.range.lowerBound + totalDiffs
                 let mods = try $0.modifications(for: ideal, actualStartCol: column)
-                totalDiffs += mods.reduce(0, { $0 + $1.diff })
+                totalDiffs += mods.reduce(0) { $0 + $1.diff }
                 return mods
             }
         }
     }
+
     var lines = [Line]()
-    private var indexes =   Set<Int>()
-    var ideal  = AlignmentGuide()
+    private var indexes = Set<Int>()
+    var ideal = AlignmentGuide()
 
     func modifications() throws -> [ModifiedRange] {
         try lines.flatMap { try $0.modifications(for: ideal) }
     }
 
     private func acceptsLine(_ line: Line) -> Bool {
-        indexes.count == 0 || indexes.contains(line.index)
+        indexes.isEmpty || indexes.contains(line.index)
     }
 
     private mutating func addLine(_ line: Line) {
         lines.append(line)
-        indexes.formUnion([line.index-1, line.index, line.index+1])
+        indexes.formUnion([line.index - 1, line.index, line.index + 1])
         ideal.merge(line.guide)
     }
 
     static func groups(from blocks: [Block]) -> [FormatGroup] {
         let lines = Dictionary(grouping: blocks, by: { $0.range.line })
-            .map { (key, value) in
+            .map { key, value in
                 Line(blocks: value, index: Int(key))
             }
-            .sorted() { $0.index < $1.index }
+            .sorted { $0.index < $1.index }
 
         var groups = [FormatGroup]()
         var group = FormatGroup()
@@ -267,7 +267,7 @@ struct FormatGroup {
             }
             group.addLine(line)
         }
-        if group.lines.count != 0 { groups.append(group) }
+        if !group.lines.isEmpty { groups.append(group) }
         return groups
     }
 }
@@ -289,7 +289,7 @@ struct AlignmentGuide {
     }
 
     func range(of block: Block.BlockType) -> Range<Int> {
-        return ranges[block]! // TODO: handle error here
+        ranges[block]! // TODO: handle error here
     }
 
     private mutating func rebuildRanges() {
@@ -316,7 +316,7 @@ public struct ModifiedRange: CustomStringConvertible, Comparable {
 
     let range: InlineRange
     let replacement: Replacement
-    
+
     init?(range: InlineRange, replacement: Replacement) throws {
         if case let .spaces(count) = replacement, count == range.width { return nil }
         if case let .spaces(count) = replacement, count <= 0 { throw FormattingError.negativeWidth }
@@ -359,10 +359,9 @@ public struct ModifiedRange: CustomStringConvertible, Comparable {
 
     public static func == (lhs: ModifiedRange, rhs: ModifiedRange) -> Bool {
         lhs.range.line == rhs.range.line
-        && lhs.range.lowerBound == rhs.range.lowerBound
+            && lhs.range.lowerBound == rhs.range.lowerBound
     }
 }
-
 
 // TODO: add spaces near barlines
 // TODO: remove spaces inside and touching field parens; leading label colons

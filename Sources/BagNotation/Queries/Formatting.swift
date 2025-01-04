@@ -1,8 +1,6 @@
 //
 //  Formatting.swift
-//
-//
-//  Created by Paul Landers on 4/26/24.
+//  Bag Notation
 //
 
 // TODO: Add a build step to generate this file from the real query files
@@ -11,15 +9,15 @@
 
 extension BagTree {
     static let formattingQuery = """
-(voice
-  .
-  (field)? @leadingField
-  .
-  (barline)? @leadingBarline
-  .
-  (bar
-    (barline) @normalBarline
-  )+
-)
-"""
+        (voice
+          .
+          (field)? @leadingField
+          .
+          (barline)? @leadingBarline
+          .
+          (bar
+            (barline) @normalBarline
+          )+
+        )
+        """
 }

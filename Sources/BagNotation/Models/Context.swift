@@ -17,7 +17,7 @@ public struct FlowContext {
     let noteLength: Duration
     let tempo: Int?
     let variation: Variation
-    
+
     let previousPitch: Pitch
 
     let upcomingAnnotation: String?
@@ -30,12 +30,12 @@ public struct FlowContext {
         self.noteLength = noteLength
         self.tempo = tempo
 
-        self.previousPitch = .e
-        self.variation = .none
-        self.upcomingAnnotation = nil
-        self.upcomingFermata = false
-        self.upcomingAccidental = nil
-        self.upcomingChord = nil
+        previousPitch = .e
+        variation = .none
+        upcomingAnnotation = nil
+        upcomingFermata = false
+        upcomingAccidental = nil
+        upcomingChord = nil
     }
 
     init(from base: FlowContext,
