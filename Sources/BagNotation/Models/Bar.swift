@@ -44,10 +44,10 @@ public enum Barline {
 extension Barline {
     static func from(string: String) throws -> Barline {
         switch string {
-        case "|": .plain
-        case "|:": .repeatStart
-        case ":|": .repeatEnd
-        case "||": .double
+        case "|", "i": .plain
+        case "|:", "i:": .repeatStart
+        case ":|", ":i": .repeatEnd
+        case "||", "ii", "i|", "|i": .double
         default: throw ModelParseError.invalidBarline
         }
     }

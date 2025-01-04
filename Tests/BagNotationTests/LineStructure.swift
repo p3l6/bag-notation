@@ -38,6 +38,13 @@ struct LineStructure {
     }
 
     @Test
+    func alternateBarlines() throws {
+        let line = try makeLineVoice(from: "ii abc def i: abc def i abc def :i abc def |i abc def i|")
+        #expect(line.leadingBarline == .partStart)
+        #expect(line.bars.map(\.trailingBarline) == [.repeatStart, .plain, .repeatEnd, .double, .partEnd])
+    }
+
+    @Test
     func clusters() throws {
         let line = try makeLineVoice(from: "| abc def | abcdef | ab cd ef |")
         #expect(line.bars.map(\.contents.count) == [2, 1, 3])

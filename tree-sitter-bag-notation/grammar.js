@@ -26,7 +26,7 @@ module.exports = grammar({
 
     //// Bars
     bar: $ => seq(repeat($._bar_content), prec(-1, $.barline)),
-    barline: $ => /:?\|+:?/,
+    barline: $ => /:?[|i]+:?/,
     _bar_content: $ => choice(prec(-1, $.field), $.cluster),
 
     //// Notes and clusters

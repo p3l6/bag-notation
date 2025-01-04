@@ -18,3 +18,25 @@ Barlines
       (bar (cluster (note (pitch))) (barline))
       (bar (cluster (note (pitch))) (barline))
       (bar (cluster (note (pitch))) (barline)))))
+
+
+=====>>
+Alternate Barlines
+=====>>
+
+---
+---
+
+|| a i b ii c i: d :i e ||
+
+----->>
+
+(file (tune
+  (header)
+    (voice
+      (barline)
+      (bar (cluster (note (pitch))) (barline))
+      (bar (cluster (note (pitch))) (barline))
+      (bar (cluster (note (pitch))) (barline))
+      (bar (cluster (note (pitch))) (barline))
+      (bar (cluster (note (pitch))) (barline)))))

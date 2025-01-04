@@ -62,7 +62,7 @@ repository:
 
   barline:
     name: keyword.operator.barline.bag
-    match: ':?\|+:?'
+    match: ':?[|i]+:?'
 
   migrationFailure:
     name: invalid.illegal.migration

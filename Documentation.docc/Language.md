@@ -53,7 +53,7 @@ All characters in the file are expected be from the ascii character set.
 | `label: value`   | A field, in the context of a tune header
 | `&^',=01234`     | Shorthand field labels
 | `---`            | Header begin and end marker
-| `| |: || :|`     | Barline markers
+| `| |: || :| i`   | Barline markers
 | `#`              | Comment marker
 | `_ ~ -`          | Tie, slur, and triplet/tuplet markers
 | `+ / .`          | Doubles, cuts, or dots the duration of notes
@@ -182,7 +182,8 @@ Every line should have at least one bar (unless it's completely blank), that mea
 Each bar consists of a series of note clusters or fields, and ends with a barline. A bar must contain at least one of these items.
 Whitespace is required between the final cluster in a bar and the barline; and between any cluster and a field parentheses.
 
-Valid barlines are `|` or `||` or `:|` or `|:`. The beginning and end of parts should use the double barline.
+Canonical barlines are `|` or `||` or `:|` or `|:`. The beginning and end of parts should use the double barline.
+Alternatively, the letter `i` may be used in place of the pipe character, such as `i ii i: :i`. This is a shortcut due to the inconvenience of typing a pipe on many keyboards. While any of these alternate forms will parse as valid barlines, they are not preferred, and so they will be replaced by the canonical versions when auto-formatter command.
 
 ## Clusters and Notes
 
