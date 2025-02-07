@@ -13,6 +13,7 @@ Types of changes: New, Improved, Fixed, Removed.
 - New: CLI flag to format in landscape mode
 - Fixed: An issue parsing 3/2 and 6/4 time signatures
 - New: Added 'i' to barline parsing, as an alternative to the pipe caracter
+- Fixed: Remove API that requires swift version 6
 
 ## [0.1.0] - 11 Nov 2024
 

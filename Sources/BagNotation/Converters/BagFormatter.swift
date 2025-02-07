@@ -91,8 +91,8 @@ private func isLikelyPickup(node barlineNode: Node) -> Bool {
     // TODO: if it fully compiles, add hint for "voices with pickups"
     let barNode = barlineNode.parent!
     let voiceNode = barNode.parent!
-    let clusters = (0 ..< barNode.childCount).count { barNode.child(at: $0)?.nodeType == NodeType.cluster.rawValue }
-    let bars = (0 ..< voiceNode.childCount).count { voiceNode.child(at: $0)?.nodeType == NodeType.bar.rawValue }
+    let clusters = (0 ..< barNode.childCount).compactMap(barNode.child(at:)).filter{ $0.nodeType == NodeType.cluster.rawValue }.count
+    let bars = (0 ..< voiceNode.childCount).compactMap(voiceNode.child(at:)).filter{ $0.nodeType == NodeType.bar.rawValue }.count
     return clusters <= 1 && bars > 4
 }
 
