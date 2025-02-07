@@ -7,7 +7,7 @@ import ArgumentParser
 import BagNotation
 
 struct Abc: AsyncParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         abstract: "Convert bag notation to abc notation."
     )
 

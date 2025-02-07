@@ -92,7 +92,7 @@ public struct Field {
     }
 }
 
-public enum FieldLabel: String {
+public enum FieldLabel: String, Sendable {
     case title
     case by
     case arr

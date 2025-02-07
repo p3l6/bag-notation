@@ -6,7 +6,7 @@
 import ArgumentParser
 
 struct Summary: AsyncParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         abstract: """
             Creates a summary of a group of bag notation files.
             The summary will include the first two bars of each tune, grouped by style and time signature.

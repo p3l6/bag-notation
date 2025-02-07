@@ -10,6 +10,7 @@ Types of changes: New, Improved, Fixed, Removed.
 ## [Unreleased]
 
 - New: Added zed extension
+- Improved: Uses strict concurrency for swift 6 language mode
 
 ## [0.4.1] - 14 Feb 2025
 

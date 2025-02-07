@@ -11,7 +11,8 @@ public class AbcWriter {
     public init(_ doc: Doc) { self.doc = doc }
 
     public func makeAbc() throws -> String {
-        formatSpecs() + doc.tunes.mapToAbc(joined: "\n\n")
+        let ctx = AbcActiveContext()
+        return formatSpecs() + doc.tunes.mapToAbc(joined: "\n\n", ctx: ctx)
     }
 
     func formatSpecs() -> String {
@@ -49,20 +50,18 @@ public class AbcWriter {
     }
 }
 
-private var activeFlow: FlowContext!
-
 extension Tune: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
-        activeFlow = context.head
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
+        ctx.activeFlow = context.head
 
-        var abc = header.abcSource() + "\n"
-        abc += lines.mapToAbc(joined: "\n")
+        var abc = header.abcSource(ctx: ctx) + "\n"
+        abc += lines.mapToAbc(joined: "\n", ctx: ctx)
         return abc
     }
 }
 
 extension Header: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         let tempoLine = if let tempo {
             "Q:\(timeSignature.beatLength.representedNote())=\(tempo)"
         } else {
@@ -77,8 +76,8 @@ extension Header: AbcSourceConverting {
             X:1
             T:\(title)
             C:\(composer)\(arranger)
-            R:\(style.abcSource())
-            M:\(timeSignature.abcSource())
+            R:\(style.abcSource(ctx: ctx))
+            M:\(timeSignature.abcSource(ctx: ctx))
             L:1/8
             \(tempoLine)
             K:HP
@@ -87,7 +86,7 @@ extension Header: AbcSourceConverting {
 }
 
 extension TuneStyle: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         switch self {
         case .march: "March"
         case .hornpipe: "Hornpipe"
@@ -105,7 +104,7 @@ extension TuneStyle: AbcSourceConverting {
 }
 
 extension TimeSignature: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         switch self {
         case .time22: "2/2"
         case .time24: "2/4"
@@ -122,70 +121,68 @@ extension TimeSignature: AbcSourceConverting {
 }
 
 extension Line: AbcSourceConverting {
-    static var currentVoiceCount = 0
-
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         var abc = ""
-        if voices.count != Self.currentVoiceCount {
+        if voices.count != ctx.currentVoiceCount {
             abc += "%%staves \((0 ..< voices.count).map(String.init).joined(separator: " "))\n"
-            Self.currentVoiceCount = voices.count
+            ctx.currentVoiceCount = voices.count
         }
-        abc += voices.mapToAbc(joined: "\n")
+        abc += voices.mapToAbc(joined: "\n", ctx: ctx)
         return abc
     }
 }
 
 extension Voice: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         var abc = "[V: \(context.body.voiceNumber)] "
-        abc += leadingBarline?.abcSource() ?? ""
+        abc += leadingBarline?.abcSource(ctx: ctx) ?? ""
         abc += " "
-        abc += bars.mapToAbc(joined: " ")
+        abc += bars.mapToAbc(joined: " ", ctx: ctx)
         // ends a possible variation here
-        activeFlow = context.tail
+        ctx.activeFlow = context.tail
         return abc
     }
 }
 
 extension Bar: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         var abc = contents.map { element in
             switch element {
-            case let .cluster(cluster): cluster.context.head.abcSource() + cluster.abcSource()
-            case let .rest(duration): "z" + duration.abcSource()
+            case let .cluster(cluster): cluster.context.head.abcSource(ctx: ctx) + cluster.abcSource(ctx: ctx)
+            case let .rest(duration): "z" + duration.abcSource(ctx: ctx)
             case .barRest: "Z"
-            case let .spacer(duration): "x" + duration.abcSource()
+            case let .spacer(duration): "x" + duration.abcSource(ctx: ctx)
             case .barSpacer: "X"
             }
         }.joined(separator: " ")
         abc += " "
-        abc += trailingBarline.abcSource()
+        abc += trailingBarline.abcSource(ctx: ctx)
         return abc
     }
 }
 
 extension FlowContext: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         var abc = ""
-        if variation != activeFlow.variation {
+        if variation != ctx.activeFlow.variation {
             switch variation {
             case .none: abc += " ] "
             case let .other(label): abc += " [\"\(label)\" "
             }
         }
-        if let tempo, tempo != activeFlow.tempo {
+        if let tempo, tempo != ctx.activeFlow.tempo {
             abc += "[Q:\(timeSignature.beatLength.representedNote())=\(tempo)]"
         }
-        if timeSignature != activeFlow.timeSignature {
-            abc += "[M:\(timeSignature.abcSource())]"
+        if timeSignature != ctx.activeFlow.timeSignature {
+            abc += "[M:\(timeSignature.abcSource(ctx: ctx))]"
         }
-        activeFlow = self
+        ctx.activeFlow = self
         return abc
     }
 }
 
 extension Barline: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         switch self {
         case .plain: "|"
         case .partStart: "[|"
@@ -198,15 +195,13 @@ extension Barline: AbcSourceConverting {
 }
 
 extension Cluster: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
-        notes.mapToAbc()
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
+        notes.mapToAbc(ctx: ctx)
     }
 }
 
 extension Note: AbcSourceConverting {
-    static var closeNextSlur = false
-
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         var abc = ""
         if let annotation {
             abc += " \"^\(annotation)\" "
@@ -221,7 +216,7 @@ extension Note: AbcSourceConverting {
         }
 
         if let embellishment {
-            abc += "{\(embellishment.pitches.mapToAbc())}"
+            abc += "{\(embellishment.pitches.mapToAbc(ctx: ctx))}"
         }
 
         if fermata {
@@ -238,22 +233,22 @@ extension Note: AbcSourceConverting {
         }
 
         if let chord {
-            abc += "[\(pitch.abcSource())\(chord.abcSource())]"
+            abc += "[\(pitch.abcSource(ctx: ctx))\(chord.abcSource(ctx: ctx))]"
         } else {
-            abc += pitch.abcSource()
+            abc += pitch.abcSource(ctx: ctx)
         }
 
-        abc += duration.abcSource()
+        abc += duration.abcSource(ctx: ctx)
 
         if tiedToNext {
             abc += "-"
         }
-        if Self.closeNextSlur {
+        if ctx.closeNextSlur {
             abc += ")"
-            Self.closeNextSlur = false
+            ctx.closeNextSlur = false
         }
         if slurredToNext {
-            Self.closeNextSlur = true
+            ctx.closeNextSlur = true
         }
 
         return abc
@@ -261,7 +256,7 @@ extension Note: AbcSourceConverting {
 }
 
 extension Pitch: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         switch self {
         case .highA: "a"
         case .highG: "g"
@@ -277,7 +272,7 @@ extension Pitch: AbcSourceConverting {
 }
 
 extension Duration: AbcSourceConverting {
-    fileprivate func abcSource() -> String {
+    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         switch self {
         case .sixtyfourth: "///"
         case .sixtyfourthDotted: "3/16"
@@ -317,11 +312,17 @@ extension Duration: AbcSourceConverting {
 }
 
 private protocol AbcSourceConverting {
-    func abcSource() -> String
+    func abcSource(ctx: AbcActiveContext) -> String
+}
+
+private class AbcActiveContext {
+    var activeFlow: FlowContext!
+    var closeNextSlur = false
+    var currentVoiceCount = 0
 }
 
 private extension Array where Element: AbcSourceConverting {
-    func mapToAbc(joined: String = "") -> String {
-        map { $0.abcSource() }.joined(separator: joined)
+    func mapToAbc(joined: String = "", ctx: AbcActiveContext) -> String {
+        map { $0.abcSource(ctx: ctx) }.joined(separator: joined)
     }
 }

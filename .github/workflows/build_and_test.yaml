@@ -8,19 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: swift-actions/setup-swift@736b146b8f26e7a66cbe3a89bc8d413ac0ea536e # v2 does not have swift 6 yet
+      - uses: swift-actions/setup-swift@v2
         with:
           swift-version: "6.0"
       - name: Build
         run: swift build
       - name: Run tests
         run: swift test
-  docker:
-    name: Build docker image
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build
-        run: docker build -t bagnotation .
-      # todo: send result to a registry

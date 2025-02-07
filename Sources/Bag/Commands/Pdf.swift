@@ -8,7 +8,7 @@ import BagNotation
 import Foundation
 
 struct Pdf: AsyncParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         abstract: "Render bag notation to pdf."
     )
 

@@ -6,7 +6,7 @@
 import ArgumentParser
 
 struct Check: AsyncParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         abstract: "Check a bag notation file for parse errors."
     )
 

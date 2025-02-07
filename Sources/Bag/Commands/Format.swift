@@ -8,7 +8,7 @@ import BagNotation
 import SwiftTreeSitter
 
 struct Format: AsyncParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         abstract: "Format a bag notation file."
     )
 

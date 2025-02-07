@@ -8,7 +8,7 @@ import Foundation
 
 @main
 struct Bag: AsyncParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         abstract: "A parser for bag notation files.",
         subcommands: [Abc.self, Format.self, Pdf.self])
 

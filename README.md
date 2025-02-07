@@ -42,8 +42,9 @@ Some editors that support bag notation:
 
 ## Development
 
-As a pure swift library, xcode is not required, only the swift compiler.
+As a pure swift library, xcode is not required, only the swift compiler.  
 It will build on the linux distribution of swift as well.
+Requires swift version 6.
 
 ### Tree sitter
 
