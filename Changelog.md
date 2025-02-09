@@ -9,6 +9,8 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+## [0.3.0] - 9 Feb 2025
+
 - New: Command to render tune as a pdf
 
 ## [0.2.0] - 6 Feb 2025
