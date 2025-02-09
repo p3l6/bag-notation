@@ -2,8 +2,20 @@
 
 The compiler and language reference for `.bag` music notation files
 
+## Installing
+
+Install via homebrew:
+
+```
+brew install p3l6/tap/bag-notation
+```
+This will also install dependencies required for pdf generation: 
+- `abcm2ps`, of a fork with a [few custom changes](https://github.com/p3l6/abcm2ps)
+- `ghostscript`, for the ps2pdf tool
+
 ## Running
 
+* `bag pdf -o something.pdf something.bag` -> writes output to `something.pdf`
 * `bag abc something.bag` -> prints compiled abc source as output
 * `bag abc -o something.abc something.bag` -> writes output to `something.abc`
 * `bag format something.bag` -> prints formatted output
@@ -14,11 +26,11 @@ The compiler and language reference for `.bag` music notation files
 
 Some editors that support bag notation:
 
+* Coming soon: Zed extension
 * Vscode, via the extension in this repository.
-  - highlights syntax
-  - will autocorrect ` i ` to ` | `, which can make typing barlines quicker.
-  - isn't currently published: see the [extension readme](vscode-extension/README.md) for local build instructions.
-* Chanter tape. a future dedicated macOS app.
+  - ::Deprecated::
+  - highlights approximate syntax
+  - isn't published: see the [extension readme](vscode-extension/README.md) for local build instructions.
 
 ## Documentation
 
@@ -29,8 +41,6 @@ Some editors that support bag notation:
 [Quick Reference](/Documentation.docc/Resources/Quick%20Reference.pdf)
 
 ## Development
-
-Swift 6 is required.
 
 As a pure swift library, xcode is not required, only the swift compiler.
 It will build on the linux distribution of swift as well.
