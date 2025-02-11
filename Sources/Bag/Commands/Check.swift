@@ -10,7 +10,7 @@ struct Check: AsyncParsableCommand {
         abstract: "Check a bag notation file for parse errors."
     )
 
-    @OptionGroup var options: Bag.Options
+    @OptionGroup var options: Bag.InputOptions
 
     mutating func run() async throws {
         print("TODO: implementation")

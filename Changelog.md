@@ -9,6 +9,8 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+- New: Option to omit harmoies when rendering
+
 ## [0.3.0] - 9 Feb 2025
 
 - New: Command to render tune as a pdf

@@ -1,8 +1,6 @@
 //
-//  File.swift
+//  Pdf.swift
 //  Bag Notation
-//
-//  Created by Paul Landers on 2/7/25.
 //
 
 import ArgumentParser
@@ -14,21 +12,19 @@ struct Pdf: AsyncParsableCommand {
         abstract: "Render bag notation to pdf."
     )
 
-    @OptionGroup var options: Bag.Options
+    @OptionGroup var inOpts: Bag.InputOptions
+    @OptionGroup var outOpts: Bag.OutputOptions
 
     @Option(name: [.short, .customLong("out")], help: "Path for pdf output.")
     var outputFile: String
 
-    @Flag(name: .shortAndLong, help: "Sets output to landscape mode.")
-    var landscape: Bool = false
-
-    lazy var tempDir = URL.temporaryDirectory.appending(component: "bag-notation").appending(component:UUID().uuidString)
+    lazy var tempDir = URL.temporaryDirectory.appending(component: "bag-notation").appending(component: UUID().uuidString)
     lazy var abcFile = tempDir.appendingPathComponent("conv.abc")
     lazy var psFile = tempDir.appendingPathComponent("conv.ps")
 
     mutating func run() async throws {
-        guard let input = try? String(contentsOfFile: options.inputFile) else {
-            throw RuntimeError.couldNotRead(file: options.inputFile)
+        guard let input = try? String(contentsOfFile: inOpts.inputFile) else {
+            throw RuntimeError.couldNotRead(file: inOpts.inputFile)
         }
 
         guard let abcm2ps = findTool(named: "abcm2ps") else {
@@ -43,10 +39,7 @@ struct Pdf: AsyncParsableCommand {
             throw RuntimeError.executableNotFound(name: "ps2pdf")
         }
 
-        let doc = try BagReader(input).makeModel()
-        let writer = AbcWriter(doc)
-        writer.landscape = landscape
-        let abc = try writer.makeAbc()
+        let abc = try Abc.abc(for: input, with: outOpts)
 
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
         try abc.write(toFile: abcFile.path, atomically: true, encoding: .utf8)
@@ -54,7 +47,7 @@ struct Pdf: AsyncParsableCommand {
         try subProccess(abcm2ps, with: ["-p", abcFile.path, "-O", psFile.path])
         try subProccess(ps2pdf, with: [psFile.path, outputFile])
 
-        print("Converted \(options.inputFile) to a pdf at \(outputFile)")
+        print("Converted \(inOpts.inputFile) to a pdf at \(outputFile)")
     }
 
     private func subProccess(_ url: URL, with args: [String]) throws {

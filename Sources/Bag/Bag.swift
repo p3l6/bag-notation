@@ -12,9 +12,17 @@ struct Bag: AsyncParsableCommand {
         abstract: "A parser for bag notation files.",
         subcommands: [Abc.self, Format.self, Pdf.self])
 
-    struct Options: ParsableArguments {
+    struct InputOptions: ParsableArguments {
         @Argument(help: "Path of a bag notation file.")
         var inputFile: String
+    }
+
+    struct OutputOptions: ParsableArguments {
+        @Flag(name: .shortAndLong, help: "Sets formatting to landscape mode.")
+        var landscape: Bool = false
+
+        @Flag(name: .shortAndLong, help: "Hides any harmonies.")
+        var melodyOnly: Bool = false
     }
 }
 

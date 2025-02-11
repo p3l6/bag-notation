@@ -12,7 +12,7 @@ struct Format: AsyncParsableCommand {
         abstract: "Format a bag notation file."
     )
 
-    @OptionGroup var options: Bag.Options
+    @OptionGroup var options: Bag.InputOptions
 
     @Flag(help: "Does not print or wirte, but will exit with error if input is not already well formatted.")
     var dryRun: Bool = false
