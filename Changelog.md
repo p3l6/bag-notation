@@ -9,6 +9,8 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+## [0.4.0] - 14 Feb 2025
+
 - New: Option to omit harmoies when rendering
 
 ## [0.3.0] - 9 Feb 2025
