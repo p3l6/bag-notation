@@ -9,6 +9,10 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+## [0.4.1] - 14 Feb 2025
+
+- Fixed: Ventura homebrew builder compatibility
+
 ## [0.4.0] - 14 Feb 2025
 
 - New: Option to omit harmoies when rendering
