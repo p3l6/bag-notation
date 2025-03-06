@@ -1,0 +1,4 @@
+name = "Bag Notation"
+grammar = "BagNotation"
+path_suffixes = ["bag"]
+line_comments = ["# "]

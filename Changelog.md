@@ -9,6 +9,8 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+- New: Added zed extension
+
 ## [0.4.1] - 14 Feb 2025
 
 - Fixed: Ventura homebrew builder compatibility

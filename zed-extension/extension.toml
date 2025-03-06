@@ -1,0 +1,12 @@
+id = "bag-notation"
+name = "Bag Notation"
+version = "0.0.1"
+schema_version = 1
+authors = ["Paul Landers <paul@p3l6.dev>"]
+description = "Syntax highlighting for bag notation"
+repository = "https://github.com/p3l6/bag-notation"
+
+[grammars.BagNotation]
+repository = "https://github.com/p3l6/bag-notation"
+commit = "ac70cbbd6ff595bd64e9d3e202452b1200cb9488"
+path = "tree-sitter-bag-notation"
