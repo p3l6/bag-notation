@@ -1,0 +1,3 @@
+; brackets.scm
+
+("(" @open ")" @close)

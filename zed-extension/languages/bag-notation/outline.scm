@@ -1,0 +1,1 @@
+../../../tree-sitter-bag-notation/queries/outline.scm
