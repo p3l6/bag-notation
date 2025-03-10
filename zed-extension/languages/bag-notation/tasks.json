@@ -1,0 +1,24 @@
+[
+  {
+    "label": "Build PDF",
+    "command": "bag",
+    "args": ["pdf", "-o", "$ZED_DIRNAME/$ZED_STEM.pdf", "$ZED_FILE"],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "reveal": "no_focus",
+    "hide": "on_success",
+    "show_summary": true,
+    "show_output": true
+  },
+  {
+    "label": "Format bag notation",
+    "command": "bag",
+    "args": ["format", "-i", "$ZED_FILE"],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "reveal": "never",
+    "hide": "on_success",
+    "show_summary": true,
+    "show_output": true
+  }
+]
