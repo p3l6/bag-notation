@@ -14,7 +14,7 @@ public class BagTree: NodeSourceTextProvider {
     public init(_ source: String) {
         self.source = source
         sourceLines = source.split(separator: "\n", omittingEmptySubsequences: false)
-        config = try! LanguageConfiguration(tree_sitter_BagNotation(), name: "BagNotation", bundleName: "Bag Notation_TreeSitterBagNotation")
+        config = LanguageConfiguration(tree_sitter_BagNotation(), name: "BagNotation", queries: [:])
     }
 
     lazy var tree: Tree = {
