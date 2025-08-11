@@ -14,8 +14,11 @@ struct Abc: AsyncParsableCommand {
     @OptionGroup var inOpts: Bag.InputOptions
     @OptionGroup var outOpts: Bag.OutputOptions
 
-    @Option(name: [.short, .customLong("out")], help: "Path for abc output. Prints to stdout if omitted.")
+    @Option(name: [.short, .customLong("out")], help: "Path for abc output. If ommitted, path is determined automatically by replacing file extension.")
     var outputFile: String?
+
+    @Flag(name: .shortAndLong, help: "Prints abc to stdout instead of a file.")
+    var printed: Bool = false
 
     mutating func run() async throws {
         guard let input = try? String(contentsOfFile: inOpts.inputFile) else {
@@ -24,10 +27,11 @@ struct Abc: AsyncParsableCommand {
 
         let abc = try Self.abc(for: input, with: outOpts)
 
-        if let outputFile {
-            try abc.write(toFile: outputFile, atomically: true, encoding: .utf8)
-        } else {
+        if printed {
             print(abc)
+        } else  {
+            let outputFile = outputFile ?? inOpts.inputFile.replacingExtension("bag", with: "abc")
+            try abc.write(toFile: outputFile, atomically: true, encoding: .utf8)
         }
     }
 

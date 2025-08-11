@@ -10,6 +10,8 @@ Types of changes: New, Improved, Fixed, Removed.
 ## [Unreleased]
 
 - New: Added zed extension
+- New: Abc command has new flag `--printed` to direct output to the terminal instead of a file
+- Improved: CLI output flag (`-o`) is now optional for abc and pdf commands
 - Improved: Uses strict concurrency for swift 6 language mode
 
 ## [0.4.1] - 14 Feb 2025

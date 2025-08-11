@@ -15,8 +15,8 @@ struct Pdf: AsyncParsableCommand {
     @OptionGroup var inOpts: Bag.InputOptions
     @OptionGroup var outOpts: Bag.OutputOptions
 
-    @Option(name: [.short, .customLong("out")], help: "Path for pdf output.")
-    var outputFile: String
+    @Option(name: [.short, .customLong("out")], help: "Path for abc output. If ommitted, path is determined automatically by replacing file extension.")
+    var outputFile: String?
 
     lazy var tempDir = URL.temporaryDirectory.appending(component: "bag-notation").appending(component: UUID().uuidString)
     lazy var abcFile = tempDir.appendingPathComponent("conv.abc")
@@ -43,6 +43,8 @@ struct Pdf: AsyncParsableCommand {
 
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
         try abc.write(toFile: abcFile.path, atomically: true, encoding: .utf8)
+
+        let outputFile = outputFile ?? inOpts.inputFile.replacingExtension("bag", with: "pdf")
 
         try subProccess(abcm2ps, with: ["-p", abcFile.path, "-O", psFile.path])
         try subProccess(ps2pdf, with: [psFile.path, outputFile])

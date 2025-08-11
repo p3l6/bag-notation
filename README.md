@@ -15,9 +15,9 @@ This will also install dependencies required for pdf generation:
 
 ## Running
 
-* `bag pdf -o something.pdf something.bag` -> writes output to `something.pdf`
+* `bag pdf something.bag` -> writes output to `something.pdf`
 * `bag abc something.bag` -> prints compiled abc source as output
-* `bag abc -o something.abc something.bag` -> writes output to `something.abc`
+* `bag abc something.bag` -> writes output to `something.abc`
 * `bag format something.bag` -> prints formatted output
 * `bag format --dry-run something.bag` -> prints nothing, but exits with status 0 only if no changes would be made
 * `bag format -i something.bag` -> formats input by overwriting
