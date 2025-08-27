@@ -110,6 +110,7 @@ All possible field labels are listed here. Most require values, unless stated.
 * `rev`: A revision date or number, appears in the page footer
     * Only one revision is used per file. If more than one tune has revision field, the first will be used for all pages, and the rest ignored
 * `newpage`: Forces this tune to be placed on a new page, instead of possibly sharing a page with the preceeding tune
+* `dense`: Compacts the spacing between lines and harmonies in the tune, useful when tunes _almost_ fit together on a single page
 
 ### Fields valid for both the tune header and inline
 

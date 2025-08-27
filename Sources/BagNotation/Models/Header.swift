@@ -12,7 +12,11 @@ public struct Header {
     let timeSignature: TimeSignature
     let tempo: Int?
     let revision: String?
+    
+    // Hints for rendering to a page
+    
     let forceNewPage: Bool
+    let tightLineSpacing: Bool
 }
 
 public enum TuneStyle {

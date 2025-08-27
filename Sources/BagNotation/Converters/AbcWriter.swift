@@ -70,6 +70,8 @@ extension Header: AbcSourceConverting {
         let arranger = if let arranger { ", arr. \(arranger)" } else { "" }
 
         let pageBreak = if forceNewPage { "%%newpage" } else { "% no forced page break" }
+        
+        let tuneFormatting = if tightLineSpacing { "%%something" } else { "% no tune format overrides" }
 
         return """
             \(pageBreak)
