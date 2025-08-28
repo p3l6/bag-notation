@@ -85,6 +85,20 @@ struct Headers {
     }
 
     @Test
+    func renderHints() throws {
+        let source = """
+            title: First
+            by: trad
+            style: jig
+            dense
+            newpage
+            """
+        let header = try makeHeader(from: source)
+        #expect(header.forceNewPage == true)
+        #expect(header.denseSpacing == true)
+    }
+
+    @Test
     func missingTitle() throws {
         let source = """
             by: trad

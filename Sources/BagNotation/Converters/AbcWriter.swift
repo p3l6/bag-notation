@@ -70,6 +70,13 @@ extension Header: AbcSourceConverting {
         let arranger = if let arranger { ", arr. \(arranger)" } else { "" }
 
         let pageBreak = if forceNewPage { "%%newpage" } else { "% no forced page break" }
+        
+        let tuneFormatSpecs = if denseSpacing {
+            """
+            %%staffsep 34
+            %%systaffsep 28
+            """
+        } else { "% no tune format overrides" }
 
         return """
             \(pageBreak)
@@ -81,6 +88,7 @@ extension Header: AbcSourceConverting {
             L:1/8
             \(tempoLine)
             K:HP
+            \(tuneFormatSpecs)
             """
     }
 }

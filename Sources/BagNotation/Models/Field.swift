@@ -112,11 +112,15 @@ public enum FieldLabel: String, Sendable {
     case flat
     case nat
     case newpage
+    case dense
     case chord
 
     var requiresValue: Bool {
         switch self {
-        case .trad, .h, .v, .hold, .rest, .spacer, .sharp, .flat, .nat, .newpage:
+        case .trad, .newpage, .dense,
+                .h, .v,
+                .hold, .sharp, .flat, .nat,
+                .rest, .spacer:
             false
         default:
             true
