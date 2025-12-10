@@ -9,6 +9,8 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+- Fixed: Issue where some invalid embellishment errors would be missing the file location
+
 ## [1.0.0]
 
 - New: Added zed extension

@@ -86,7 +86,7 @@ extension EmbellishmentType {
         case "ntt", "ntnt": .birl(withLeadingGrace: false, withInitialA: true)
         case "xtt", "xntnt": .birl(withLeadingGrace: true, withInitialA: true)
         case "ptt", "pntnt": .birlWithDGracenote
-        default: throw NoteParseError.unknownEmbellishment
+        default: throw ModelParseError.invalidEmbellishment
         }
     }
 }

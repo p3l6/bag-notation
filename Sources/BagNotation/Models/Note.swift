@@ -35,7 +35,6 @@ public enum Accidental {
 
 public enum NoteParseError: Error {
     case unknownPitch
-    case unknownEmbellishment
 }
 
 // MARK: Create from strings

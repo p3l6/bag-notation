@@ -48,7 +48,7 @@ struct Notes {
         #expect(throws: LocatedModelParseError.self) { try makeCluster(from: "xh") }
         #expect(throws: LocatedModelParseError.self) { try makeCluster(from: "rl") }
         #expect(throws: LocatedModelParseError.self) { try makeCluster(from: "vze") }
-        #expect(throws: NoteParseError.self) { try makeCluster(from: "zra") }
+        #expect(throws: LocatedModelParseError.self) { try makeCluster(from: "zra") }
     }
 
     @Test
