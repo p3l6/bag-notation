@@ -2,7 +2,7 @@
   {
     "label": "Build PDF",
     "command": "bag",
-    "args": ["pdf", "-o", "$ZED_DIRNAME/$ZED_STEM.pdf", "$ZED_FILE"],
+    "args": ["pdf", "\"$ZED_FILE\""],
     "use_new_terminal": false,
     "allow_concurrent_runs": true,
     "reveal": "no_focus",
@@ -13,7 +13,7 @@
   {
     "label": "Format bag notation",
     "command": "bag",
-    "args": ["format", "-i", "$ZED_FILE"],
+    "args": ["format", "-i", "\"$ZED_FILE\""],
     "use_new_terminal": false,
     "allow_concurrent_runs": true,
     "reveal": "never",
