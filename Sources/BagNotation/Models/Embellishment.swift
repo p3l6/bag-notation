@@ -126,6 +126,7 @@ private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) 
     // grips
     case (.grip, _, .d): [.lowG, .e, .lowG]
     case (.grip, .d, .lowA): [.lowG, .b, .lowG]
+    case (.grip, .d, .e): [.lowG, .b, .lowG]
     case (.grip, _, _): [.lowG, .d, .lowG]
     case (.odro(true), .highG, .d): [.highA, .d, .lowG, .e, .lowG]
     case let (.odro(withLeadingGrace), _, .d): withLeadingGrace ? [.highG, .d, .lowG, .e, .lowG] : [.d, .lowG, .e, .lowG]

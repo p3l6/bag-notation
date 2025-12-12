@@ -11,7 +11,8 @@ Types of changes: New, Improved, Fixed, Removed.
 
 - Fixed: Issue where some invalid embellishment errors would be missing the file location
 - Fixed: Zed issue with path quoting
-- Fixed: Single-note variations at the end of a bar would close after the barline 
+- Fixed: Single-note variations at the end of a bar would close after the barline
+- Improved: Added embellishment case for a grip from D to E 
 
 ## [1.0.0]
 
