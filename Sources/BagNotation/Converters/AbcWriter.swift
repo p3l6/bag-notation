@@ -164,7 +164,7 @@ extension Bar: AbcSourceConverting {
             }
         }.joined(separator: " ")
         abc += " "
-        abc += trailingBarline.abcSource(ctx: ctx)
+        abc += context.tail.abcSource(ctx: ctx) + trailingBarline.abcSource(ctx: ctx)
         return abc
     }
 }
