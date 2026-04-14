@@ -1,6 +1,11 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 
 import PackageDescription
+
+let concurrencySettings: [SwiftSetting] = [
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+    .enableUpcomingFeature("InferIsolatedConformances")
+  ]
 
 let package = Package(
     name: "Bag Notation",
@@ -13,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", "0.9.0" ..< "0.10.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0")
     ],
+    
     targets: [
         .executableTarget(
             name: "bag",
@@ -20,13 +26,16 @@ let package = Package(
                 "BagNotation",
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
-            path: "Sources/Bag"),
+            path: "Sources/Bag",
+            swiftSettings: concurrencySettings,),
         .target(
             name: "BagNotation",
             dependencies: [
                 "SwiftTreeSitter",
                 "TreeSitterBagNotation"
-            ]),
+            ],
+            swiftSettings: concurrencySettings,
+        ),
         .testTarget(name: "BagNotationTests", dependencies: ["BagNotation"]),
         .target(
             name: "TreeSitterBagNotation",
