@@ -9,13 +9,16 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+
+## [1.0.1] - 17 Apr 2026
+
 - Fixed: Issue where some invalid embellishment errors would be missing the file location
 - Fixed: Zed issue with path quoting
 - Fixed: Single-note variations at the end of a bar would close after the barline
 - Improved: Added embellishment case for a grip from D to E
 - Improved: Auto-detect half doublings when using `xx` after high-A
 
-## [1.0.0]
+## [1.0.0] - 27 Aug 2025
 
 - New: Added zed extension
 - New: Abc command has new flag `--printed` to direct output to the terminal instead of a file
