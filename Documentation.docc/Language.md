@@ -122,7 +122,7 @@ All possible field labels are listed here. Most require values, unless stated.
     * Usually ommitted, as the default value is "eighth" and that works for most tunes 
     * All notes in the tune will start at this length, and then the modifications (doubled, cut, dotted) will be applied 
     * When used inline, the base length is changed for all following notes.
-* tempo: Sets the tempo, as displayed on page output
+* `tempo`: Sets the tempo, as displayed on page output
     * Value should be an integer
     * When used inline, the new tempo will be notated at that point
 
