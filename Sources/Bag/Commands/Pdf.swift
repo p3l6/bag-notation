@@ -15,7 +15,7 @@ struct Pdf: AsyncParsableCommand {
     @OptionGroup var inOpts: Bag.InputOptions
     @OptionGroup var outOpts: Bag.OutputOptions
 
-    @Option(name: [.short, .customLong("out")], help: "Path for abc output. If ommitted, path is determined automatically by replacing file extension.")
+    @Option(name: [.short, .customLong("out")], help: "Path for pdf output. If ommitted, path is determined automatically by replacing file extension.")
     var outputFile: String?
 
     lazy var tempDir = URL.temporaryDirectory.appending(component: "bag-notation").appending(component: UUID().uuidString)
