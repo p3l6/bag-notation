@@ -5,7 +5,7 @@ import PackageDescription
 let concurrencySettings: [SwiftSetting] = [
     .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
     .enableUpcomingFeature("InferIsolatedConformances")
-  ]
+]
 
 let package = Package(
     name: "Bag Notation",
@@ -18,7 +18,7 @@ let package = Package(
         .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", "0.9.0" ..< "0.10.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0")
     ],
-    
+
     targets: [
         .executableTarget(
             name: "bag",
@@ -27,7 +27,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ],
             path: "Sources/Bag",
-            swiftSettings: concurrencySettings,),
+            swiftSettings: concurrencySettings),
         .target(
             name: "BagNotation",
             dependencies: [
@@ -35,8 +35,7 @@ let package = Package(
                 "TreeSitterBagNotation"
             ],
             resources: [.copy("Resources/Bravura/")],
-            swiftSettings: concurrencySettings,
-        ),
+            swiftSettings: concurrencySettings),
         .testTarget(name: "BagNotationTests", dependencies: ["BagNotation"]),
         .target(
             name: "TreeSitterBagNotation",

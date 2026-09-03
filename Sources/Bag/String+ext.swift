@@ -4,8 +4,6 @@
 //
 
 extension String {
-
-    
     /// Replaces a file extension at the end of this string.
     ///
     /// - Note: If the file extension specified is not present at the end, the new extension is simple appended.

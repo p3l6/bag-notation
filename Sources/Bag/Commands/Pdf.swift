@@ -9,8 +9,7 @@ import Foundation
 
 struct Pdf: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Render bag notation to pdf."
-    )
+        abstract: "Render bag notation to pdf.")
 
     @OptionGroup var inOpts: Bag.InputOptions
     @OptionGroup var outOpts: Bag.OutputOptions
@@ -67,7 +66,7 @@ struct Pdf: AsyncParsableCommand {
             let errorsData = errors.fileHandleForReading.readDataToEndOfFile()
             let outputString = String(data: outputData, encoding: .utf8)
             let errorsString = String(data: errorsData, encoding: .utf8)
-            throw RuntimeError.executableFailed(name: url.lastPathComponent, output: [outputString, errorsString].compactMap{$0}.joined(separator: "\n"))
+            throw RuntimeError.executableFailed(name: url.lastPathComponent, output: [outputString, errorsString].compactMap(\.self).joined(separator: "\n"))
         }
     }
 

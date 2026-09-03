@@ -7,8 +7,7 @@ import ArgumentParser
 
 struct Check: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Check a bag notation file for parse errors."
-    )
+        abstract: "Check a bag notation file for parse errors.")
 
     @OptionGroup var options: Bag.InputOptions
 

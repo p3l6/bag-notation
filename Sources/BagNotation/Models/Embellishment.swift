@@ -174,5 +174,5 @@ private func pitchesFor(_ emb: EmbellishmentType, from: Pitch, on pitch: Pitch) 
     default: throw ModelParseError.invalidEmbellishment
     }
 
-    return pitchesWithNils.compactMap { $0 }
+    return pitchesWithNils.compactMap(\.self)
 }

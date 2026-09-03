@@ -52,11 +52,11 @@ struct Notes {
         notes = try makeCluster(from: "hxxe")
         target = try makeCluster(from: "hnxe")
         #expect(notes.map(\.embellishment?.pitches) == target.map(\.embellishment?.pitches))
-        
+
         notes = try makeCluster(from: "hxxc")
         target = try makeCluster(from: "hnxc")
         #expect(notes.map(\.embellishment?.pitches) == target.map(\.embellishment?.pitches))
-        
+
         notes = try makeCluster(from: "hxxb")
         target = try makeCluster(from: "hnxb")
         #expect(notes.map(\.embellishment?.pitches) == target.map(\.embellishment?.pitches))

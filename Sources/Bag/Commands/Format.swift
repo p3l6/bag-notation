@@ -9,8 +9,7 @@ import SwiftTreeSitter
 
 struct Format: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Format a bag notation file."
-    )
+        abstract: "Format a bag notation file.")
 
     @OptionGroup var options: Bag.InputOptions
 

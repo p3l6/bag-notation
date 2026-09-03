@@ -8,8 +8,7 @@ import BagNotation
 
 struct Abc: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Convert bag notation to abc notation."
-    )
+        abstract: "Convert bag notation to abc notation.")
 
     @OptionGroup var inOpts: Bag.InputOptions
     @OptionGroup var outOpts: Bag.OutputOptions
@@ -29,7 +28,7 @@ struct Abc: AsyncParsableCommand {
 
         if printed {
             print(abc)
-        } else  {
+        } else {
             let outputFile = outputFile ?? inOpts.inputFile.replacingExtension("bag", with: "abc")
             try abc.write(toFile: outputFile, atomically: true, encoding: .utf8)
         }

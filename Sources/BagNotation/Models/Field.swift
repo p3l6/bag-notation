@@ -118,9 +118,9 @@ public enum FieldLabel: String, Sendable {
     var requiresValue: Bool {
         switch self {
         case .trad, .newpage, .dense,
-                .h, .v,
-                .hold, .sharp, .flat, .nat,
-                .rest, .spacer:
+             .h, .v,
+             .hold, .sharp, .flat, .nat,
+             .rest, .spacer:
             false
         default:
             true

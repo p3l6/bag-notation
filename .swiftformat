@@ -20,6 +20,10 @@
 --disable hoistTry
 --enable isEmpty
 --enable wrapEnumCases
+--disable wrapFunctionBodies
+--disable wrapIfExpressionBodies
+--disable wrapIfStatementBodies
+--disable wrapPropertyBodies
 --disable wrapMultilineStatementBraces
 
 # Exclude default Logger methods which use autoclosures

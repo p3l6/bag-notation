@@ -184,7 +184,7 @@ private final class HeaderModeler: LeafModeler {
         guard let titleField = fields[.title] else { throw ModelParseError.missingTuneTitle }
         guard let styleField = fields[.style] else { throw ModelParseError.missingTuneStyle }
 
-        let possibleComposers = [fields[.by]?.value, fields[.trad] != nil ? "trad" : nil].compactMap { $0 }
+        let possibleComposers = [fields[.by]?.value, fields[.trad] != nil ? "trad" : nil].compactMap(\.self)
 
         guard possibleComposers.count <= 1 else { throw ModelParseError.duplicateComposers }
 

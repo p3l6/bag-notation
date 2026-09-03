@@ -70,7 +70,7 @@ extension Header: AbcSourceConverting {
         let arranger = if let arranger { ", arr. \(arranger)" } else { "" }
 
         let pageBreak = if forceNewPage { "%%newpage" } else { "% no forced page break" }
-        
+
         let tuneFormatSpecs = if denseSpacing {
             """
             %%staffsep 34
@@ -94,7 +94,7 @@ extension Header: AbcSourceConverting {
 }
 
 extension TuneStyle: AbcSourceConverting {
-    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
+    fileprivate func abcSource(ctx _: AbcActiveContext) -> String {
         switch self {
         case .march: "March"
         case .hornpipe: "Hornpipe"
@@ -112,7 +112,7 @@ extension TuneStyle: AbcSourceConverting {
 }
 
 extension TimeSignature: AbcSourceConverting {
-    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
+    fileprivate func abcSource(ctx _: AbcActiveContext) -> String {
         switch self {
         case .time22: "2/2"
         case .time24: "2/4"
@@ -190,7 +190,7 @@ extension FlowContext: AbcSourceConverting {
 }
 
 extension Barline: AbcSourceConverting {
-    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
+    fileprivate func abcSource(ctx _: AbcActiveContext) -> String {
         switch self {
         case .plain: "|"
         case .partStart: "[|"
@@ -264,7 +264,7 @@ extension Note: AbcSourceConverting {
 }
 
 extension Pitch: AbcSourceConverting {
-    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
+    fileprivate func abcSource(ctx _: AbcActiveContext) -> String {
         switch self {
         case .highA: "a"
         case .highG: "g"
@@ -280,7 +280,7 @@ extension Pitch: AbcSourceConverting {
 }
 
 extension Duration: AbcSourceConverting {
-    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
+    fileprivate func abcSource(ctx _: AbcActiveContext) -> String {
         switch self {
         case .sixtyfourth: "///"
         case .sixtyfourthDotted: "3/16"
