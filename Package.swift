@@ -34,6 +34,7 @@ let package = Package(
                 "SwiftTreeSitter",
                 "TreeSitterBagNotation"
             ],
+            resources: [.copy("Resources/Bravura/")],
             swiftSettings: concurrencySettings,
         ),
         .testTarget(name: "BagNotationTests", dependencies: ["BagNotation"]),
