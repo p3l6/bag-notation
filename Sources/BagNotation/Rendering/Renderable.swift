@@ -3,6 +3,8 @@
 //  Bag Notation
 //
 
+#if !os(Linux)
+
 import CoreGraphics
 
 protocol Renderable<S> {
@@ -13,23 +15,28 @@ protocol Renderable<S> {
 }
 
 class BaseRenderable {
-    var boundingBox: BoundingBox
-    init(inside boundingBox: BoundingBox) {
-        self.boundingBox = boundingBox
+    var box: BoundingBox
+    init(inside box: BoundingBox) {
+        self.box = box
     }
 
-    func layoutVertically(_ inputs: [Sizable], insideMargin: CGFloat? = nil) throws -> [BoundingBox] {
-        let heights = inputs.map(\.heightRequirement)
+    enum LayoutDirection {
+        case horizontal
+        case vertical
+    }
 
-        // total height
-        var totalHeight: CGFloat = 0
+    func layout(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [BoundingBox] {
+        let sizes = inputs.map(direction == .horizontal ? \.width : \.height)
+
+        // Sum of all the individual parts
+        var totalSize: CGFloat = 0
         var stretchableCount = 0
-        for height in heights {
-            switch height {
+        for size in sizes {
+            switch size {
             case let .exact(value):
-                totalHeight += value
+                totalSize += value
             case let .atLeast(value):
-                totalHeight += value
+                totalSize += value
                 stretchableCount += 1
             case .full:
                 throw PdfError.insufficientSpace
@@ -37,74 +44,36 @@ class BaseRenderable {
         }
 
         // make sure they fit, or error
-        let extraHeight = boundingBox.height - totalHeight
-        guard extraHeight >= 0 else {
+        let extra = (direction == .horizontal ? box.width : box.height) - totalSize
+        guard extra >= 0 else {
             throw PdfError.insufficientSpace
         }
 
-        // strech if needed
-        let stretch = extraHeight / CGFloat(stretchableCount)
+        // strech value per adjustable block if needed
+        let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
 
         // create Render objects with bounding boxes
         var advance = 0.0
-        return try inputs.map { line in
-            let actualHeight = switch line.heightRequirement {
+        return try inputs.map { item in
+            let requirement = direction == .horizontal ? item.width : item.height
+            let actual = switch requirement {
             case let .exact(value): value
             case let .atLeast(value): value + stretch
             case .full: throw PdfError.insufficientSpace
             }
-            let actualSize = BoundingBox(left: boundingBox.left,
-                                         bottom: boundingBox.bottom + boundingBox.height - advance - actualHeight,
-                                         width: boundingBox.width,
-                                         height: actualHeight)
-            advance += actualHeight
-            advance += insideMargin ?? 0
-            return actualSize
-        }
-    }
-
-    func layoutHorizontally(_ inputs: [Sizable], insideMargin: CGFloat? = nil) throws -> [BoundingBox] {
-        let widths = inputs.map(\.width)
-
-        // total height
-        var totalWidth: CGFloat = 0
-        var stretchableCount = 0
-        for width in widths {
-            switch width {
-            case let .exact(value):
-                totalWidth += value
-            case let .atLeast(value):
-                totalWidth += value
-                stretchableCount += 1
-            case .full:
-                throw PdfError.insufficientSpace
+            let actualSize = if direction == .horizontal {
+                BoundingBox(left: box.left + advance,
+                            bottom: box.bottom,
+                            width: actual,
+                            height: box.height)
+            } else {
+                BoundingBox(left: box.left,
+                            bottom: box.bottom + box.height - advance - actual,
+                            width: box.width,
+                            height: actual)
             }
-        }
-
-        // make sure they fit, or error
-        let extraWidth = boundingBox.width - totalWidth
-        guard extraWidth >= 0 else {
-            throw PdfError.insufficientSpace
-        }
-
-        // strech if needed
-        let stretch = extraWidth / CGFloat(stretchableCount)
-
-        // create Render objects with bounding boxes
-        var advance = 0.0
-        return try inputs.map { line in
-            let actualWidth = switch line.width {
-            case let .exact(value): value
-            case let .atLeast(value): value + stretch
-            case .full: throw PdfError.insufficientSpace
-            }
-            //// :TODO:  warn if hightReq != .full ?
-            let actualSize = BoundingBox(left: boundingBox.left + advance,
-                                         bottom: boundingBox.bottom,
-                                         width: actualWidth,
-                                         height: boundingBox.height)
-            advance += actualWidth
-            advance += insideMargin ?? 0
+            advance += actual
+            advance += spacing ?? 0
             return actualSize
         }
     }
@@ -115,22 +84,28 @@ struct BoundingBox {
     let bottom: CGFloat
     let width: CGFloat
     let height: CGFloat
+
+    func inset(x: CGFloat, y: CGFloat) -> CGPoint {
+        CGPoint(x: left + x, y: bottom + y)
+    }
+
+    func insetFromTop(x: CGFloat, y: CGFloat) -> CGPoint {
+        CGPoint(x: left + x, y: bottom + height - y)
+    }
 }
 
-enum StretchyWidth {
+enum Length {
     case exact(CGFloat)
     case atLeast(CGFloat)
     case full
 }
 
 protocol Sizable {
-    /// false for trailing-in-container stuff like barlines
     var alignLeading: Bool { get }
-
-    // TODO: Should cache these somehow
+    // :TODO: Should cache these somehow
     // :TODO: one of these should always be .full. Enforce that?
-    // exact height required
-    var heightRequirement: StretchyWidth { get }
-    /// min width required
-    var width: StretchyWidth { get }
+    var height: Length { get }
+    var width: Length { get }
 }
+
+#endif // !os(Linux)

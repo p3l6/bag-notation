@@ -24,7 +24,7 @@ public class PdfWriter {
             throw PdfError.couldNotCreateContext
         }
 
-        let canvas = RenderCanvas(pageSize: pageSize, graphics: context)
+        let canvas = try RenderCanvas(pageSize: pageSize, graphics: context)
         let canvasBounding = BoundingBox(left: LayoutConstants.pageMargin,
                                          bottom: LayoutConstants.pageMargin,
                                          width: pageSize.width - LayoutConstants.pageMargin * 2,
@@ -51,13 +51,10 @@ public class PdfWriter {
     }
 }
 
-// :TODO: Rename lots of classes/props/protocols/etc
-// :TODO: extract various repeated functionality
-// :TODO: add !osLinux to all files in Rendering/ folder
-
 public enum PdfError: Error {
     case couldNotCreateContext
     case insufficientSpace
+    case couldNotLoadFont
 }
 
 #endif // !os(Linux)

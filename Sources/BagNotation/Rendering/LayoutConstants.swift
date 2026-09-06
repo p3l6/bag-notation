@@ -3,6 +3,8 @@
 //  Bag Notation
 //
 
+#if !os(Linux)
+
 import CoreGraphics
 
 // :TODO: Should this be configurable? instead of global? via settings, based on page size, etc?
@@ -17,3 +19,5 @@ enum LayoutConstants {
     static let noteStemLineWidth: CGFloat = 1.2
     static let noteStemIdealHeight: CGFloat = 25
 }
+
+#endif // !os(Linux)

@@ -3,24 +3,35 @@
 //  Bag Notation
 //
 
-import AppKit // // :TODO: can we not? just for colors...
+#if !os(Linux)
+
+import AppKit
 import CoreGraphics
-import CoreText
 import Foundation
 
-/// or RenderCanvas or renderDestination
 struct RenderCanvas {
     let pageSize: CGSize
-    let margin: CGFloat = 48
-    let staffLeft: CGFloat = 48
-    var staffRight: CGFloat { pageSize.width - margin }
-    var firstStaffTop: CGFloat { pageSize.height - margin - 128 }
-
+    let bravuraFont: NSFont
     let graphics: CGContext
+
+    init(pageSize: CGSize, graphics: CGContext) throws {
+        self.pageSize = pageSize
+        self.graphics = graphics
+
+        guard let url = Bundle.module.url(forResource: "Bravura/Bravura", withExtension: "otf") else {
+            throw PdfError.couldNotLoadFont
+        }
+        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+
+        guard let font = NSFont(name: "Bravura", size: 30) else {
+            throw PdfError.couldNotLoadFont
+        }
+        bravuraFont = font
+    }
 
     func drawLine(from start: CGPoint, to end: CGPoint, width: CGFloat) {
         graphics.saveGState()
-        graphics.setStrokeColor(NSColor.black.cgColor)
+        graphics.setStrokeColor(CGColor.black)
         graphics.setLineWidth(width)
         graphics.move(to: start)
         graphics.addLine(to: end)
@@ -28,12 +39,8 @@ struct RenderCanvas {
         graphics.restoreGState()
     }
 
-    func drawText(_ text: String, at point: CGPoint, font: NSFont) {
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: NSColor.black
-        ]
-        let attributedString = NSAttributedString(string: text, attributes: attributes)
+    func drawText(_ text: String, at point: CGPoint, fontSize: CGFloat) {
+        let attributedString = NSAttributedString(string: text, attributes: [.font: NSFont.systemFont(ofSize: fontSize)])
         let line = CTLineCreateWithAttributedString(attributedString)
 
         graphics.saveGState()
@@ -43,25 +50,25 @@ struct RenderCanvas {
         graphics.restoreGState()
     }
 
-    func drawSymbol(_ codePoint: String, at point: CGPoint) {
-        // // :TODO: throw
-        guard let font = bravuraFont(size: 30) else { return }
-        // :TODO: make an enum for these codepoints
-        drawText(codePoint, at: point, font: font)
+    func drawSymbol(_ symbol: BravuraSymbol, at point: CGPoint) {
+        let attributedString = NSAttributedString(string: symbol.rawValue, attributes: [.font: bravuraFont])
+        let line = CTLineCreateWithAttributedString(attributedString)
+
+        graphics.saveGState()
+        graphics.textMatrix = .identity
+        graphics.textPosition = point
+        CTLineDraw(line, graphics)
+        graphics.restoreGState()
     }
 
-    private func bravuraFont(size: CGFloat) -> NSFont? {
-        registerBravuraFontIfNeeded()
-        return NSFont(name: "Bravura", size: size)
+    func advancePage() {
+        // :TODO: calculate if multiple pages are needed, and when to break for them
     }
-
-    private func registerBravuraFontIfNeeded() {
-        guard let url = Bundle.module.url(forResource: "Bravura/Bravura", withExtension: "otf") else {
-            // :TODO: throw
-            return
-        }
-        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
-    }
-
-    func advancePage() {}
 }
+
+enum BravuraSymbol: String {
+    case noteHead = "\u{E0A4}"
+    // More: https://smufl.formats.music/latest/tables/staff-brackets-and-dividers.html
+}
+
+#endif // !os(Linux)
