@@ -26,6 +26,23 @@ struct Pdf: AsyncParsableCommand {
             throw RuntimeError.couldNotRead(file: inOpts.inputFile)
         }
 
+#if !os(Linux)
+        var doc = try BagReader(input).makeModel()
+        if outOpts.melodyOnly { doc = doc.withSingleVoice() }
+        let writer = PdfWriter(doc)
+        writer.landscape = outOpts.landscape
+        let data = try writer.makePdf()
+
+        let outputFile = outputFile ?? inOpts.inputFile.replacingExtension("bag", with: "pdf")
+        try data.write(to: URL(filePath: outputFile))
+#else // !os(Linux)
+        try legacyPdfPipeline(input)
+#endif // !os(Linux)
+
+        print("Converted \(inOpts.inputFile) to a pdf at \(outputFile)")
+    }
+
+    private mutating func legacyPdfPipeline(_ input: String) throws {
         guard let abcm2ps = findTool(named: "abcm2ps") else {
             print("Could not find abcm2ps, which is required to render pdfs.")
             print("Hint: install it with `brew install p3l6/tap/abcm2ps`")
@@ -47,8 +64,6 @@ struct Pdf: AsyncParsableCommand {
 
         try subProccess(abcm2ps, with: ["-p", abcFile.path, "-O", psFile.path])
         try subProccess(ps2pdf, with: [psFile.path, outputFile])
-
-        print("Converted \(inOpts.inputFile) to a pdf at \(outputFile)")
     }
 
     private func subProccess(_ url: URL, with args: [String]) throws {
