@@ -92,12 +92,38 @@ struct BoundingBox {
     func insetFromTop(x: CGFloat, y: CGFloat) -> CGPoint {
         CGPoint(x: left + x, y: bottom + height - y)
     }
+
+    var right: CGFloat { left + width }
+    var top: CGFloat { bottom + height }
+
+    var origin: CGPoint { .init(x: left, y: bottom) }
+    var topLeft: CGPoint { .init(x: left, y: bottom + height) }
+    var topRight: CGPoint { .init(x: left + width, y: bottom + height) }
+    var bottomRight: CGPoint { .init(x: left + width, y: bottom) }
 }
 
 enum Length {
     case exact(CGFloat)
     case atLeast(CGFloat)
     case full
+
+    static func + (lhs: Length, rhs: Length) -> Length {
+        switch (lhs, rhs) {
+        case (.full, _), (_, .full): .full
+        case let (.exact(lv), .exact(rv)): .exact(lv + rv)
+        case let (.atLeast(lv), .exact(rv)),
+             let (.atLeast(lv), .atLeast(rv)),
+             let (.exact(lv), .atLeast(rv)): .atLeast(lv + rv)
+        }
+    }
+
+    static func += (lhs: inout Length, rhs: Length) {
+        lhs = lhs + rhs
+    }
+
+    static func += (lhs: inout Length, rhs: [Length]) {
+        lhs = rhs.reduce(lhs, +)
+    }
 }
 
 protocol Sizable {

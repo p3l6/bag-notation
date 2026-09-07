@@ -17,6 +17,10 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
 
     func render(in graphics: RenderCanvas) {
         //// :TODO:  draw cleff, etc
+//        Maybe, if instead of having a dedicated renderer object just for the cleff,
+//        the layout algorithm can be told to skip some amount of leading space?
+//        This would simplify the tune header as well.
+//        Maybe trailing barlines? if I did trailing skips?
 
         for lineIndex in 0 ..< 5 {
             let y = box.bottom + CGFloat(lineIndex) * LayoutConstants.staffLineSpacing
@@ -27,18 +31,10 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
     }
 
     func directChildren() throws -> [any Renderable] {
-        var notes = [] as [Note]
-        for note in line.voices.first!.bars.first!.contents {
-            switch note {
-            case let .cluster(c):
-                notes.append(contentsOf: c.notes)
-            default:
-                continue
-            }
-        }
-        let boxes = try layout(.horizontal, notes)
-        return notes.enumerated().map { index, note in
-            NoteRenderer(inside: boxes[index], rendering: note)
+        let bars = line.voices.first!.bars
+        let boxes = try layout(.horizontal, bars)
+        return bars.enumerated().map { index, bar in
+            BarRenderer(inside: boxes[index], rendering: bar)
         }
     }
 }

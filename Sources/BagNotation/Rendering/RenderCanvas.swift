@@ -40,6 +40,7 @@ struct RenderCanvas {
     }
 
     func drawText(_ text: String, at point: CGPoint, fontSize: CGFloat) {
+        // :TODO: What font should this use? is it embedded in pdf already?
         let attributedString = NSAttributedString(string: text, attributes: [.font: NSFont.systemFont(ofSize: fontSize)])
         let line = CTLineCreateWithAttributedString(attributedString)
 
@@ -58,6 +59,19 @@ struct RenderCanvas {
         graphics.textMatrix = .identity
         graphics.textPosition = point
         CTLineDraw(line, graphics)
+        graphics.restoreGState()
+    }
+
+    func debugOutline(box: BoundingBox) {
+        graphics.saveGState()
+        graphics.setStrokeColor(CGColor(red: 1, green: 0, blue: 0, alpha: 1))
+        graphics.setLineWidth(0.5)
+        graphics.move(to: box.origin)
+        graphics.addLine(to: box.topLeft)
+        graphics.addLine(to: box.topRight)
+        graphics.addLine(to: box.bottomRight)
+        graphics.addLine(to: box.origin)
+        graphics.strokePath()
         graphics.restoreGState()
     }
 

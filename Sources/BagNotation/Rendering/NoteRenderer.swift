@@ -32,15 +32,20 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     }
 
     func render(in graphics: RenderCanvas) {
-        // todo leger lines
+        if note.pitch == .highA {
+            let y = heightOffset(for: .highA)
+            graphics.drawLine(from: box.inset(x: LayoutConstants.noteSpacingMin / 2 - 4, y: y),
+                              to: box.inset(x: 12 + LayoutConstants.noteSpacingMin / 2, y: y),
+                              width: LayoutConstants.staffLineWidth)
+        }
 
-        graphics.drawSymbol(.noteHead, at: CGPoint(x: box.left + LayoutConstants.noteSpacingMin / 2,
-                                                   y: box.bottom + heightOffset(for: note.pitch)))
+        graphics.drawSymbol(.noteHead, at: box.inset(x: LayoutConstants.noteSpacingMin / 2,
+                                                     y: heightOffset(for: note.pitch)))
 
-        graphics.drawLine(from: CGPoint(x: box.left + LayoutConstants.noteSpacingMin / 2,
-                                        y: box.bottom + heightOffset(for: note.pitch)),
-                          to: CGPoint(x: box.left + LayoutConstants.noteSpacingMin / 2,
-                                      y: box.bottom + heightOffset(for: note.pitch) - LayoutConstants.noteStemIdealHeight),
+        graphics.drawLine(from: box.inset(x: LayoutConstants.noteSpacingMin / 2,
+                                          y: heightOffset(for: note.pitch)),
+                          to: box.inset(x: LayoutConstants.noteSpacingMin / 2,
+                                        y: heightOffset(for: note.pitch) - LayoutConstants.noteStemIdealHeight),
                           width: LayoutConstants.noteStemLineWidth)
     }
 
