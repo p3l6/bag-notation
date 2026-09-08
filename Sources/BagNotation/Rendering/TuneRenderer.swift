@@ -13,57 +13,32 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
     init(inside box: BoundingBox, rendering tune: Tune) {
         self.tune = tune
         super.init(inside: box)
-    }
-
-    func render(in _: RenderCanvas) {}
-
-    func directChildren() throws -> [any Renderable] {
-        var items: [any Sizable] = [tune.header]
-        items.append(contentsOf: tune.lines)
-        let boxes = try layout(.vertical, items, spacing: LayoutConstants.staffSpacing)
-
-        var renderables = [any Renderable]()
-        renderables.append(HeaderRenderer(inside: boxes[0], rendering: tune.header))
-        for (index, line) in tune.lines.enumerated() {
-            renderables.append(LineRenderer(inside: boxes[index + 1], rendering: line))
-        }
-        return renderables
-    }
-}
-
-extension Tune: Sizable {
-    var alignLeading: Bool { true }
-    var width: Length { .full }
-    var height: Length {
-        header.height +
-            lines.map(\.height).reduce(.exact(0), +)
-    }
-}
-
-// MARK: Header
-
-final class HeaderRenderer: BaseRenderable, Renderable<Header> {
-    let header: Header
-
-    init(inside box: BoundingBox, rendering header: Header) {
-        self.header = header
-        super.init(inside: box)
+        reservedLeading = Layout.tuneHeaderHeight
     }
 
     func render(in graphics: RenderCanvas) {
         // :TODO: How to center or right justify this text??
-        graphics.drawText(header.title, at: box.insetFromTop(x: 100, y: 12), fontSize: 12)
-        graphics.drawText(header.composer, at: box.insetFromTop(x: 300, y: 20), fontSize: 12)
+        graphics.drawText(tune.header.title, at: box.insetFromTop(x: 100, y: 12), fontSize: 12)
+        graphics.drawText(tune.header.composer, at: box.insetFromTop(x: 300, y: 20), fontSize: 12)
         graphics.drawText(styleText, at: box.insetFromTop(x: 0, y: 20), fontSize: 12)
         // :TODO: arranger
         // :TODO: tempo
         // :TODO: revision? in footer of each page? unclear how to do this
     }
 
-    func directChildren() throws -> [any Renderable] { [] }
+    func directChildren() throws -> [any Renderable] {
+        let lines = tune.lines
+        let boxes = try layout(.vertical, lines, spacing: Layout.staffSeparation)
+
+        var renderables = [any Renderable]()
+        for (index, line) in tune.lines.enumerated() {
+            renderables.append(LineRenderer(inside: boxes[index], rendering: line))
+        }
+        return renderables
+    }
 
     fileprivate var styleText: String {
-        switch header.style {
+        switch tune.header.style {
         case .march: "March"
         case .hornpipe: "Hornpipe"
         case .jig: "Jig"
@@ -79,11 +54,11 @@ final class HeaderRenderer: BaseRenderable, Renderable<Header> {
     }
 }
 
-extension Header: Sizable {
-    var alignLeading: Bool { true }
+extension Tune: Sizable {
     var width: Length { .full }
     var height: Length {
-        .exact(LayoutConstants.tuneHeaderHeight)
+        .exact(Layout.tuneHeaderHeight) +
+            lines.map(\.height).reduce(.exact(0), +)
     }
 }
 

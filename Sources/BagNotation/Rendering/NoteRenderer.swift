@@ -28,25 +28,25 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
         case .lowG: 2
         }
 
-        return LayoutConstants.noteStep * stepsUp
+        return Layout.noteStep * stepsUp
     }
 
     func render(in graphics: RenderCanvas) {
         if note.pitch == .highA {
             let y = heightOffset(for: .highA)
-            graphics.drawLine(from: box.inset(x: LayoutConstants.noteSpacingMin / 2 - 4, y: y),
-                              to: box.inset(x: 12 + LayoutConstants.noteSpacingMin / 2, y: y),
-                              width: LayoutConstants.staffLineWidth)
+            graphics.drawLine(from: box.inset(x: -Layout.ledgerLineExtension, y: y),
+                              to: box.inset(x: Layout.noteSpacingMin + Layout.ledgerLineExtension, y: y),
+                              width: Layout.ledgerLineWidth)
         }
 
-        graphics.drawSymbol(.noteHead, at: box.inset(x: LayoutConstants.noteSpacingMin / 2,
+        graphics.drawSymbol(.noteHead, at: box.inset(x: 0,
                                                      y: heightOffset(for: note.pitch)))
 
-        graphics.drawLine(from: box.inset(x: LayoutConstants.noteSpacingMin / 2,
+        graphics.drawLine(from: box.inset(x: 0,
                                           y: heightOffset(for: note.pitch)),
-                          to: box.inset(x: LayoutConstants.noteSpacingMin / 2,
-                                        y: heightOffset(for: note.pitch) - LayoutConstants.noteStemIdealHeight),
-                          width: LayoutConstants.noteStemLineWidth)
+                          to: box.inset(x: 0,
+                                        y: heightOffset(for: note.pitch) - Layout.noteStemIdealHeight),
+                          width: Layout.noteStemLineWidth)
     }
 
     func directChildren() throws -> [any Renderable] {
@@ -55,8 +55,7 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
 }
 
 extension Note: Sizable {
-    var alignLeading: Bool { true }
-    var width: Length { .atLeast(LayoutConstants.noteSpacingMin) }
+    var width: Length { .atLeast(Layout.noteSpacingMin) }
     var height: Length { .full }
 }
 

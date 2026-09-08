@@ -47,7 +47,6 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
 }
 
 extension Bar: Sizable {
-    var alignLeading: Bool { true }
     var width: Length {
         var width: Length = .exact(0)
         for item in contents {
@@ -82,15 +81,15 @@ final class BarlineRenderer: BaseRenderable, Renderable<Barline> {
     }
 
     func render(in graphics: RenderCanvas) {
-        graphics.drawLine(from: box.bottomRight, to: box.topRight, width: 1.5)
+        // :TODO: switch case different barline types. Also in sizeable
+        graphics.drawLine(from: box.bottomRight, to: box.inset(x: box.width, y: 4 * Layout.staffLineSpacing), width: Layout.barlineWidth)
     }
 
     func directChildren() throws -> [any Renderable] { [] }
 }
 
 extension Barline: Sizable {
-    var alignLeading: Bool { false }
-    var width: Length { .exact(12) }
+    var width: Length { .exact(Layout.barlineWidth) }
     var height: Length { .full }
 }
 #endif // !os(Linux)

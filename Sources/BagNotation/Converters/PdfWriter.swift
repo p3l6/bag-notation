@@ -15,7 +15,7 @@ public class PdfWriter {
     public init(_ doc: Doc) { self.doc = doc }
 
     public func makePdf() throws -> Data {
-        let pageSize = landscape ? CGSize(width: 841.89, height: 595.28) : CGSize(width: 595.28, height: 841.89)
+        let pageSize = landscape ? CGSize(width: 792, height: 612) : CGSize(width: 612, height: 792)
         var mediaBox = CGRect(origin: .zero, size: pageSize)
         let data = NSMutableData()
 
@@ -25,10 +25,10 @@ public class PdfWriter {
         }
 
         let canvas = try RenderCanvas(pageSize: pageSize, graphics: context)
-        let canvasBounding = BoundingBox(left: LayoutConstants.pageMargin,
-                                         bottom: LayoutConstants.pageMargin,
-                                         width: pageSize.width - LayoutConstants.pageMargin * 2,
-                                         height: pageSize.height - LayoutConstants.pageMargin * 2)
+        let canvasBounding = BoundingBox(left: Layout.pageMargin,
+                                         bottom: Layout.pageMargin,
+                                         width: pageSize.width - Layout.pageMargin * 2,
+                                         height: pageSize.height - Layout.pageMargin * 2)
 
         var parents: [any Renderable] = [TuneRenderer(inside: canvasBounding, rendering: doc.tunes.first!)]
         var renderables = parents

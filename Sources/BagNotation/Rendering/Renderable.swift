@@ -16,6 +16,9 @@ protocol Renderable<S> {
 
 class BaseRenderable {
     var box: BoundingBox
+    var reservedLeading: CGFloat = 0
+    var reservedTrailing: CGFloat = 0
+
     init(inside box: BoundingBox) {
         self.box = box
     }
@@ -44,7 +47,8 @@ class BaseRenderable {
         }
 
         // make sure they fit, or error
-        let extra = (direction == .horizontal ? box.width : box.height) - totalSize
+        let available = (direction == .horizontal ? box.width : box.height) - reservedLeading - reservedTrailing
+        let extra = available - totalSize
         guard extra >= 0 else {
             throw PdfError.insufficientSpace
         }
@@ -53,7 +57,7 @@ class BaseRenderable {
         let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
 
         // create Render objects with bounding boxes
-        var advance = 0.0
+        var advance = reservedLeading
         return try inputs.map { item in
             let requirement = direction == .horizontal ? item.width : item.height
             let actual = switch requirement {
@@ -127,7 +131,6 @@ enum Length {
 }
 
 protocol Sizable {
-    var alignLeading: Bool { get }
     // :TODO: Should cache these somehow
     // :TODO: one of these should always be .full. Enforce that?
     var height: Length { get }

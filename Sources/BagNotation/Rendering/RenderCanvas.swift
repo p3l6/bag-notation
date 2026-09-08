@@ -23,7 +23,7 @@ struct RenderCanvas {
         }
         CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
 
-        guard let font = NSFont(name: "Bravura", size: 30) else {
+        guard let font = NSFont(name: "Bravura", size: Layout.bravuraFontSize) else {
             throw PdfError.couldNotLoadFont
         }
         bravuraFont = font
@@ -82,6 +82,7 @@ struct RenderCanvas {
 
 enum BravuraSymbol: String {
     case noteHead = "\u{E0A4}"
+    case gClef = "\u{E050}"
     // More: https://smufl.formats.music/latest/tables/staff-brackets-and-dividers.html
 }
 
