@@ -34,13 +34,14 @@ enum Layout {
     static let ledgerLineExtension = 0.4 * baseScale
     static let barlineSeparation = 0.4 * baseScale
     static let barlineDotSeparation = 0.16 * baseScale
-    static let barlineWidth = 0.16 * baseScale
-    static let barlineWidthThick = 0.5 * baseScale
+    static let barlineLineWidth = 0.16 * baseScale
+    static let barlineThickLineWidth = 0.5 * baseScale
 
     /// Space used by various font elements
     /// These values are based on the ones included in the Bravura.json file downloaded with the font release
     enum Advance {
         static let gClef = 2.685 * baseScale
+        static let repeatDots = 0.4 * baseScale
     }
 
     /*
@@ -51,6 +52,13 @@ enum Layout {
      "tieMidpointThickness": 0.22,
      "tupletBracketThickness": 0.16
      */
+}
+
+enum BravuraSymbol: String {
+    case noteHead = "\u{E0A4}"
+    case gClef = "\u{E050}"
+    case repeatDots = "\u{E043}"
+    // More: https://smufl.formats.music/latest/tables/staff-brackets-and-dividers.html
 }
 
 #endif // !os(Linux)

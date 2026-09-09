@@ -89,21 +89,29 @@ struct BoundingBox {
     let width: CGFloat
     let height: CGFloat
 
-    func inset(x: CGFloat, y: CGFloat) -> CGPoint {
+    func inset(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
         CGPoint(x: left + x, y: bottom + y)
     }
 
-    func insetFromTop(x: CGFloat, y: CGFloat) -> CGPoint {
-        CGPoint(x: left + x, y: bottom + height - y)
+    func insetFromTop(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
+        CGPoint(x: left + x, y: top - y)
+    }
+
+    func insetFromRight(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
+        CGPoint(x: right - x, y: bottom + y)
+    }
+
+    func insetFromTopRight(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
+        CGPoint(x: right - x, y: top - y)
     }
 
     var right: CGFloat { left + width }
     var top: CGFloat { bottom + height }
 
     var origin: CGPoint { .init(x: left, y: bottom) }
-    var topLeft: CGPoint { .init(x: left, y: bottom + height) }
-    var topRight: CGPoint { .init(x: left + width, y: bottom + height) }
-    var bottomRight: CGPoint { .init(x: left + width, y: bottom) }
+    var topLeft: CGPoint { .init(x: left, y: top) }
+    var topRight: CGPoint { .init(x: right, y: top) }
+    var bottomRight: CGPoint { .init(x: right, y: bottom) }
 }
 
 enum Length {

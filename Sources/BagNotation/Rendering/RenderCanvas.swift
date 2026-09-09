@@ -39,6 +39,14 @@ struct RenderCanvas {
         graphics.restoreGState()
     }
 
+    func drawLineVert(from: CGPoint, length: CGFloat, width: CGFloat) {
+        drawLine(from: from, to: CGPoint(x: from.x, y: from.y + length), width: width)
+    }
+
+    func drawLineHoiz(from: CGPoint, length: CGFloat, width: CGFloat) {
+        drawLine(from: from, to: CGPoint(x: from.x + length, y: from.y), width: width)
+    }
+
     func drawText(_ text: String, at point: CGPoint, fontSize: CGFloat) {
         // :TODO: What font should this use? is it embedded in pdf already?
         let attributedString = NSAttributedString(string: text, attributes: [.font: NSFont.systemFont(ofSize: fontSize)])
@@ -78,12 +86,6 @@ struct RenderCanvas {
     func advancePage() {
         // :TODO: calculate if multiple pages are needed, and when to break for them
     }
-}
-
-enum BravuraSymbol: String {
-    case noteHead = "\u{E0A4}"
-    case gClef = "\u{E050}"
-    // More: https://smufl.formats.music/latest/tables/staff-brackets-and-dividers.html
 }
 
 #endif // !os(Linux)

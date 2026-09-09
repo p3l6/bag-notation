@@ -14,7 +14,7 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
         self.line = line
         super.init(inside: box)
 
-        reservedLeading = Layout.Advance.gClef
+        reservedLeading = Layout.Advance.gClef + Layout.baseScale
     }
 
     func render(in graphics: RenderCanvas) {
