@@ -22,8 +22,8 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
         var items = [any Sizable]()
         for item in bar.contents {
             switch item {
-            case let .cluster(c):
-                items.append(contentsOf: c.notes)
+            case let .cluster(cluster):
+                items.append(cluster)
             default:
                 continue
             }
@@ -34,10 +34,8 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
         var renderables = [any Renderable]()
         for item in bar.contents {
             switch item {
-            case let .cluster(c):
-                for note in c.notes {
-                    renderables.append(NoteRenderer(inside: boxes[renderables.count], rendering: note))
-                }
+            case let .cluster(cluster):
+                renderables.append(ClusterRenderer(inside: boxes[renderables.count], rendering: cluster))
             default:
                 continue
             }

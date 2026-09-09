@@ -9,14 +9,17 @@ import CoreGraphics
 
 final class NoteRenderer: BaseRenderable, Renderable<Note> {
     let note: Note
+    var drawsFlag = true
+    let stemX: CGFloat
+    var stemBottom: CGFloat
+    let pitchOffset: CGFloat
+    let noteheadAdvance: CGFloat
 
     init(inside box: BoundingBox, rendering note: Note) {
         self.note = note
-        super.init(inside: box)
-    }
+        stemX = box.left
 
-    private func heightOffset(for pitch: Pitch) -> CGFloat {
-        let stepsUp: CGFloat = switch pitch {
+        let stepsUp: CGFloat = switch note.pitch {
         case .highA: 10
         case .highG: 9
         case .f: 8
@@ -28,25 +31,46 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
         case .lowG: 2
         }
 
-        return Layout.noteStep * stepsUp
+        pitchOffset = Layout.noteStep * stepsUp
+        stemBottom = box.bottom + pitchOffset - Layout.noteStemIdealHeight
+
+        noteheadAdvance = note.duration >= .whole ? Layout.Advance.noteHeadWhole : Layout.Advance.noteHead
+
+        super.init(inside: box)
     }
 
     func render(in graphics: RenderCanvas) {
+        // High-A ledger line
         if note.pitch == .highA {
-            let y = heightOffset(for: .highA)
-            graphics.drawLine(from: box.inset(x: -Layout.ledgerLineExtension, y: y),
-                              to: box.inset(x: Layout.noteSpacingMin + Layout.ledgerLineExtension, y: y),
-                              width: Layout.ledgerLineWidth)
+            graphics.drawLineHoriz(from: box.inset(x: -Layout.ledgerLineExtension, y: pitchOffset),
+                                   length: 2 * Layout.ledgerLineExtension + noteheadAdvance,
+                                   width: Layout.ledgerLineWidth)
         }
 
-        graphics.drawSymbol(.noteHead, at: box.inset(x: 0,
-                                                     y: heightOffset(for: note.pitch)))
+        // Note head
+        let noteHead = box.inset(y: pitchOffset)
+        graphics.drawSymbol(note.duration.noteHeadSymbol, at: noteHead)
 
-        graphics.drawLine(from: box.inset(x: 0,
-                                          y: heightOffset(for: note.pitch)),
-                          to: box.inset(x: 0,
-                                        y: heightOffset(for: note.pitch) - Layout.noteStemIdealHeight),
-                          width: Layout.noteStemLineWidth)
+        // Dotted not dot
+        if note.duration.isDotted {
+            let bumpDotUp = [.lowG, .b, .d, .f, .highA].contains(note.pitch)
+            let dotHeight = bumpDotUp ? pitchOffset + Layout.noteStep : pitchOffset
+            let x = Layout.noteDotSeparation + noteheadAdvance
+            graphics.drawSymbol(.dotted, at: box.inset(x: x, y: dotHeight))
+        }
+
+        if note.duration.needsStem {
+            // Stem
+            let stemEnd = CGPoint(x: stemX, y: stemBottom)
+            graphics.drawLine(from: noteHead,
+                              to: stemEnd,
+                              width: Layout.noteStemLineWidth)
+
+            // Flag
+            if drawsFlag, let flag = note.duration.flagSymbol {
+                graphics.drawSymbol(flag, at: stemEnd)
+            }
+        }
     }
 
     func directChildren() throws -> [any Renderable] {
@@ -55,8 +79,52 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
 }
 
 extension Note: Sizable {
-    var width: Length { .atLeast(Layout.noteSpacingMin) }
+    var width: Length {
+        var min = Layout.Advance.noteHead
+        if duration >= .whole {
+            min = Layout.Advance.noteHeadWhole
+        }
+        if duration.isDotted {
+            min += Layout.Advance.noteDot + Layout.noteDotSeparation
+        }
+        return .atLeast(min)
+    }
+
     var height: Length { .full }
+}
+
+extension Duration {
+    var noteHeadSymbol: BravuraSymbol {
+        switch self {
+        case .whole, .wholeDotted: .noteHeadWhole
+        case .half, .halfDotted: .noteHeadHalf
+        default: .noteHead
+        }
+    }
+
+    var needsStem: Bool {
+        self < .whole
+    }
+
+    var beamCount: Int {
+        switch self {
+        case .eighth, .eighthDotted: 1
+        case .sixteenth, .sixteenthDotted: 2
+        case .thirtysecond, .thirtysecondDotted: 3
+        case .sixtyfourth, .sixtyfourthDotted: 4
+        default: 0
+        }
+    }
+
+    var flagSymbol: BravuraSymbol? {
+        switch self {
+        case .eighth, .eighthDotted: .flag8th
+        case .sixteenth, .sixteenthDotted: .flag16th
+        case .thirtysecond, .thirtysecondDotted: .flag32nd
+        case .sixtyfourth, .sixtyfourthDotted: .flag64th
+        default: nil
+        }
+    }
 }
 
 #endif // !os(Linux)

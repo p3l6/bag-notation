@@ -43,7 +43,7 @@ struct RenderCanvas {
         drawLine(from: from, to: CGPoint(x: from.x, y: from.y + length), width: width)
     }
 
-    func drawLineHoiz(from: CGPoint, length: CGFloat, width: CGFloat) {
+    func drawLineHoriz(from: CGPoint, length: CGFloat, width: CGFloat) {
         drawLine(from: from, to: CGPoint(x: from.x + length, y: from.y), width: width)
     }
 

@@ -78,6 +78,21 @@ public enum Duration: Comparable {
         case .sixtyfourth: .sixtyfourthDotted
         }
     }
+
+    var isDotted: Bool {
+        switch self {
+        case .sixtyfourthDotted,
+             .thirtysecondDotted,
+             .sixteenthDotted,
+             .eighthDotted,
+             .quarterDotted,
+             .halfDotted,
+             .wholeDotted:
+            true
+        default:
+            false
+        }
+    }
 }
 
 // MARK: Create from strings

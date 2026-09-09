@@ -25,11 +25,12 @@ enum Layout {
     static let bravuraFontSize = 4 * baseScale
     static let staffLineWidth = 0.13 * baseScale
     static let noteStep = 0.5 * baseScale
-    static let noteSpacingMin = 1.18 * baseScale
     static let noteStemLineWidth = 0.12 * baseScale
     static let noteStemIdealHeight = 3.2 * baseScale
-    static let noteBeamWidth = 0.5 * baseScale
+    static let noteBeamLineWidth = 0.5 * baseScale
     static let noteBeamSeparation = 0.25 * baseScale
+    static let noteBeamPartialExtension = 0.75 * Advance.noteHead
+    static let noteDotSeparation = 0.25 * baseScale
     static let ledgerLineWidth = 0.16 * baseScale
     static let ledgerLineExtension = 0.4 * baseScale
     static let barlineSeparation = 0.4 * baseScale
@@ -42,6 +43,9 @@ enum Layout {
     enum Advance {
         static let gClef = 2.685 * baseScale
         static let repeatDots = 0.4 * baseScale
+        static let noteHead = 1.18 * baseScale
+        static let noteHeadWhole = 1.688 * baseScale
+        static let noteDot = 0.4 * baseScale
     }
 
     /*
@@ -55,9 +59,17 @@ enum Layout {
 }
 
 enum BravuraSymbol: String {
+    case noteHeadWhole = "\u{E0A2}"
+    case noteHeadHalf = "\u{E0A3}"
     case noteHead = "\u{E0A4}"
     case gClef = "\u{E050}"
     case repeatDots = "\u{E043}"
+    case flag8th = "\u{E241}"
+    case flag16th = "\u{E243}"
+    case flag32nd = "\u{E245}"
+    case flag64th = "\u{E247}"
+    case dotted = "\u{E1E7}"
+
     // More: https://smufl.formats.music/latest/tables/staff-brackets-and-dividers.html
 }
 

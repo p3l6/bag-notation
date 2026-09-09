@@ -134,7 +134,13 @@ enum Length {
     }
 
     static func += (lhs: inout Length, rhs: [Length]) {
-        lhs = rhs.reduce(lhs, +)
+        lhs = rhs.sum
+    }
+}
+
+extension [Length] {
+    var sum: Length {
+        reduce(.exact(0), +)
     }
 }
 
