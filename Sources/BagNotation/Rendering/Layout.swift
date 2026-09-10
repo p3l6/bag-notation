@@ -46,6 +46,7 @@ enum Layout {
         static let noteHead = 1.18 * baseScale
         static let noteHeadWhole = 1.688 * baseScale
         static let noteDot = 0.4 * baseScale
+        static let timeSig = 1.75 * baseScale
     }
 
     /*
@@ -69,6 +70,16 @@ enum BravuraSymbol: String {
     case flag32nd = "\u{E245}"
     case flag64th = "\u{E247}"
     case dotted = "\u{E1E7}"
+    case timeSig1 = "\u{E081}"
+    case timeSig2 = "\u{E082}"
+    case timeSig3 = "\u{E083}"
+    case timeSig4 = "\u{E084}"
+    case timeSig5 = "\u{E085}"
+    case timeSig6 = "\u{E086}"
+    case timeSig7 = "\u{E087}"
+    case timeSig8 = "\u{E088}"
+    case timeSig9 = "\u{E089}"
+    case timeSig12 = "\u{E081}\u{E082}"
 
     // More: https://smufl.formats.music/latest/tables/staff-brackets-and-dividers.html
 }

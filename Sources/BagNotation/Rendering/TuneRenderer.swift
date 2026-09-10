@@ -30,10 +30,12 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
         let lines = tune.lines
         let boxes = try layout(.vertical, lines, spacing: Layout.staffSeparation)
 
-        var renderables = [any Renderable]()
+        var renderables = [LineRenderer]()
         for (index, line) in tune.lines.enumerated() {
             renderables.append(LineRenderer(inside: boxes[index], rendering: line))
         }
+        renderables.first!.setTimeSignature(tune.header.timeSignature)
+
         return renderables
     }
 
