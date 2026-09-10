@@ -14,24 +14,14 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     var stemBottom: CGFloat
     let pitchOffset: CGFloat
     let noteheadAdvance: CGFloat
+    let embellishmentAdvance: CGFloat
 
     init(inside box: BoundingBox, rendering note: Note) {
         self.note = note
-        stemX = box.left
+        embellishmentAdvance = note.embellishment?.width.advance ?? 0
+        stemX = box.left + embellishmentAdvance
 
-        let stepsUp: CGFloat = switch note.pitch {
-        case .highA: 10
-        case .highG: 9
-        case .f: 8
-        case .e: 7
-        case .d: 6
-        case .c: 5
-        case .b: 4
-        case .lowA: 3
-        case .lowG: 2
-        }
-
-        pitchOffset = Layout.noteStep * stepsUp
+        pitchOffset = note.pitch.yOffset
         stemBottom = box.bottom + pitchOffset - Layout.noteStemIdealHeight
 
         noteheadAdvance = note.duration >= .whole ? Layout.Advance.noteHeadWhole : Layout.Advance.noteHead
@@ -42,13 +32,13 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     func render(in graphics: RenderCanvas) {
         // High-A ledger line
         if note.pitch == .highA {
-            graphics.drawLineHoriz(from: box.inset(x: -Layout.ledgerLineExtension, y: pitchOffset),
+            graphics.drawLineHoriz(from: box.inset(x: embellishmentAdvance - Layout.ledgerLineExtension, y: pitchOffset),
                                    length: 2 * Layout.ledgerLineExtension + noteheadAdvance,
                                    width: Layout.ledgerLineWidth)
         }
 
         // Note head
-        let noteHead = box.inset(y: pitchOffset)
+        let noteHead = box.inset(x: embellishmentAdvance, y: pitchOffset)
         graphics.drawSymbol(note.duration.noteHeadSymbol, at: noteHead)
 
         // Dotted not dot
@@ -56,7 +46,7 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
             let bumpDotUp = [.lowG, .b, .d, .f, .highA].contains(note.pitch)
             let dotHeight = bumpDotUp ? pitchOffset + Layout.noteStep : pitchOffset
             let x = Layout.noteDotSeparation + noteheadAdvance
-            graphics.drawSymbol(.dotted, at: box.inset(x: x, y: dotHeight))
+            graphics.drawSymbol(.dotted, at: box.inset(x: embellishmentAdvance + x, y: dotHeight))
         }
 
         if note.duration.needsStem {
@@ -74,11 +64,15 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     }
 
     func directChildren() throws -> [any Renderable] {
-        []
+        guard let embellishment = note.embellishment  else { return [] }
+
+        let embellishmentBox = BoundingBox(left: box.left, bottom: box.bottom, width: embellishment.width.advance, height: box.height)
+        return [EmbellishmentRenderer(inside: embellishmentBox, rendering: embellishment)]
     }
 }
 
 extension Note: Sizable {
+    var height: Length { .full }
     var width: Length {
         var min = Layout.Advance.noteHead
         if duration >= .whole {
@@ -87,10 +81,26 @@ extension Note: Sizable {
         if duration.isDotted {
             min += Layout.Advance.noteDot + Layout.noteDotSeparation
         }
-        return .atLeast(min)
+        return .atLeast(min) + (embellishment?.width ?? .zero)
     }
+}
 
-    var height: Length { .full }
+extension Pitch {
+    var yOffset: CGFloat {
+        let steps = switch self {
+        case .highA: 10
+        case .highG: 9
+        case .f: 8
+        case .e: 7
+        case .d: 6
+        case .c: 5
+        case .b: 4
+        case .lowA: 3
+        case .lowG: 2
+        }
+
+        return CGFloat(steps) * Layout.noteStep
+    }
 }
 
 extension Duration {

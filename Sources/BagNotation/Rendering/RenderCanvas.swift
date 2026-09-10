@@ -12,6 +12,7 @@ import Foundation
 struct RenderCanvas {
     let pageSize: CGSize
     let bravuraFont: NSFont
+    let bravuraFontSmall: NSFont
     let graphics: CGContext
 
     init(pageSize: CGSize, graphics: CGContext) throws {
@@ -27,6 +28,11 @@ struct RenderCanvas {
             throw PdfError.couldNotLoadFont
         }
         bravuraFont = font
+
+        guard let fontSmall = NSFont(name: "Bravura", size: Layout.bravuraFontSmallSize) else {
+            throw PdfError.couldNotLoadFont
+        }
+        bravuraFontSmall = fontSmall
     }
 
     func drawLine(from start: CGPoint, to end: CGPoint, width: CGFloat) {
@@ -59,8 +65,9 @@ struct RenderCanvas {
         graphics.restoreGState()
     }
 
-    func drawSymbol(_ symbol: BravuraSymbol, at point: CGPoint) {
-        let attributedString = NSAttributedString(string: symbol.rawValue, attributes: [.font: bravuraFont])
+    func drawSymbol(_ symbol: BravuraSymbol, at point: CGPoint, small: Bool = false) {
+        let font = small ? bravuraFontSmall : bravuraFont
+        let attributedString = NSAttributedString(string: symbol.rawValue, attributes: [.font: font])
         let line = CTLineCreateWithAttributedString(attributedString)
 
         graphics.saveGState()

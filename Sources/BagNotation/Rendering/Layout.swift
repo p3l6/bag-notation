@@ -9,7 +9,9 @@ import CoreGraphics
 
 // :TODO: Should this be configurable? instead of global? via settings, based on page size, etc?
 enum Layout {
-    static let baseScale: CGFloat = 6
+    // :TODO: Eventual target around 4 to match previous methods
+    // Then of course staff separation will play a big part too
+    static let baseScale: CGFloat = 5
 
     // Other explicit constants
 
@@ -23,6 +25,7 @@ enum Layout {
     /// Staff line spacing is the main metric by which bravura-font related items are scaled
     static let staffLineSpacing = baseScale
     static let bravuraFontSize = 4 * baseScale
+    static let bravuraFontSmallSize = 2.4 * baseScale
     static let staffLineWidth = 0.13 * baseScale
     static let noteStep = 0.5 * baseScale
     static let noteStemLineWidth = 0.12 * baseScale
@@ -30,6 +33,13 @@ enum Layout {
     static let noteBeamLineWidth = 0.5 * baseScale
     static let noteBeamSeparation = 0.25 * baseScale
     static let noteBeamPartialExtension = 0.75 * Advance.noteHead
+    static let noteGracenoteSeparation = 0.3 * baseScale
+    static let gracenoteStemIdealHeight = 2.4 * baseScale
+    static let gracenoteStemLineWidth = 0.1 * baseScale
+    static let gracenoteBeamLineWidth = 0.25 * baseScale
+    static let gracenoteBeamSeparation = 0.18 * baseScale
+    static let gracenoteLedgerLineExtension = 0.28 * baseScale
+    static let gracenoteSeparation = 0.12 * baseScale
     static let noteDotSeparation = 0.25 * baseScale
     static let ledgerLineWidth = 0.16 * baseScale
     static let ledgerLineExtension = 0.4 * baseScale
@@ -45,6 +55,7 @@ enum Layout {
         static let repeatDots = 0.4 * baseScale
         static let noteHead = 1.18 * baseScale
         static let noteHeadWhole = 1.688 * baseScale
+        static let gracenoteHead = noteHead * bravuraFontSmallSize / bravuraFontSize
         static let noteDot = 0.4 * baseScale
         static let timeSig = 1.75 * baseScale
     }
@@ -68,6 +79,7 @@ enum BravuraSymbol: String {
     case flag8th = "\u{E241}"
     case flag16th = "\u{E243}"
     case flag32nd = "\u{E245}"
+    case flag32ndUp = "\u{E244}"
     case flag64th = "\u{E247}"
     case dotted = "\u{E1E7}"
     case timeSig1 = "\u{E081}"

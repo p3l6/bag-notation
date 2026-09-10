@@ -36,6 +36,7 @@ class BaseRenderable {
         var stretchableCount = 0
         for size in sizes {
             switch size {
+            case .zero: continue
             case let .exact(value):
                 totalSize += value
             case let .atLeast(value):
@@ -61,6 +62,7 @@ class BaseRenderable {
         return try inputs.map { item in
             let requirement = direction == .horizontal ? item.width : item.height
             let actual = switch requirement {
+            case .zero: 0.0
             case let .exact(value): value
             case let .atLeast(value): value + stretch
             case .full: throw PdfError.insufficientSpace
@@ -115,12 +117,15 @@ struct BoundingBox {
 }
 
 enum Length {
+    case zero
     case exact(CGFloat)
     case atLeast(CGFloat)
     case full
 
     static func + (lhs: Length, rhs: Length) -> Length {
         switch (lhs, rhs) {
+        case (.zero, _): rhs
+        case (_, .zero): lhs
         case (.full, _), (_, .full): .full
         case let (.exact(lv), .exact(rv)): .exact(lv + rv)
         case let (.atLeast(lv), .exact(rv)),
@@ -135,6 +140,15 @@ enum Length {
 
     static func += (lhs: inout Length, rhs: [Length]) {
         lhs = rhs.sum
+    }
+
+    var advance: CGFloat {
+        switch self {
+        case .zero: 0.0
+        case let .exact(v), let .atLeast(v): v
+        case .full: .infinity
+        }
+
     }
 }
 
