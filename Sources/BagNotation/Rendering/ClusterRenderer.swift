@@ -93,6 +93,10 @@ private struct Beam {
     let slope: Slope
 
     init(noteRenderers: [NoteRenderer]) {
+        // :TODO: each stem in the beam should have a minimum height?
+        // or, avoid gracing overlapping beams, somehow.
+        // the minimum height doesn't have to be the ideal, could be less. at least enough for the number of beams + padding
+
         if noteRenderers.count > 1 {
             let m = (noteRenderers.last!.stemBottom - noteRenderers.first!.stemBottom) /
                 (noteRenderers.last!.stemX - noteRenderers.first!.stemX)
@@ -129,15 +133,8 @@ private struct Beam {
 
                 if beamStartIndex == index - 1 {
                     let startX = noteRenderers[beamStartIndex].stemX
-                    let direction: CGFloat = if beamStartIndex == noteRenderers.startIndex {
-                        1
-                    } else if beamStartIndex == noteRenderers.index(before: noteRenderers.endIndex) {
-                        -1
-                    } else if noteRenderers[beamStartIndex + 1].note.duration.beamCount > 0 {
-                        1
-                    } else {
-                        -1
-                    }
+                    // right by default (1), left whenever the beam below this is also ending (-1)
+                    let direction: CGFloat = (targetBeamCount < startStack.count) ? -1 : 1
                     flags.append(Flag(startX: startX, direction: direction, slope: slope, stackIndex: beamStackCount))
                 } else {
                     let startX = noteRenderers[beamStartIndex].stemX

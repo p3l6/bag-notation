@@ -63,8 +63,9 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
 extension Tune: Sizable {
     var width: Length { .full }
     var height: Length {
-        .exact(Layout.tuneHeaderHeight) +
-            lines.map(\.height).reduce(.exact(0), +)
+        .exact(Layout.tuneHeaderHeight)
+            + lines.map(\.height).sum
+            + .exact(Layout.staffSeparation * CGFloat(lines.count))
     }
 }
 

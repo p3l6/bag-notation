@@ -47,7 +47,7 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
 
 extension Bar: Sizable {
     var width: Length {
-        var width: Length = .exact(0)
+        var width: Length = .exact(Layout.baseScale)
         for item in contents {
             switch item {
             case let .cluster(cluster):
@@ -63,7 +63,8 @@ extension Bar: Sizable {
             default: break
             }
         }
-        return width
+        width += trailingBarline.width
+        return isPickup ? .exact(width.advance) + .exact(Layout.baseScale) : width
     }
 
     var height: Length { .full }

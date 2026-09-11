@@ -11,10 +11,11 @@ import CoreGraphics
 enum Layout {
     // :TODO: Eventual target around 4 to match previous methods
     // Then of course staff separation will play a big part too
-    static let baseScale: CGFloat = 5
+    static let baseScale: CGFloat = 4
 
     // Other explicit constants
 
+    static let tuneSeparation: CGFloat = 10
     static let staffSeparation: CGFloat = 20
     static let pageMargin: CGFloat = 20
     static let tuneHeaderHeight: CGFloat = 50

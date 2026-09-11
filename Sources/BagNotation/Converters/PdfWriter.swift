@@ -24,27 +24,23 @@ public class PdfWriter {
             throw PdfError.couldNotCreateContext
         }
 
-        let canvas = try RenderCanvas(pageSize: pageSize, graphics: context)
-        let canvasBounding = BoundingBox(left: Layout.pageMargin,
-                                         bottom: Layout.pageMargin,
-                                         width: pageSize.width - Layout.pageMargin * 2,
-                                         height: pageSize.height - Layout.pageMargin * 2)
+        let canvas = try RenderCanvas(graphics: context)
+        let pageBounding = BoundingBox(page: 0, left: 0, bottom: 0, width: pageSize.width, height: pageSize.height)
 
-        var parents: [any Renderable] = [TuneRenderer(inside: canvasBounding, rendering: doc.tunes.first!)]
-        var renderables = parents
+        let doc = DocRenderer(inside: pageBounding, rendering: doc)
 
-        while !parents.isEmpty {
-            let parent = parents.removeFirst()
-            let children = try parent.directChildren()
-            parents.append(contentsOf: children)
-            renderables.append(contentsOf: children)
+        let renderables = try doc.collectAllRenderables()
+
+        let pages = Dictionary(grouping: renderables, by: { $0.box.page })
+
+        for page in pages.keys.sorted() {
+            let pageRenderables = pages[page]!
+
+            context.beginPDFPage(nil)
+            pageRenderables.forEach { $0.render(in: canvas) }
+            context.endPDFPage()
         }
 
-        context.beginPDFPage(nil)
-
-        renderables.forEach { $0.render(in: canvas) }
-
-        context.endPDFPage()
         context.closePDF()
 
         return data as Data

@@ -64,9 +64,9 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     }
 
     func directChildren() throws -> [any Renderable] {
-        guard let embellishment = note.embellishment  else { return [] }
+        guard let embellishment = note.embellishment else { return [] }
 
-        let embellishmentBox = BoundingBox(left: box.left, bottom: box.bottom, width: embellishment.width.advance, height: box.height)
+        let embellishmentBox = BoundingBox(page: box.page, left: box.left, bottom: box.bottom, width: embellishment.width.advance, height: box.height)
         return [EmbellishmentRenderer(inside: embellishmentBox, rendering: embellishment)]
     }
 }

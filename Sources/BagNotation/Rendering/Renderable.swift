@@ -10,8 +10,30 @@ import CoreGraphics
 protocol Renderable<S> {
     associatedtype S: Sizable
     init(inside boundingBox: BoundingBox, rendering: S)
+    var box: BoundingBox { get }
     func render(in graphics: RenderCanvas)
     func directChildren() throws -> [any Renderable]
+}
+
+extension Renderable {
+    /// Collects this renderable, and all descendent renderables.
+    ///
+    /// This is to be used at the top level of the rendering stack, and only
+    /// called once. It should not be called by any renderable for making calculations
+    /// or layouts.
+    func collectAllRenderables() throws -> [any Renderable] {
+        var parents: [any Renderable] = [self]
+        var renderables = parents
+
+        while !parents.isEmpty {
+            let parent = parents.removeFirst()
+            let children = try parent.directChildren()
+            parents.append(contentsOf: children)
+            renderables.append(contentsOf: children)
+        }
+
+        return renderables
+    }
 }
 
 class BaseRenderable {
@@ -55,6 +77,7 @@ class BaseRenderable {
         }
 
         // strech value per adjustable block if needed
+        // :TODO: consider scaling this assignment relative to the porportional width of each stretchy item
         let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
 
         // create Render objects with bounding boxes
@@ -65,15 +88,18 @@ class BaseRenderable {
             case .zero: 0.0
             case let .exact(value): value
             case let .atLeast(value): value + stretch
-            case .full: throw PdfError.insufficientSpace
+            case .full:
+                throw PdfError.insufficientSpace
             }
             let actualSize = if direction == .horizontal {
-                BoundingBox(left: box.left + advance,
+                BoundingBox(page: box.page,
+                            left: box.left + advance,
                             bottom: box.bottom,
                             width: actual,
                             height: box.height)
             } else {
-                BoundingBox(left: box.left,
+                BoundingBox(page: box.page,
+                            left: box.left,
                             bottom: box.bottom + box.height - advance - actual,
                             width: box.width,
                             height: actual)
@@ -86,6 +112,7 @@ class BaseRenderable {
 }
 
 struct BoundingBox {
+    let page: Int
     let left: CGFloat
     let bottom: CGFloat
     let width: CGFloat
@@ -139,7 +166,7 @@ enum Length {
     }
 
     static func += (lhs: inout Length, rhs: [Length]) {
-        lhs = rhs.sum
+        lhs += rhs.sum
     }
 
     var advance: CGFloat {
@@ -148,7 +175,6 @@ enum Length {
         case let .exact(v), let .atLeast(v): v
         case .full: .infinity
         }
-
     }
 }
 

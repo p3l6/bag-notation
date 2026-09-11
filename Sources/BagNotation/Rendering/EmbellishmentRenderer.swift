@@ -1,5 +1,5 @@
 //
-//  NoteRenderer.swift
+//  EmbellishmentRenderer.swift
 //  Bag Notation
 //
 
@@ -67,8 +67,9 @@ extension Embellishment: Sizable {
     var height: Length { .full }
     var width: Length {
         .exact(CGFloat(pitches.count) * Layout.Advance.gracenoteHead
-               + CGFloat(pitches.count - 1) * Layout.gracenoteSeparation
-               + Layout.noteGracenoteSeparation)
+            + CGFloat(pitches.count - 1) * Layout.gracenoteSeparation
+            // :TODO: singlings that are lower than note need more padding
+            + Layout.noteGracenoteSeparation)
     }
 }
 

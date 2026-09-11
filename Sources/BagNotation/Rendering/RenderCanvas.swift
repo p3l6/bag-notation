@@ -10,12 +10,10 @@ import CoreGraphics
 import Foundation
 
 struct RenderCanvas {
-    let pageSize: CGSize
     let fonts: Fonts
     let graphics: CGContext
 
-    init(pageSize: CGSize, graphics: CGContext) throws {
-        self.pageSize = pageSize
+    init(graphics: CGContext) throws {
         self.graphics = graphics
 
         fonts = try Fonts()
@@ -87,10 +85,6 @@ struct RenderCanvas {
         graphics.strokePath()
         graphics.restoreGState()
     }
-
-    func advancePage() {
-        // :TODO: calculate if multiple pages are needed, and when to break for them
-    }
 }
 
 struct Fonts {
@@ -129,18 +123,18 @@ struct Fonts {
                                                       traits: [],
                                                       weight: 5,
                                                       size: Layout.bravuraFontSmallSize),
-              let bold = NSFontManager.shared.font(withFamily: "Academico",
-                                                   traits: [.boldFontMask],
+            let bold = NSFontManager.shared.font(withFamily: "Academico",
+                                                 traits: [.boldFontMask],
+                                                 weight: 5,
+                                                 size: Layout.bravuraFontSmallSize),
+            let italic = NSFontManager.shared.font(withFamily: "Academico",
+                                                   traits: [.italicFontMask],
                                                    weight: 5,
                                                    size: Layout.bravuraFontSmallSize),
-              let italic = NSFontManager.shared.font(withFamily: "Academico",
-                                                     traits: [.italicFontMask],
-                                                     weight: 5,
-                                                     size: Layout.bravuraFontSmallSize),
-              let boldItalic = NSFontManager.shared.font(withFamily: "Academico",
-                                                         traits: [.boldFontMask, .italicFontMask],
-                                                         weight: 5,
-                                                         size: Layout.bravuraFontSmallSize)
+            let boldItalic = NSFontManager.shared.font(withFamily: "Academico",
+                                                       traits: [.boldFontMask, .italicFontMask],
+                                                       weight: 5,
+                                                       size: Layout.bravuraFontSmallSize)
         else {
             throw PdfError.couldNotLoadFont
         }
