@@ -64,6 +64,7 @@ private struct Beam {
         func draw(in graphics: RenderCanvas) {
             let offsetY = CGFloat(stackIndex) * (Layout.noteBeamLineWidth + Layout.noteBeamSeparation)
 
+            // :TODO: draw a paralellagram instead, to have the ends vertical
             graphics.drawLine(from: CGPoint(x: startX, y: slope.height(at: startX) + offsetY),
                               to: CGPoint(x: endX, y: slope.height(at: endX) + offsetY),
                               width: Layout.noteBeamLineWidth)

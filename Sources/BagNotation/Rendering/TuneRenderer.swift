@@ -17,12 +17,16 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
     }
 
     func render(in graphics: RenderCanvas) {
-        // :TODO: How to center or right justify this text??
-        graphics.drawText(tune.header.title, at: box.insetFromTop(x: 100, y: 12), fontSize: 12)
-        graphics.drawText(tune.header.composer, at: box.insetFromTop(x: 300, y: 20), fontSize: 12)
-        graphics.drawText(styleText, at: box.insetFromTop(x: 0, y: 20), fontSize: 12)
-        // :TODO: arranger
-        // :TODO: tempo
+        graphics.drawText(tune.header.title, at: box.insetFromTop(x: box.width / 2, y: 20), fontSize: 20, kind: .italic, justify: .center)
+        graphics.drawText(tune.header.composer, at: box.insetFromTopRight(y: 30), fontSize: 10, justify: .right)
+        if let arr = tune.header.arranger {
+            graphics.drawText("Arr: \(arr)", at: box.insetFromTopRight(y: 42), fontSize: 9, justify: .right)
+        }
+        graphics.drawText(styleText, at: box.insetFromTop(y: 30), fontSize: 10)
+        if let tempo = tune.header.tempo {
+            graphics.drawText("\(tempo) bpm", at: box.insetFromTop(y: 42), fontSize: 9)
+        }
+
         // :TODO: revision? in footer of each page? unclear how to do this
     }
 

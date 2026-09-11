@@ -17,7 +17,7 @@ enum Layout {
 
     static let staffSeparation: CGFloat = 20
     static let pageMargin: CGFloat = 20
-    static let tuneHeaderHeight: CGFloat = 20
+    static let tuneHeaderHeight: CGFloat = 50
 
     // Scaled constants
     // These values are based on the ones included in the Bravura.json file downloaded with the font release
