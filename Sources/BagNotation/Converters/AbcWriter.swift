@@ -16,7 +16,7 @@ public class AbcWriter {
     }
 
     func formatSpecs() -> String {
-        let revision = doc.tunes.compactMap(\.header.revision).first
+        let revision = doc.revision
         let revisionLines = if let revision {
             "%% footerfont * 12\n%% footer \"(rev: \(revision))\t\t\""
         } else {

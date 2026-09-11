@@ -9,7 +9,7 @@ import CoreGraphics
 
 protocol Renderable<S> {
     associatedtype S: Sizable
-    init(inside boundingBox: BoundingBox, rendering: S)
+    init(inside box: BoundingBox, rendering: S)
     var box: BoundingBox { get }
     func render(in graphics: RenderCanvas)
     func directChildren() throws -> [any Renderable]
@@ -73,6 +73,8 @@ class BaseRenderable {
         let available = (direction == .horizontal ? box.width : box.height) - reservedLeading - reservedTrailing
         let extra = available - totalSize
         guard extra >= 0 else {
+            // :TODO: Consider alternatives, such as rendering what can be fit.
+            // perhaps configuable, this is only desired on line layouts?
             throw PdfError.insufficientSpace
         }
 
