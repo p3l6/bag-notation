@@ -17,6 +17,9 @@ struct Pdf: AsyncParsableCommand {
     @Option(name: [.short, .customLong("out")], help: "Path for pdf output. If ommitted, path is determined automatically by replacing file extension.")
     var outputFile: String?
 
+    @Flag(name: [.customLong("legacy")], help: "Force using the legacy rendering pipeline. (Default: false) (only on macOS, linux only uses legacy)")
+    var useLegacy: Bool = false
+
     lazy var tempDir = URL.temporaryDirectory.appending(component: "bag-notation").appending(component: UUID().uuidString)
     lazy var abcFile = tempDir.appendingPathComponent("conv.abc")
     lazy var psFile = tempDir.appendingPathComponent("conv.ps")
@@ -26,15 +29,20 @@ struct Pdf: AsyncParsableCommand {
             throw RuntimeError.couldNotRead(file: inOpts.inputFile)
         }
 
-#if !os(Linux)
-        var doc = try BagReader(input).makeModel()
-        if outOpts.melodyOnly { doc = doc.withSingleVoice() }
-        let writer = PdfWriter(doc)
-        writer.landscape = outOpts.landscape
-        let data = try writer.makePdf()
-
         let outputFile = outputFile ?? inOpts.inputFile.replacingExtension("bag", with: "pdf")
-        try data.write(to: URL(filePath: outputFile))
+
+#if !os(Linux)
+        if useLegacy {
+            try legacyPdfPipeline(input)
+        } else {
+            var doc = try BagReader(input).makeModel()
+            if outOpts.melodyOnly { doc = doc.withSingleVoice() }
+            let writer = PdfWriter(doc)
+            writer.landscape = outOpts.landscape
+
+            let data = try writer.makePdf()
+            try data.write(to: URL(filePath: outputFile))
+        }
 #else // !os(Linux)
         try legacyPdfPipeline(input)
 #endif // !os(Linux)

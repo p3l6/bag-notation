@@ -9,6 +9,8 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+- (In progress): Native rendering (macos only)
+- New: Added `--legacy` flag to the `pdf` command, to fall back to abmc2ps->ps2pdf rendering pipeline 
 
 ## [1.0.1] - 17 Apr 2026
 
