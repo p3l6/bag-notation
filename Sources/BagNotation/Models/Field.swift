@@ -46,7 +46,7 @@ public struct Field {
     }
 
     func asVariation() -> Variation {
-        _value == nil ? .none : .other(label: _value!)
+        _value == nil ? .end : .start(label: _value!)
     }
 
     func asTempo() throws -> Int {

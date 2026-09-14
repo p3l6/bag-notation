@@ -52,7 +52,8 @@ public class AbcWriter {
 
 extension Tune: AbcSourceConverting {
     fileprivate func abcSource(ctx: AbcActiveContext) -> String {
-        ctx.activeFlow = context.head
+        ctx.currentTempo = header.tempo
+        ctx.currentTimeSignature = header.timeSignature
 
         var abc = header.abcSource(ctx: ctx) + "\n"
         abc += lines.mapToAbc(joined: "\n", ctx: ctx)
@@ -142,21 +143,25 @@ extension Line: AbcSourceConverting {
 
 extension Voice: AbcSourceConverting {
     fileprivate func abcSource(ctx: AbcActiveContext) -> String {
-        var abc = "[V: \(context.body.voiceNumber)] "
+        var abc = "[V: \(context.voiceNumber)] "
         abc += leadingBarline?.abcSource(ctx: ctx) ?? ""
         abc += " "
         abc += bars.mapToAbc(joined: " ", ctx: ctx)
-        // ends a possible variation here
-        ctx.activeFlow = context.tail
         return abc
     }
 }
 
 extension Bar: AbcSourceConverting {
     fileprivate func abcSource(ctx: AbcActiveContext) -> String {
-        var abc = contents.map { element in
+        var abc = ""
+        if context.timeSignature != ctx.currentTimeSignature {
+            abc += "[M:\(context.timeSignature.abcSource(ctx: ctx))]"
+            ctx.currentTimeSignature = context.timeSignature
+        }
+
+        abc += contents.map { element in
             switch element {
-            case let .cluster(cluster): cluster.context.head.abcSource(ctx: ctx) + cluster.abcSource(ctx: ctx)
+            case let .cluster(cluster): cluster.abcSource(ctx: ctx)
             case let .rest(duration): "z" + duration.abcSource(ctx: ctx)
             case .barRest: "Z"
             case let .spacer(duration): "x" + duration.abcSource(ctx: ctx)
@@ -164,27 +169,7 @@ extension Bar: AbcSourceConverting {
             }
         }.joined(separator: " ")
         abc += " "
-        abc += context.tail.abcSource(ctx: ctx) + trailingBarline.abcSource(ctx: ctx)
-        return abc
-    }
-}
-
-extension FlowContext: AbcSourceConverting {
-    fileprivate func abcSource(ctx: AbcActiveContext) -> String {
-        var abc = ""
-        if variation != ctx.activeFlow.variation {
-            switch variation {
-            case .none: abc += " ] "
-            case let .other(label): abc += " [\"\(label)\" "
-            }
-        }
-        if let tempo, tempo != ctx.activeFlow.tempo {
-            abc += "[Q:\(timeSignature.beatLength.representedNote())=\(tempo)]"
-        }
-        if timeSignature != ctx.activeFlow.timeSignature {
-            abc += "[M:\(timeSignature.abcSource(ctx: ctx))]"
-        }
-        ctx.activeFlow = self
+        abc += trailingBarline.abcSource(ctx: ctx)
         return abc
     }
 }
@@ -204,7 +189,32 @@ extension Barline: AbcSourceConverting {
 
 extension Cluster: AbcSourceConverting {
     fileprivate func abcSource(ctx: AbcActiveContext) -> String {
-        notes.mapToAbc(ctx: ctx)
+        var abc = ""
+        var trailingAbc = ""
+
+        switch variation {
+        case .none: break
+        case let .start(label): abc += " [\"\(label)\" "
+        case let .startAndEnd(label):
+            abc += " [\"\(label)\" "
+            if !context.isFinalClusterOfVoice {
+                // Abc will automatically terminate in this case
+                trailingAbc += " ] "
+            }
+        case .active: break
+        case .end:
+            if !context.isFinalClusterOfVoice {
+                // Abc will automatically terminate in this case
+                trailingAbc += " ] "
+            }
+        }
+
+        if let tempo = context.tempo, tempo != ctx.currentTempo {
+            abc += "[Q:\(context.bar.timeSignature.beatLength.representedNote())=\(tempo)]"
+        }
+
+        abc += notes.mapToAbc(ctx: ctx)
+        return abc + trailingAbc
     }
 }
 
@@ -219,8 +229,8 @@ extension Note: AbcSourceConverting {
             abc += "("
         }
 
-        if context.body.tupletNumber == 1 {
-            abc += "(\(context.body.tupletSize)"
+        if context.tupletNumber == 1 {
+            abc += "(\(context.tupletSize)"
         }
 
         if let embellishment {
@@ -324,9 +334,11 @@ private protocol AbcSourceConverting {
 }
 
 private class AbcActiveContext {
-    var activeFlow: FlowContext!
-    var closeNextSlur = false
+    var currentTimeSignature: TimeSignature!
+    var currentTempo: Int?
     var currentVoiceCount = 0
+
+    var closeNextSlur = false
 }
 
 private extension Array where Element: AbcSourceConverting {

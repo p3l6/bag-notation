@@ -29,6 +29,10 @@ The ts-grammar can be found in `repo/tree-sitter-bag-notation/grammar.js`
 
 - ``BagReader``
 
+Note on model objects vs model context objects. A model should stand on its own, making coeherent sense without any of the information from its associated context.
+The context properties are accessible by child models, and so contain either summary data, or information about the surroundings. 
+For example, "tune index in file" is not needed on the tune model, but describes situational-awareness about where this tune is found.
+
 ### Abc output
 
 - ``AbcWriter``

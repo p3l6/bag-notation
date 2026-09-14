@@ -116,7 +116,7 @@ All possible field labels are listed here. Most require values, unless stated.
 
 * `time`: The tune's time signature
     * Required in the header, unless implied by the `style` field
-    * When used inline, the current time signature changes at that point 
+    * When used inline, the current time signature changes at the beginning of that bar. **Note:** an inline `time` should appear as the first item in the bar, and multiple time fields in a single bar is undefined.
 * `note`: Set the base note length
     * Values: "quarter", "eighth", "sixteenth", etc
     * Usually ommitted, as the default value is "eighth" and that works for most tunes 
@@ -135,6 +135,7 @@ All possible field labels are listed here. Most require values, unless stated.
     * Values: any string, usually like `2` or `2 of 4`
     * Without a value, signifies the end of the variation. Note that variations will end at the end at the end of a line, and so this is only needed when the variation is only a few notes in the middle of the line
     * Shorthands: `0 1 2 3 4`.  As the most common variation names, these numbers can be used alone. A zero will end the current variation. ie. `(v: 1) xa.b/ c (v: 2) xac e (v)` is the same as `1 xa.b/c 2 xac e 0`
+    * **Note:** shorthand for this fields should _not_ be placed inside a note cluster. 
 * `text`: Adds an annotation to the following note
 * `hold`: Adds a fermata on the following note
     * This field has no value

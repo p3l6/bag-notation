@@ -4,7 +4,11 @@
 //
 
 public struct Doc {
-    let context: DocContext
+    public struct Context {
+        let tuneCount: Int
+    }
+
+    let context: Context
     let tunes: [Tune]
 
     var revision: String? {

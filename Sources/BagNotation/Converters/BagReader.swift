@@ -15,7 +15,7 @@ public class BagReader {
         let docModeler = try DocModeler(node: tree.rootNode, textSource: tree)
         // docFlow is essentially ignored
         let docFlow = FlowContext(timeSignature: .time44, noteLength: .eighth, tempo: nil)
-        let docContext = DocContextBody(tuneCount: docModeler.tuneModelers.count)
+        let docContext = Doc.Context(tuneCount: docModeler.tuneModelers.count)
         _ = try docModeler.provideContext(head: docFlow, body: docContext)
         return docModeler.model()
     }
@@ -70,7 +70,7 @@ private final class DocModeler: Modeler {
 
     let tuneModelers: [TuneModeler]
 
-    var context: DocContext!
+    var context: ContextGroup<Doc.Context>!
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
@@ -83,23 +83,23 @@ private final class DocModeler: Modeler {
         }
     }
 
-    func provideContext(private head: FlowContext, body: DocContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: Doc.Context) throws -> FlowContext {
         var flow = head
 
         for (idx, tm) in tuneModelers.enumerated() {
-            let tuneContext = TuneContextBody(tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
+            let tuneContext = Tune.Context(tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
             let headerFlow = FlowContext(timeSignature: tm.header.timeSignature,
                                          noteLength: tm.header.noteLength,
                                          tempo: tm.header.tempo)
             flow = try tm.provideContext(head: headerFlow, body: tuneContext)
         }
 
-        context = DocContext(head: head, body: body, tail: flow)
+        context = (head: head, body: body, tail: flow)
         return flow
     }
 
     func model() -> Doc {
-        Doc(context: context, tunes: tuneModelers.map { $0.model() })
+        Doc(context: context.body, tunes: tuneModelers.map { $0.model() })
     }
 }
 
@@ -110,8 +110,8 @@ private final class TuneModeler: Modeler {
     let header: Header
     let voiceModelersByLine: [[VoiceModeler]]
 
-    var context: TuneContext!
-    var lineContexts = [LineContext]()
+    var context: ContextGroup<Tune.Context>!
+    var lineContexts = [ContextGroup<Line.Context>]()
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
@@ -139,31 +139,31 @@ private final class TuneModeler: Modeler {
         self.voiceModelersByLine = voiceModelersByLine
     }
 
-    func provideContext(private head: FlowContext, body: TuneContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: Tune.Context) throws -> FlowContext {
         var flow = head
         // TODO: split flow per voice
 
         for (lineIdx, lineVoices) in voiceModelersByLine.enumerated() {
-            let lineBody = LineContextBody(tune: body, lineNumber: lineIdx + 1, voiceCount: lineVoices.count)
+            let lineBody = Line.Context(tune: body, lineNumber: lineIdx + 1, voiceCount: lineVoices.count)
             let lineHead = flow
             for (voiceIdx, voiceModeler) in lineVoices.enumerated() {
-                let voiceBody = VoiceContextBody(line: lineBody, voiceNumber: voiceIdx, barCount: voiceModeler.barModelers.count)
+                let voiceBody = Voice.Context(line: lineBody, voiceNumber: voiceIdx, barCount: voiceModeler.barModelers.count)
                 flow = try voiceModeler.provideContext(head: flow, body: voiceBody)
             }
-            lineContexts.append(LineContext(head: lineHead, body: lineBody, tail: flow))
+            lineContexts.append((head: lineHead, body: lineBody, tail: flow))
         }
 
-        context = TuneContext(head: head, body: body, tail: flow)
+        context = (head: head, body: body, tail: flow)
         return flow
     }
 
     func model() -> Tune {
         let lines = zip(voiceModelersByLine, lineContexts).map { lineVoices, lineContext in
             let voices = lineVoices.map { $0.model() }
-            return Line(context: lineContext, voices: voices)
+            return Line(context: lineContext.body, voices: voices)
         }
 
-        return Tune(context: context, header: header, lines: lines)
+        return Tune(context: context.body, header: header, lines: lines)
     }
 }
 
@@ -238,7 +238,7 @@ private final class VoiceModeler: Modeler {
     let leadingField: Field?
     let barModelers: [BarModeler]
 
-    var context: VoiceContext!
+    var context: ContextGroup<Voice.Context>!
     var isHarmony: Bool { leadingField?.label == .h }
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
@@ -263,7 +263,7 @@ private final class VoiceModeler: Modeler {
         }
     }
 
-    func provideContext(private head: FlowContext, body: VoiceContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: Voice.Context) throws -> FlowContext {
         var flow = if let leadingField, leadingField.label != .h {
             try leadingField.reflow(context: head)
         } else {
@@ -271,7 +271,7 @@ private final class VoiceModeler: Modeler {
         }
 
         for (idx, barModeler) in barModelers.enumerated() {
-            let barBody = BarContextBody(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count)
+            let barBody = Bar.Context(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count, timeSignature: flow.timeSignature)
             flow = try barModeler.provideContext(head: flow, body: barBody)
         }
 
@@ -279,13 +279,13 @@ private final class VoiceModeler: Modeler {
             flow = FlowContext(from: flow, variation: Variation.none)
         }
 
-        context = VoiceContext(head: head, body: body, tail: flow)
+        context = (head: head, body: body, tail: flow)
         return flow
     }
 
     func model() -> Voice {
         let bars = barModelers.map { $0.model() }
-        return Voice(context: context, isHarmony: isHarmony, bars: bars, leadingBarline: leadingBarline)
+        return Voice(context: context.body, isHarmony: isHarmony, bars: bars, leadingBarline: leadingBarline)
     }
 }
 
@@ -306,7 +306,7 @@ private final class BarModeler: Modeler {
         elements.compactMap { if case let .cluster(modeler) = $0 { modeler } else { nil } }
     }
 
-    var context: BarContext!
+    var context: ContextGroup<Bar.Context>!
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
@@ -335,24 +335,57 @@ private final class BarModeler: Modeler {
         }
     }
 
-    func provideContext(private head: FlowContext, body: BarContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: Bar.Context) throws -> FlowContext {
         var flow = head
+        var barContext = body
         var number = 0
+        var previousCluster: ClusterModeler?
 
         for element in elements {
             switch element {
             case let .field(field):
                 flow = try field.reflow(context: flow)
+
+                // If this field ends a variation, backport that to the flow tail on the previous cluster
+                // And set the current flow to none
+                if field.label == .v, field.asVariation() == .end {
+                    guard let previousCluster else {
+                        print("error: ending a variation must be happen in the same bar as the final cluster")
+                        throw ModelParseError.invalidField
+                    }
+                    previousCluster.context.head = FlowContext(from: previousCluster.context.head,
+                                                               variation: previousCluster.context.head.variation.convertedToEnding)
+                    previousCluster.context.tail = FlowContext(from: previousCluster.context.tail, variation: Variation.none)
+                    flow = FlowContext(from: flow, variation: Variation.none)
+                }
+
+                // A time signature field applies to the whole bar
+                if field.label == .time {
+                    barContext = Bar.Context(voice: barContext.voice,
+                                             barNumber: barContext.barNumber,
+                                             clusterCount: barContext.clusterCount,
+                                             timeSignature: flow.timeSignature)
+                }
             case let .rest(modeler):
                 flow = try modeler.provideContext(head: flow, body: ())
             case let .cluster(modeler):
                 number += 1
-                let clusterBody = ClusterContextBody(bar: body, clusterNumber: number)
+                let clusterBody = Cluster.Context(bar: barContext,
+                                                  clusterNumber: number,
+                                                  noteLength: flow.noteLength,
+                                                  tempo: flow.tempo)
+
+                // last cluster on a line always ends a variation
+                if clusterBody.isFinalClusterOfVoice && flow.variation.isEndable {
+                    flow = FlowContext(from: flow, variation: flow.variation.convertedToEnding)
+                }
+
                 flow = try modeler.provideContext(head: flow, body: clusterBody)
+                previousCluster = modeler
             }
         }
 
-        context = BarContext(head: head, body: body, tail: flow)
+        context = (head: head, body: barContext, tail: flow)
         return flow
     }
 
@@ -364,7 +397,7 @@ private final class BarModeler: Modeler {
             case .field: nil
             }
         }
-        return Bar(context: context, contents: contents, trailingBarline: barline)
+        return Bar(context: context.body, contents: contents, trailingBarline: barline)
     }
 }
 
@@ -374,7 +407,7 @@ private final class ClusterModeler: Modeler {
 
     let noteModelers: [NoteModeler]
 
-    var context: ClusterContext!
+    var context: ContextGroup<Cluster.Context>!
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
@@ -387,7 +420,7 @@ private final class ClusterModeler: Modeler {
         }
     }
 
-    func provideContext(private head: FlowContext, body: ClusterContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: Cluster.Context) throws -> FlowContext {
         var flow = head
 
         var tupletSizes = [Int]()
@@ -409,9 +442,9 @@ private final class ClusterModeler: Modeler {
                 tupletPosition += 1
             }
 
-            let noteBody = NoteContextBody(cluster: body,
-                                           tupletSize: tupletPosition == 0 ? 0 : tupletSizes[tupletSizeIndex],
-                                           tupletNumber: tupletPosition)
+            let noteBody = Note.Context(cluster: body,
+                                        tupletSize: tupletPosition == 0 ? 0 : tupletSizes[tupletSizeIndex],
+                                        tupletNumber: tupletPosition)
             flow = try nm.provideContext(head: flow, body: noteBody)
 
             if tupletPosition != 0 && !nm.continuesTuplet {
@@ -419,13 +452,22 @@ private final class ClusterModeler: Modeler {
                 tupletSizeIndex += 1
             }
         }
-        context = ClusterContext(head: head, body: body, tail: flow)
+
+        // fixup variations types for the tail flow
+        switch head.variation {
+        case .start: flow = FlowContext(from: flow, variation: .active)
+        case .end, .startAndEnd: flow = FlowContext(from: flow, variation: Variation.none)
+        default: break
+        }
+
+        context = (head: head, body: body, tail: flow)
         return flow
     }
 
     func model() -> Cluster {
         let notes = noteModelers.map { $0.model() }
-        return Cluster(context: context, notes: notes)
+
+        return Cluster(context: context.body, notes: notes, variation: context.head.variation)
     }
 }
 
@@ -470,7 +512,7 @@ private final class NoteModeler: Modeler {
     var fermata: Bool
     var accidental: Accidental?
     var chord: Pitch?
-    var context: NoteContext!
+    var context: ContextGroup<Note.Context>!
 
     init(private node: Node, textSource: any NodeSourceTextProvider) throws {
         self.node = node
@@ -490,7 +532,7 @@ private final class NoteModeler: Modeler {
         chord = nil
     }
 
-    func provideContext(private head: FlowContext, body: NoteContextBody) throws -> FlowContext {
+    func provideContext(private head: FlowContext, body: Note.Context) throws -> FlowContext {
         embellishment = if let embellishmentStr = try children.optional(.embellishment)?.trimmedText(from: textSource) {
             try Embellishment(string: embellishmentStr, from: head.previousPitch, on: pitch)
         } else { nil }
@@ -515,12 +557,12 @@ private final class NoteModeler: Modeler {
             }
         }
 
-        context = NoteContext(head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAllUpcoming: true))
+        context = (head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAllUpcoming: true))
         return context.tail
     }
 
     func model() -> Note {
-        Note(context: context,
+        Note(context: context.body,
              pitch: pitch,
              embellishment: embellishment,
              duration: duration,

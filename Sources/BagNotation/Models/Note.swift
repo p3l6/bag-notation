@@ -4,7 +4,16 @@
 //
 
 public struct Note {
-    let context: NoteContext
+    public struct Context {
+        let cluster: Cluster.Context
+
+        /// Zero when not in a tuplet
+        let tupletSize: Int
+        /// First note in tuplet is 1
+        let tupletNumber: Int
+    }
+
+    let context: Context
     let pitch: Pitch
     let embellishment: Embellishment?
     let duration: Duration

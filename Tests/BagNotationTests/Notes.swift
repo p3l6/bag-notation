@@ -88,22 +88,22 @@ struct Notes {
     @Test
     func triplets() throws {
         var notes = try makeCluster(from: "xxexd-e-fg")
-        #expect(notes.map(\.context.body.tupletSize) == [0, 3, 3, 3, 0])
-        #expect(notes.map(\.context.body.tupletNumber) == [0, 1, 2, 3, 0])
+        #expect(notes.map(\.context.tupletSize) == [0, 3, 3, 3, 0])
+        #expect(notes.map(\.context.tupletNumber) == [0, 1, 2, 3, 0])
 
         notes = try makeCluster(from: "xd-e-fxe-d-c")
-        #expect(notes.map(\.context.body.tupletSize) == [3, 3, 3, 3, 3, 3])
-        #expect(notes.map(\.context.body.tupletNumber) == [1, 2, 3, 1, 2, 3])
+        #expect(notes.map(\.context.tupletSize) == [3, 3, 3, 3, 3, 3])
+        #expect(notes.map(\.context.tupletNumber) == [1, 2, 3, 1, 2, 3])
     }
 
     @Test
     func tuplets() throws {
         var notes = try makeCluster(from: "a-b-c-d-e-fgbd")
-        #expect(notes.map(\.context.body.tupletSize) == [6, 6, 6, 6, 6, 6, 0, 0, 0])
-        #expect(notes.map(\.context.body.tupletNumber) == [1, 2, 3, 4, 5, 6, 0, 0, 0])
+        #expect(notes.map(\.context.tupletSize) == [6, 6, 6, 6, 6, 6, 0, 0, 0])
+        #expect(notes.map(\.context.tupletNumber) == [1, 2, 3, 4, 5, 6, 0, 0, 0])
 
         notes = try makeCluster(from: "a+-b+-c+-d+")
-        #expect(notes.map(\.context.body.tupletSize) == [4, 4, 4, 4])
-        #expect(notes.map(\.context.body.tupletNumber) == [1, 2, 3, 4])
+        #expect(notes.map(\.context.tupletSize) == [4, 4, 4, 4])
+        #expect(notes.map(\.context.tupletNumber) == [1, 2, 3, 4])
     }
 }

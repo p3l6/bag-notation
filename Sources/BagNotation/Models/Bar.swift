@@ -4,7 +4,17 @@
 //
 
 public struct Bar {
-    let context: BarContext
+    public struct Context {
+        let voice: Voice.Context
+
+        /// First bar is 1
+        var barNumber: Int
+        let clusterCount: Int
+        /// Time signatures can only change on bar boundaries
+        let timeSignature: TimeSignature
+    }
+
+    let context: Context
 
     enum BarContent {
         case cluster(cluster: Cluster)
@@ -18,15 +28,15 @@ public struct Bar {
     let contents: [BarContent]
     let trailingBarline: Barline
 
-    init(context: BarContext, contents: [BarContent], trailingBarline: Barline) {
+    init(context: Context, contents: [BarContent], trailingBarline: Barline) {
         self.context = context
         self.contents = contents
-        self.trailingBarline = trailingBarline == .double && context.body.barNumber == context.body.voice.barCount ? .partEnd : trailingBarline
+        self.trailingBarline = trailingBarline == .double && context.barNumber == context.voice.barCount ? .partEnd : trailingBarline
     }
 
     var isPickup: Bool {
         // TODO: improve logic when contents is only rests
-        context.body.barNumber == 1 && contents.count < context.tail.timeSignature.beatsPerBar
+        context.barNumber == 1 && contents.count < context.timeSignature.beatsPerBar
     }
 }
 
