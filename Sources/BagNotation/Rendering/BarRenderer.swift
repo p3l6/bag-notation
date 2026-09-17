@@ -13,7 +13,6 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
     init(inside box: BoundingBox, rendering bar: Bar) {
         self.bar = bar
         super.init(inside: box)
-        reservedLeading = Layout.baseScale
     }
 
     func render(in _: RenderCanvas) {}
@@ -47,7 +46,7 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
 
 extension Bar: Sizable {
     var width: Length {
-        var width: Length = .exact(Layout.baseScale)
+        var width: Length = .zero
         for item in contents {
             switch item {
             case let .cluster(cluster):

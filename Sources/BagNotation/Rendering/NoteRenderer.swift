@@ -10,6 +10,7 @@ import CoreGraphics
 final class NoteRenderer: BaseRenderable, Renderable<Note> {
     let note: Note
     var drawsFlag = true
+    let centerJustifyAdvance: CGFloat
     let stemX: CGFloat
     var stemBottom: CGFloat
     let pitchOffset: CGFloat
@@ -19,7 +20,8 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     init(inside box: BoundingBox, rendering note: Note) {
         self.note = note
         embellishmentAdvance = note.embellishment?.width.advance ?? 0
-        stemX = box.left + embellishmentAdvance
+        centerJustifyAdvance = (box.width - note.width.advance) / 2
+        stemX = box.left + centerJustifyAdvance + embellishmentAdvance
 
         pitchOffset = note.pitch.yOffset
         stemBottom = box.bottom + pitchOffset - Layout.noteStemIdealHeight
@@ -32,20 +34,20 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     func render(in graphics: RenderCanvas) {
         // High-A ledger line
         if note.pitch == .highA {
-            graphics.drawLineHoriz(from: box.inset(x: embellishmentAdvance - Layout.ledgerLineExtension, y: pitchOffset),
+            graphics.drawLineHoriz(from: box.inset(x: embellishmentAdvance + centerJustifyAdvance - Layout.ledgerLineExtension, y: pitchOffset),
                                    length: 2 * Layout.ledgerLineExtension + noteheadAdvance,
                                    width: Layout.ledgerLineWidth)
         }
 
         // Note head
-        let noteHead = box.inset(x: embellishmentAdvance, y: pitchOffset)
+        let noteHead = box.inset(x: centerJustifyAdvance + embellishmentAdvance, y: pitchOffset)
         graphics.drawSymbol(note.duration.noteHeadSymbol, at: noteHead)
 
         // Dotted not dot
         if note.duration.isDotted {
             let bumpDotUp = [.lowG, .b, .d, .f, .highA].contains(note.pitch)
             let dotHeight = bumpDotUp ? pitchOffset + Layout.noteStep : pitchOffset
-            let x = Layout.noteDotSeparation + noteheadAdvance
+            let x = Layout.noteDotSeparation + noteheadAdvance + centerJustifyAdvance
             graphics.drawSymbol(.dotted, at: box.inset(x: embellishmentAdvance + x, y: dotHeight))
         }
 
@@ -66,7 +68,7 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     func directChildren() throws -> [any Renderable] {
         guard let embellishment = note.embellishment else { return [] }
 
-        let embellishmentBox = BoundingBox(page: box.page, left: box.left, bottom: box.bottom, width: embellishment.width.advance, height: box.height)
+        let embellishmentBox = BoundingBox(page: box.page, left: box.left + centerJustifyAdvance, bottom: box.bottom, width: embellishment.width.advance, height: box.height)
         return [EmbellishmentRenderer(inside: embellishmentBox, rendering: embellishment)]
     }
 }

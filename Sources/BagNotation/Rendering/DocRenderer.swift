@@ -80,7 +80,7 @@ final class PageFooter: Renderable<Doc> {
 
     func render(in graphics: RenderCanvas) {
         guard let rev = doc.revision else { return }
-        graphics.drawText("(rev: \(rev))", at: box.origin, fontSize: 10)
+        graphics.drawText("(rev: \(rev))", at: box.origin, fontSize: 8)
     }
 
     func directChildren() throws -> [any Renderable] {[]}
