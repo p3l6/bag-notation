@@ -10,6 +10,7 @@ import CoreGraphics
 final class LineRenderer: BaseRenderable, Renderable<Line> {
     let line: Line
     private var timeSignature: TimeSignature?
+    private var variationAnchors = [VariationAnchor]()
 
     init(inside box: BoundingBox, rendering line: Line) {
         self.line = line
@@ -19,6 +20,7 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
     }
 
     func render(in graphics: RenderCanvas) {
+        // Staff lines
         for lineIndex in 0 ..< 5 {
             let y = box.bottom + CGFloat(lineIndex) * Layout.staffLineSpacing
             graphics.drawLine(from: CGPoint(x: box.left, y: y),
@@ -26,14 +28,46 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
                               width: Layout.staffLineWidth)
         }
 
+        // Clef
         graphics.drawSymbol(.gClef, at: box.inset(x: 1, y: Layout.staffLineSpacing))
 
+        // Time signature
         if let timeSignature {
             let (top, bottom) = timeSignature.symbols
             let bottomXExtra = timeSignature == .time128 ? Layout.Advance.timeSig / 2 : 0
 
             graphics.drawSymbol(top, at: box.inset(x: Layout.Advance.gClef + Layout.baseScale / 2, y: 3 * Layout.baseScale))
             graphics.drawSymbol(bottom, at: box.inset(x: Layout.Advance.gClef + Layout.baseScale / 2 + bottomXExtra, y: 1 * Layout.baseScale))
+        }
+
+        // Variations
+        var horizStart: CGFloat?
+        for anchor in variationAnchors {
+            let y = box.top - Layout.variationBracketLineWidth / 2
+
+            if let x = anchor.startX {
+                horizStart = horizStart ?? x
+                graphics.drawLineVert(from: CGPoint(x: x, y: y),
+                                      length: -Layout.variationBracketHeight,
+                                      width: Layout.variationBracketLineWidth)
+                if let label = anchor.label {
+                    let fontSize = Layout.variationBracketHeight - Layout.baseScale / 2
+                    graphics.drawText(label,
+                                      at: CGPoint(x: x + Layout.baseScale,
+                                                  y: y - fontSize),
+                                      fontSize: fontSize)
+                }
+            }
+
+            if let x = anchor.endX, let horizStart {
+                graphics.drawLineVert(from: CGPoint(x: x, y: y),
+                                      length: -Layout.variationBracketHeight,
+                                      width: Layout.variationBracketLineWidth)
+                graphics.drawLineHoriz(from: CGPoint(x: horizStart, y: y),
+                                       length: x - horizStart,
+                                       width: Layout.variationBracketLineWidth)
+            }
+
         }
     }
 
@@ -51,12 +85,27 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
                 renderables.append(BarlineRenderer(inside: layoutItem.box, rendering: barline))
             case let bar as Bar:
                 let barRenderer = BarRenderer(inside: layoutItem.box, rendering: bar)
+                barRenderer.onLayout = collectVariations(from:)
                 renderables.append(barRenderer)
             default: throw PdfError.unexpectedSizable
             }
         }
 
         return renderables
+    }
+
+    func collectVariations(from grandchildren: [LayoutResult]) throws {
+        let anchors = try grandchildren.compactMap { grandchild -> VariationAnchor? in
+            guard let cluster = grandchild.sizable as? Cluster,
+                  !cluster.variation.isContinuation else {
+                return nil
+            }
+
+            return try VariationAnchor(clusterLeft: grandchild.box.left,
+                                       clusterRight: grandchild.box.right,
+                                       variation: cluster.variation)
+        }
+        variationAnchors.append(contentsOf: anchors)
     }
 
     func setTimeSignature(_ timeSignature: TimeSignature) {
@@ -71,7 +120,48 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
 
 extension Line: Sizable {
     var width: Length { .full }
-    var height: Length { .exact(Layout.staffLineSpacing * 6) }
+    var height: Length {
+        .exact(Layout.staffLineSpacing * 7) +
+        // :TODO: somehow kern this into the staff separation buffer
+        (hasAnyVariations ? .exact(Layout.variationBracketHeight) : .zero)
+    }
+
+    private var hasAnyVariations: Bool {
+        voices.first!.bars
+            .flatMap(\.contents)
+            .compactMap { if case let .cluster(cluster) = $0 { cluster } else { nil } }
+            .contains { !$0.variation.isContinuation }
+    }
+
+}
+
+struct VariationAnchor {
+    let label: String?
+    let startX: CGFloat?
+    let endX: CGFloat?
+    let breakHorizLine: Bool
+
+    init(clusterLeft: CGFloat, clusterRight: CGFloat, variation: Variation) throws {
+        switch variation {
+        case .none, .active:
+            throw PdfError.unexpectedVariationAnchor
+        case let .start(label):
+            self.label = label
+            startX = clusterLeft
+            endX = nil
+            breakHorizLine = false
+        case let .startAndEnd(label):
+            self.label = label
+            startX = clusterLeft
+            endX = clusterRight
+            breakHorizLine = true
+        case .end:
+            endX = clusterRight
+            breakHorizLine = true
+            startX = nil
+            label = nil
+        }
+    }
 }
 
 extension TimeSignature {

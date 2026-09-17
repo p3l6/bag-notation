@@ -52,6 +52,7 @@ public enum PdfError: Error {
     case insufficientSpace
     case couldNotLoadFont
     case unexpectedSizable
+    case unexpectedVariationAnchor
 }
 
 #endif // !os(Linux)

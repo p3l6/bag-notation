@@ -41,7 +41,7 @@ class BaseRenderable {
     var reservedLeading: CGFloat = 0
     var reservedTrailing: CGFloat = 0
     /// Callback to inform a parent item about layout results
-    var onLayout: (([LayoutResult])->Void)?
+    var onLayout: (([LayoutResult]) throws ->Void)?
 
     init(inside box: BoundingBox) {
         self.box = box
@@ -113,7 +113,7 @@ class BaseRenderable {
             return LayoutResult(sizable: item, box: actualSize)
         }
         
-        onLayout?(results)
+        try onLayout?(results)
         return results
     }
 }

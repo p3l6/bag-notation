@@ -48,6 +48,8 @@ enum Layout {
     static let barlineDotSeparation = 0.16 * baseScale
     static let barlineLineWidth = 0.16 * baseScale
     static let barlineThickLineWidth = 0.5 * baseScale
+    static let variationBracketLineWidth = 0.12 * baseScale
+    static let variationBracketHeight = 2.8 * baseScale
 
     /// Space used by various font elements
     /// These values are based on the ones included in the Bravura.json file downloaded with the font release

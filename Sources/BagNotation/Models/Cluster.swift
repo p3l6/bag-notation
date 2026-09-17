@@ -50,4 +50,11 @@ enum Variation: Equatable {
         default: false
         }
     }
+
+    var isContinuation: Bool {
+        switch self {
+        case .active, .none: true
+        default: false
+        }
+    }
 }
