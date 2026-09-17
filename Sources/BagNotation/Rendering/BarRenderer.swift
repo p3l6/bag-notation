@@ -19,28 +19,28 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
     func render(in _: RenderCanvas) {}
 
     func directChildren() throws -> [any Renderable] {
-        var items = [any Sizable]()
+        var sizables = [any Sizable]()
         for item in bar.contents {
             switch item {
             case let .cluster(cluster):
-                items.append(cluster)
+                sizables.append(cluster)
             default:
                 continue
             }
         }
-        items.append(bar.trailingBarline)
+        sizables.append(bar.trailingBarline)
 
-        let boxes = try layout(.horizontal, items)
         var renderables = [any Renderable]()
-        for item in bar.contents {
-            switch item {
-            case let .cluster(cluster):
-                renderables.append(ClusterRenderer(inside: boxes[renderables.count], rendering: cluster))
-            default:
-                continue
+        for layoutItem in try layout(.horizontal, sizables) {
+            switch layoutItem.sizable {
+            case let barline as Barline:
+                renderables.append(BarlineRenderer(inside: layoutItem.box, rendering: barline))
+            case let cluster as Cluster:
+                renderables.append(ClusterRenderer(inside: layoutItem.box, rendering: cluster))
+            default: throw PdfError.unexpectedSizable
             }
         }
-        renderables.append(BarlineRenderer(inside: boxes.last!, rendering: bar.trailingBarline))
+
         return renderables
     }
 }

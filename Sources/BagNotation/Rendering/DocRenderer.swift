@@ -25,7 +25,6 @@ final class DocRenderer: BaseRenderable, Renderable<Doc> {
 
     func directChildren() throws -> [any Renderable] {
         let tunes = doc.tunes
-        // :TODO: custom page layouts
         var pageAdvance: CGFloat = 0
         var currentPage = 0
 

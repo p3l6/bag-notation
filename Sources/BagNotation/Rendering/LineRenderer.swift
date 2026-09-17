@@ -38,24 +38,24 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
     }
 
     func directChildren() throws -> [any Renderable] {
-        var items = [any Sizable]()
-        var hasLeadingBarline = false
+        var sizables = [any Sizable]()
         if let leadingLine = line.melody.leadingBarline {
-            items.append(leadingLine)
-            hasLeadingBarline = true
+            sizables.append(leadingLine)
         }
-        let bars = line.voices.first!.bars
-        items.append(contentsOf: bars)
+        sizables.append(contentsOf: line.voices.first!.bars)
 
-        let boxes = try layout(.horizontal, items)
         var renderables = [any Renderable]()
-        if hasLeadingBarline {
-            renderables.append(BarlineRenderer(inside: boxes[0], rendering: line.melody.leadingBarline!))
+        for layoutItem in try layout(.horizontal, sizables) {
+            switch layoutItem.sizable {
+            case let barline as Barline:
+                renderables.append(BarlineRenderer(inside: layoutItem.box, rendering: barline))
+            case let bar as Bar:
+                let barRenderer = BarRenderer(inside: layoutItem.box, rendering: bar)
+                renderables.append(barRenderer)
+            default: throw PdfError.unexpectedSizable
+            }
         }
-        for (index, bar) in bars.enumerated() {
-            let boxIndex = index + (hasLeadingBarline ? 1 : 0)
-            renderables.append(BarRenderer(inside: boxes[boxIndex], rendering: bar))
-        }
+
         return renderables
     }
 

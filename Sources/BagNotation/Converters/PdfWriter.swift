@@ -51,6 +51,7 @@ public enum PdfError: Error {
     case couldNotCreateContext
     case insufficientSpace
     case couldNotLoadFont
+    case unexpectedSizable
 }
 
 #endif // !os(Linux)

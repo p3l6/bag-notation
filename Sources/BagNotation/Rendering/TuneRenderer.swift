@@ -26,20 +26,21 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
         if let tempo = tune.header.tempo {
             graphics.drawText("\(tempo) bpm", at: box.insetFromTop(y: 42), fontSize: 9)
         }
-
-        // :TODO: revision? in footer of each page? unclear how to do this
     }
 
     func directChildren() throws -> [any Renderable] {
         let lines = tune.lines
-        let boxes = try layout(.vertical, lines, spacing: Layout.staffSeparation)
 
         var renderables = [LineRenderer]()
-        for (index, line) in tune.lines.enumerated() {
-            renderables.append(LineRenderer(inside: boxes[index], rendering: line))
+        for layoutItem in try layout(.vertical, lines, spacing: Layout.staffSeparation) {
+            switch layoutItem.sizable {
+            case let line as Line:
+                renderables.append(LineRenderer(inside: layoutItem.box, rendering: line))
+            default: throw PdfError.unexpectedSizable
+            }
         }
-        renderables.first!.setTimeSignature(tune.header.timeSignature)
 
+        renderables.first!.setTimeSignature(tune.header.timeSignature)
         return renderables
     }
 

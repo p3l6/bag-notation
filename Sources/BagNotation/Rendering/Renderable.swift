@@ -40,6 +40,8 @@ class BaseRenderable {
     var box: BoundingBox
     var reservedLeading: CGFloat = 0
     var reservedTrailing: CGFloat = 0
+    /// Callback to inform a parent item about layout results
+    var onLayout: (([LayoutResult])->Void)?
 
     init(inside box: BoundingBox) {
         self.box = box
@@ -50,7 +52,7 @@ class BaseRenderable {
         case vertical
     }
 
-    func layout(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [BoundingBox] {
+    func layout(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [LayoutResult] {
         let sizes = inputs.map(direction == .horizontal ? \.width : \.height)
 
         // Sum of all the individual parts
@@ -84,7 +86,7 @@ class BaseRenderable {
 
         // create Render objects with bounding boxes
         var advance = reservedLeading
-        return try inputs.map { item in
+        let results = try inputs.map { item in
             let requirement = direction == .horizontal ? item.width : item.height
             let actual = switch requirement {
             case .zero: 0.0
@@ -108,8 +110,11 @@ class BaseRenderable {
             }
             advance += actual
             advance += spacing ?? 0
-            return actualSize
+            return LayoutResult(sizable: item, box: actualSize)
         }
+        
+        onLayout?(results)
+        return results
     }
 }
 
@@ -191,6 +196,11 @@ protocol Sizable {
     // :TODO: one of these should always be .full. Enforce that?
     var height: Length { get }
     var width: Length { get }
+}
+
+struct LayoutResult {
+    let sizable: any Sizable
+    let box: BoundingBox
 }
 
 #endif // !os(Linux)

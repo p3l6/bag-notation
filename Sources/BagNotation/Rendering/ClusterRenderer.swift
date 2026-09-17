@@ -24,7 +24,7 @@ final class ClusterRenderer: BaseRenderable, Renderable<Cluster> {
     }
 
     func directChildren() throws -> [any Renderable] {
-        let noteBoxes = try layout(.horizontal, cluster.notes)
+        let noteBoxes = try layout(.horizontal, cluster.notes).map(\.box)
         let noteRenderers = cluster.notes.enumerated().map { index, note in
             NoteRenderer(inside: noteBoxes[index], rendering: note)
         }
