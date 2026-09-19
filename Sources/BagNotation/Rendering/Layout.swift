@@ -17,6 +17,7 @@ enum Layout {
 
     static let tuneSeparation: CGFloat = 10
     static let staffSeparation: CGFloat = 20
+    static let staffJoinedSeparation: CGFloat = 12
     static let pageMargin: CGFloat = 20
     static let tuneHeaderHeight: CGFloat = 50
 

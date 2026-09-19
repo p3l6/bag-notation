@@ -53,6 +53,8 @@ public enum PdfError: Error {
     case couldNotLoadFont
     case unexpectedSizable
     case unexpectedVariationAnchor
+    case invalidLayoutParameters
+    case inconsistentVoiceLayout
 }
 
 #endif // !os(Linux)

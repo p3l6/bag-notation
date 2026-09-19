@@ -40,7 +40,6 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
             }
         }
 
-        renderables.first!.setTimeSignature(tune.header.timeSignature)
         return renderables
     }
 
@@ -66,7 +65,7 @@ extension Tune: Sizable {
     var height: Length {
         .exact(Layout.tuneHeaderHeight)
             + lines.map(\.height).sum
-            + .exact(Layout.staffSeparation * CGFloat(lines.count))
+            + .exact(Layout.staffSeparation * CGFloat(lines.count - 1))
     }
 }
 

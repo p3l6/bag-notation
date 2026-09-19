@@ -42,6 +42,9 @@ class BaseRenderable {
     var reservedTrailing: CGFloat = 0
     /// Callback to inform a parent item about layout results
     var onLayout: (([LayoutResult]) throws ->Void)?
+    /// Override layout method to provide a final width for each sizable item
+    /// - Note: count must match count of sized items!
+    var predefinedLayoutSizes: [CGFloat]?
 
     init(inside box: BoundingBox) {
         self.box = box
@@ -52,7 +55,8 @@ class BaseRenderable {
         case vertical
     }
 
-    func layout(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [LayoutResult] {
+    func stretch(_ direction: LayoutDirection, _ inputs: [Sizable], in available: CGFloat, spacing: CGFloat? = nil) throws -> [CGFloat] {
+        let itemSpacing = spacing ?? 0
         let sizes = inputs.map(direction == .horizontal ? \.width : \.height)
 
         // Sum of all the individual parts
@@ -60,11 +64,12 @@ class BaseRenderable {
         var stretchableCount = 0
         for size in sizes {
             switch size {
-            case .zero: continue
+            case .zero:
+                totalSize += itemSpacing
             case let .exact(value):
-                totalSize += value
+                totalSize += value + itemSpacing
             case let .atLeast(value):
-                totalSize += value
+                totalSize += value + itemSpacing
                 stretchableCount += 1
             case .full:
                 throw PdfError.insufficientSpace
@@ -72,7 +77,6 @@ class BaseRenderable {
         }
 
         // make sure they fit, or error
-        let available = (direction == .horizontal ? box.width : box.height) - reservedLeading - reservedTrailing
         let extra = available - totalSize
         guard extra >= 0 else {
             // :TODO: Consider alternatives, such as rendering what can be fit.
@@ -84,18 +88,48 @@ class BaseRenderable {
         // :TODO: consider scaling this assignment relative to the porportional width of each stretchy item
         let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
 
-        // create Render objects with bounding boxes
-        var advance = reservedLeading
-        let results = try inputs.map { item in
-            let requirement = direction == .horizontal ? item.width : item.height
-            let actual = switch requirement {
+        // calculate a stretched size for each box
+        let actualSizes: [CGFloat] = try inputs.map { item in
+            switch (direction == .horizontal ? item.width : item.height) {
             case .zero: 0.0
             case let .exact(value): value
             case let .atLeast(value): value + stretch
             case .full:
                 throw PdfError.insufficientSpace
             }
-            let actualSize = if direction == .horizontal {
+        }
+
+        return actualSizes
+    }
+
+    private func layoutSizes(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [CGFloat] {
+        if let predefinedLayoutSizes {
+            return predefinedLayoutSizes
+        }
+        let available = (direction == .horizontal ? box.width : box.height) - reservedLeading - reservedTrailing
+        return try stretch(direction, inputs, in: available, spacing: spacing)
+    }
+
+    func layout(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [LayoutResult] {
+        let itemCount = inputs.count
+        let sizes = try layoutSizes(direction, inputs)
+        guard itemCount > 0 && itemCount == sizes.count && sizes.allSatisfy({ $0 >= 0 }) else {
+            throw PdfError.invalidLayoutParameters
+        }
+
+        // make sure they fit, or error
+        let itemSpacing = spacing ?? 0
+        let totalSize = itemSpacing * CGFloat(itemCount - 1) + sizes.reduce(0, +)
+        let available = (direction == .horizontal ? box.width : box.height) - reservedLeading - reservedTrailing
+        // :TODO: remove this accomidation for floating point precision
+        guard totalSize <= available * 1.001 else {
+            throw PdfError.insufficientSpace
+        }
+
+        // create Render objects with bounding boxes
+        var advance = reservedLeading
+        let results = zip(inputs, sizes).map { item, actual in
+            let layoutBox = if direction == .horizontal {
                 BoundingBox(page: box.page,
                             left: box.left + advance,
                             bottom: box.bottom,
@@ -109,10 +143,10 @@ class BaseRenderable {
                             height: actual)
             }
             advance += actual
-            advance += spacing ?? 0
-            return LayoutResult(sizable: item, box: actualSize)
+            advance += itemSpacing
+            return LayoutResult(sizable: item, box: layoutBox)
         }
-        
+
         try onLayout?(results)
         return results
     }
