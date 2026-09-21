@@ -62,6 +62,10 @@ enum Layout {
         static let gracenoteHead = noteHead * bravuraFontSmallSize / bravuraFontSize
         static let noteDot = 0.4 * baseScale
         static let timeSig = 1.75 * baseScale
+        static let fermata = 2.42 * baseScale
+        static let accidentalFlat = 0.904 * baseScale
+        static let accidentalSharp = 0.996 * baseScale
+        static let accidentalNatural = 0.672 * baseScale
     }
 
     /*
@@ -96,6 +100,10 @@ enum BravuraSymbol: String {
     case timeSig8 = "\u{E088}"
     case timeSig9 = "\u{E089}"
     case timeSig12 = "\u{E081}\u{E082}"
+    case fermata = "\u{E4C0}"
+    case accidentalNat = "\u{E261}"
+    case accidentalFlat = "\u{E260}"
+    case accidentalSharp = "\u{E262}"
 
     // More: https://smufl.formats.music/latest/tables/staff-brackets-and-dividers.html
 }

@@ -85,7 +85,6 @@ class BaseRenderable {
         }
 
         // strech value per adjustable block if needed
-        // :TODO: consider scaling this assignment relative to the porportional width of each stretchy item
         let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
 
         // calculate a stretched size for each box

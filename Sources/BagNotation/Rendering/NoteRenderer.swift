@@ -16,15 +16,20 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     let pitchOffset: CGFloat
     let noteheadAdvance: CGFloat
     let embellishmentAdvance: CGFloat
+    let accidentalAdvance: CGFloat
 
     init(inside box: BoundingBox, rendering note: Note) {
         self.note = note
         embellishmentAdvance = note.embellishment?.width.advance ?? 0
+        accidentalAdvance = note.accidental?.width ?? 0
         centerJustifyAdvance = (box.width - note.width.advance) / 2
-        stemX = box.left + centerJustifyAdvance + embellishmentAdvance
+        stemX = box.left + centerJustifyAdvance + embellishmentAdvance + accidentalAdvance
 
         pitchOffset = note.pitch.yOffset
         stemBottom = box.bottom + pitchOffset - Layout.noteStemIdealHeight
+        if let chord = note.chord, chord < note.pitch {
+            stemBottom = box.bottom + chord.yOffset - Layout.noteStemIdealHeight
+        }
 
         noteheadAdvance = note.duration >= .whole ? Layout.Advance.noteHeadWhole : Layout.Advance.noteHead
 
@@ -32,29 +37,47 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     }
 
     func render(in graphics: RenderCanvas) {
+        // Accidental
+        if let accidental = note.accidental {
+            graphics.drawSymbol(accidental.symbol, at: box.inset(x: centerJustifyAdvance + embellishmentAdvance, y: pitchOffset))
+        }
+
         // High-A ledger line
         if note.pitch == .highA {
-            graphics.drawLineHoriz(from: box.inset(x: embellishmentAdvance + centerJustifyAdvance - Layout.ledgerLineExtension, y: pitchOffset),
+            graphics.drawLineHoriz(from: box.inset(x: embellishmentAdvance + centerJustifyAdvance + accidentalAdvance - Layout.ledgerLineExtension, y: pitchOffset),
                                    length: 2 * Layout.ledgerLineExtension + noteheadAdvance,
                                    width: Layout.ledgerLineWidth)
         }
 
         // Note head
-        let noteHead = box.inset(x: centerJustifyAdvance + embellishmentAdvance, y: pitchOffset)
+        let noteHead = box.inset(x: centerJustifyAdvance + embellishmentAdvance + accidentalAdvance, y: pitchOffset)
         graphics.drawSymbol(note.duration.noteHeadSymbol, at: noteHead)
+        var stemStart = noteHead
+
+        // Chorded note head
+        if let chord = note.chord {
+            // :TODO: Offset x when pitches are only 1 step apart
+            let noteHead = box.inset(x: centerJustifyAdvance + embellishmentAdvance + accidentalAdvance, y: chord.yOffset)
+            graphics.drawSymbol(note.duration.noteHeadSymbol, at: noteHead)
+
+            if chord > note.pitch {
+                stemStart = noteHead
+                // Note: the else case is handled in init(), when calculating initial stemBottom
+            }
+        }
 
         // Dotted not dot
         if note.duration.isDotted {
             let bumpDotUp = [.lowG, .b, .d, .f, .highA].contains(note.pitch)
             let dotHeight = bumpDotUp ? pitchOffset + Layout.noteStep : pitchOffset
             let x = Layout.noteDotSeparation + noteheadAdvance + centerJustifyAdvance
-            graphics.drawSymbol(.dotted, at: box.inset(x: embellishmentAdvance + x, y: dotHeight))
+            graphics.drawSymbol(.dotted, at: box.inset(x: embellishmentAdvance + accidentalAdvance + x, y: dotHeight))
         }
 
         if note.duration.needsStem {
             // Stem
             let stemEnd = CGPoint(x: stemX, y: stemBottom)
-            graphics.drawLine(from: noteHead,
+            graphics.drawLine(from: stemStart,
                               to: stemEnd,
                               width: Layout.noteStemLineWidth)
 
@@ -62,6 +85,17 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
             if drawsFlag, let flag = note.duration.flagSymbol {
                 graphics.drawSymbol(flag, at: stemEnd)
             }
+        }
+
+        // Fermata
+        if note.fermata {
+            let x = embellishmentAdvance + centerJustifyAdvance + accidentalAdvance + noteheadAdvance / 2 - Layout.Advance.fermata / 2
+            let y = switch note.pitch {
+            case .highA: 12 * Layout.noteStep
+            case .highG: 11 * Layout.noteStep
+            default: 10 * Layout.noteStep
+            }
+            graphics.drawSymbol(.fermata, at: box.inset(x: x, y: y))
         }
     }
 
@@ -82,6 +116,9 @@ extension Note: Sizable {
         }
         if duration.isDotted {
             min += Layout.Advance.noteDot + Layout.noteDotSeparation
+        }
+        if let accidental {
+            min += accidental.width
         }
         return .atLeast(min) + (embellishment?.width ?? .zero)
     }
@@ -135,6 +172,24 @@ extension Duration {
         case .thirtysecond, .thirtysecondDotted: .flag32nd
         case .sixtyfourth, .sixtyfourthDotted: .flag64th
         default: nil
+        }
+    }
+}
+
+extension Accidental {
+    var width: CGFloat {
+        switch self {
+        case .sharp: Layout.Advance.accidentalSharp + Layout.noteGracenoteSeparation
+        case .flat: Layout.Advance.accidentalFlat + Layout.noteGracenoteSeparation
+        case .natural: Layout.Advance.accidentalNatural + Layout.noteGracenoteSeparation
+        }
+    }
+
+    var symbol: BravuraSymbol {
+        switch self {
+        case .sharp: .accidentalSharp
+        case .flat: .accidentalFlat
+        case .natural: .accidentalNat
         }
     }
 }
