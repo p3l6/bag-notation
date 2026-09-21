@@ -21,7 +21,7 @@ final class DocRenderer: BaseRenderable, Renderable<Doc> {
         super.init(inside: box)
     }
 
-    func render(in graphics: RenderCanvas) {}
+    func render(in _: RenderCanvas) {}
 
     func directChildren() throws -> [any Renderable] {
         let tunes = doc.tunes
@@ -75,7 +75,7 @@ final class PageFooter: Renderable<Doc> {
 
     init(inside box: BoundingBox, rendering: Doc) {
         self.box = box
-        self.doc = rendering
+        doc = rendering
     }
 
     func render(in graphics: RenderCanvas) {
@@ -83,7 +83,7 @@ final class PageFooter: Renderable<Doc> {
         graphics.drawText("(rev: \(rev))", at: box.origin, fontSize: 8)
     }
 
-    func directChildren() throws -> [any Renderable] {[]}
+    func directChildren() throws -> [any Renderable] { [] }
 }
 
 extension Doc: Sizable {

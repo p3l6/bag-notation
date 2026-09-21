@@ -27,14 +27,14 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
         var previousVoiceBox: BoundingBox?
         var renderables = [VoiceRenderer]()
 
-        for  layoutItem in try layout(.vertical, line.voices, spacing: Layout.staffJoinedSeparation) {
+        for layoutItem in try layout(.vertical, line.voices, spacing: Layout.staffJoinedSeparation) {
             guard let voice = layoutItem.sizable as? Voice else {
                 throw PdfError.unexpectedSizable
             }
 
             let voiceRenderer = VoiceRenderer(inside: layoutItem.box, rendering: voice)
             if let previousVoiceBox {
-                voiceRenderer.barlineExtraHeight = previousVoiceBox.bottom -  layoutItem.box.bottom - 4 * Layout.staffLineSpacing
+                voiceRenderer.barlineExtraHeight = previousVoiceBox.bottom - layoutItem.box.bottom - 4 * Layout.staffLineSpacing
             }
             previousVoiceBox = layoutItem.box
             renderables.append(voiceRenderer)
@@ -60,7 +60,7 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
         var maxBarPerGroup = [Bar]()
         for barIndex in line.melody.bars.indices {
             let bars = line.voices.map { $0.bars[barIndex] }
-            maxBarPerGroup.append(bars.max(by: ({$0.width.advance > $1.width.advance}))!)
+            maxBarPerGroup.append(bars.max(by: ({ $0.width.advance > $1.width.advance }))!)
         }
 
         var sizeables: [any Sizable] = maxBarPerGroup
@@ -76,7 +76,7 @@ extension Line: Sizable {
 
     var height: Length {
         voices.map(\.height).sum
-        + .exact(Layout.staffJoinedSeparation * CGFloat(voices.count - 1))
+            + .exact(Layout.staffJoinedSeparation * CGFloat(voices.count - 1))
     }
 }
 

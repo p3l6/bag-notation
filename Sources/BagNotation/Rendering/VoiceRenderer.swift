@@ -77,7 +77,6 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
                                        length: x - horizStart,
                                        width: Layout.variationBracketLineWidth)
             }
-
         }
     }
 
@@ -126,8 +125,8 @@ extension Voice: Sizable {
     var width: Length { .full }
     var height: Length {
         .exact(Layout.staffLineSpacing * 7) +
-        // :TODO: somehow kern this into the staff separation buffer
-        (hasAnyVariations ? .exact(Layout.variationBracketHeight) : .zero)
+            // :TODO: somehow kern this into the staff separation buffer
+            (hasAnyVariations ? .exact(Layout.variationBracketHeight) : .zero)
     }
 
     private var hasAnyVariations: Bool {
@@ -135,7 +134,6 @@ extension Voice: Sizable {
             .compactMap { if case let .cluster(cluster) = $0 { cluster } else { nil } }
             .contains { !$0.variation.isContinuation }
     }
-
 }
 
 struct VariationAnchor {

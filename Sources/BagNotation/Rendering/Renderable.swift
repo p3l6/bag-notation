@@ -41,7 +41,7 @@ class BaseRenderable {
     var reservedLeading: CGFloat = 0
     var reservedTrailing: CGFloat = 0
     /// Callback to inform a parent item about layout results
-    var onLayout: (([LayoutResult]) throws ->Void)?
+    var onLayout: (([LayoutResult]) throws -> Void)?
     /// Override layout method to provide a final width for each sizable item
     /// - Note: count must match count of sized items!
     var predefinedLayoutSizes: [CGFloat]?
@@ -88,8 +88,8 @@ class BaseRenderable {
         let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
 
         // calculate a stretched size for each box
-        let actualSizes: [CGFloat] = try inputs.map { item in
-            switch (direction == .horizontal ? item.width : item.height) {
+        return try inputs.map { item in
+            switch direction == .horizontal ? item.width : item.height {
             case .zero: 0.0
             case let .exact(value): value
             case let .atLeast(value): value + stretch
@@ -97,8 +97,6 @@ class BaseRenderable {
                 throw PdfError.insufficientSpace
             }
         }
-
-        return actualSizes
     }
 
     private func layoutSizes(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [CGFloat] {
