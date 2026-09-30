@@ -14,6 +14,7 @@ public enum ModelParseError: Error, LocalizedError {
 
     case unexpectedNodeType(type: String)
     case unexpectedField(label: FieldLabel)
+    case unexpectedNoteGrouping
 
     case missingNodeChild
     case missingFunctionImplementation
@@ -41,6 +42,7 @@ public enum ModelParseError: Error, LocalizedError {
         case .duplicateComposers: "Duplicate composers"
         case let .unexpectedNodeType(type): "Unexpected node type: \(type)"
         case let .unexpectedField(label): "A field with this label was unexpected here: \(label.rawValue)"
+        case .unexpectedNoteGrouping: "Unexpected note grouping (tie or slur or tuplet)"
         case .missingNodeChild: "Node is missing a required child"
         case .missingFunctionImplementation: "Internal error: function implementation is missing"
         case .missingFieldValue: "Field is missing value"

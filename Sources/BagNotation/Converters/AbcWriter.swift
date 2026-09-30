@@ -221,16 +221,17 @@ extension Cluster: AbcSourceConverting {
 extension Note: AbcSourceConverting {
     fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         var abc = ""
+
         if let annotation {
             abc += " \"^\(annotation)\" "
         }
 
-        if slurredToNext {
+        switch grouping {
+        case .start(.slur), .transition(ending: _, starting: .slur):
             abc += "("
-        }
-
-        if context.tupletNumber == 1 {
-            abc += "(\(context.tupletSize)"
+        case let .start(.tuplet(size)):
+            abc += "(\(size)"
+        default: break
         }
 
         if let embellishment {
@@ -258,15 +259,12 @@ extension Note: AbcSourceConverting {
 
         abc += duration.abcSource(ctx: ctx)
 
-        if tiedToNext {
+        switch grouping {
+        case .start(.tie), .ongoing(.tie), .transition(ending: _, starting: .tie):
             abc += "-"
-        }
-        if ctx.closeNextSlur {
+        case .end(.slur), .transition(ending: .slur, starting: _):
             abc += ")"
-            ctx.closeNextSlur = false
-        }
-        if slurredToNext {
-            ctx.closeNextSlur = true
+        default: break
         }
 
         return abc
@@ -337,8 +335,6 @@ private class AbcActiveContext {
     var currentTimeSignature: TimeSignature!
     var currentTempo: Int?
     var currentVoiceCount = 0
-
-    var closeNextSlur = false
 }
 
 private extension Array where Element: AbcSourceConverting {

@@ -423,33 +423,23 @@ private final class ClusterModeler: Modeler {
     func provideContext(private head: FlowContext, body: Cluster.Context) throws -> FlowContext {
         var flow = head
 
-        var tupletSizes = [Int]()
         var tupletSize = 0
-        for nm in noteModelers {
-            if nm.continuesTuplet {
-                tupletSize += 1
-            } else if tupletSize > 0 {
-                tupletSizes.append(tupletSize + 1)
-                tupletSize = 0
-            }
-        }
-
-        var tupletSizeIndex = 0
-        var tupletPosition = 0
-
-        for (_, nm) in noteModelers.enumerated() {
-            if nm.continuesTuplet || tupletPosition > 0 {
-                tupletPosition += 1
+        for (index, nm) in noteModelers.enumerated() {
+            if nm.continuesTuplet && tupletSize == 0 {
+                // This is the beginning of a tuplet, look ahead to find the end.
+                var endIndex = index
+                while endIndex <= noteModelers.count && noteModelers[endIndex].continuesTuplet {
+                    endIndex += 1
+                }
+                tupletSize = endIndex - index + 1
             }
 
-            let noteBody = Note.Context(cluster: body,
-                                        tupletSize: tupletPosition == 0 ? 0 : tupletSizes[tupletSizeIndex],
-                                        tupletNumber: tupletPosition)
+            let noteBody = Note.Context(cluster: body, tupletSize: tupletSize)
             flow = try nm.provideContext(head: flow, body: noteBody)
 
-            if tupletPosition != 0 && !nm.continuesTuplet {
-                tupletPosition = 0
-                tupletSizeIndex += 1
+            if !nm.continuesTuplet && tupletSize > 0 {
+                // end of a tuplet
+                tupletSize = 0
             }
         }
 
@@ -501,12 +491,12 @@ private final class NoteModeler: Modeler {
 
     let pitch: Pitch
 
-    let tied: Bool
-    let continuesTuplet: Bool
-    let slurred: Bool
+    let connector: String?
+    var continuesTuplet: Bool { connector == "-" }
 
     fileprivate let children: NodeChildren
 
+    var grouping: NoteGrouping
     var embellishment: Embellishment?
     var duration: Duration!
     var fermata: Bool
@@ -522,10 +512,8 @@ private final class NoteModeler: Modeler {
 
         pitch = try children.unique(.pitch).trimmedText(from: textSource).toPitch()
 
-        let connector = try children.optional(.connector)?.trimmedText(from: textSource)
-        tied = connector == "_"
-        continuesTuplet = connector == "-"
-        slurred = connector == "~"
+        connector = try children.optional(.connector)?.trimmedText(from: textSource)
+        grouping = .none
 
         accidental = nil
         fermata = false
@@ -557,7 +545,10 @@ private final class NoteModeler: Modeler {
             }
         }
 
-        context = (head: head, body: body, tail: FlowContext(from: head, previousPitch: pitch, clearingAllUpcoming: true))
+        let (mainGrouping, tailGrouping) = try groupings(from: head.noteGrouping, tupletSize: body.tupletSize)
+        grouping = mainGrouping
+
+        context = (head: head, body: body, tail: FlowContext(from: head, noteGrouping: tailGrouping, previousPitch: pitch, clearingAllUpcoming: true))
         return context.tail
     }
 
@@ -566,11 +557,36 @@ private final class NoteModeler: Modeler {
              pitch: pitch,
              embellishment: embellishment,
              duration: duration,
-             tiedToNext: tied,
-             slurredToNext: slurred,
              annotation: context.head.upcomingAnnotation,
              fermata: fermata,
              accidental: accidental,
+             grouping: grouping,
              chord: chord)
+    }
+
+    private func groupings(from headGrouping: NoteGrouping, tupletSize: Int) throws -> (NoteGrouping, NoteGrouping) {
+        let tailKind: NoteGrouping.Kind? = if let connector {
+            switch connector {
+            case "_": .tie
+            case "~": .slur
+            case "-": .tuplet(size: tupletSize)
+            default: throw ModelParseError.unexpectedNoteGrouping
+            }
+        } else { nil }
+
+        let tailGrouping: NoteGrouping = if let tailKind { .ongoing(tailKind) } else { .none }
+        let grouping: NoteGrouping = switch headGrouping {
+        case .none:
+            if let tailKind { .start(tailKind) } else { .none }
+        case let .start(kind) where kind == tailKind,
+             let .ongoing(kind) where kind == tailKind:
+            .ongoing(kind)
+        case let .start(kind), let .ongoing(kind):
+            if let tailKind { .transition(ending: kind, starting: tailKind) } else { .end(kind) }
+        default:
+            throw ModelParseError.unexpectedNoteGrouping
+        }
+
+        return (grouping, tailGrouping)
     }
 }

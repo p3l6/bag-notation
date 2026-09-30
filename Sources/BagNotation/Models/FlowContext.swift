@@ -14,6 +14,7 @@ struct FlowContext {
     let tempo: Int?
     let variation: Variation
 
+    let noteGrouping: NoteGrouping
     let previousPitch: Pitch
 
     let upcomingAnnotation: String?
@@ -27,6 +28,7 @@ struct FlowContext {
         self.tempo = tempo
 
         previousPitch = .e
+        noteGrouping = .none
         variation = .none
         upcomingAnnotation = nil
         upcomingFermata = false
@@ -37,6 +39,7 @@ struct FlowContext {
     init(from base: FlowContext,
          timeSignature: TimeSignature? = nil,
          noteLength: Duration? = nil,
+         noteGrouping: NoteGrouping? = nil,
          previousPitch: Pitch? = nil,
          tempo: Int? = nil,
          variation: Variation? = nil,
@@ -47,6 +50,7 @@ struct FlowContext {
          clearingAllUpcoming: Bool = false) {
         self.timeSignature = timeSignature ?? base.timeSignature
         self.noteLength = noteLength ?? base.noteLength
+        self.noteGrouping = noteGrouping ?? base.noteGrouping
         self.previousPitch = previousPitch ?? base.previousPitch
         self.tempo = tempo ?? base.tempo
         self.variation = variation ?? base.variation

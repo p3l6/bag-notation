@@ -7,21 +7,17 @@ public struct Note {
     public struct Context {
         let cluster: Cluster.Context
 
-        /// Zero when not in a tuplet
         let tupletSize: Int
-        /// First note in tuplet is 1
-        let tupletNumber: Int
     }
 
     let context: Context
     let pitch: Pitch
     let embellishment: Embellishment?
     let duration: Duration
-    let tiedToNext: Bool
-    let slurredToNext: Bool
     let annotation: String?
     let fermata: Bool
     let accidental: Accidental?
+    let grouping: NoteGrouping
     /// A second pitch to display with the primary, as a chord
     let chord: Pitch?
 }
@@ -40,6 +36,20 @@ public enum Pitch: Comparable {
 
 public enum Accidental {
     case sharp, flat, natural
+}
+
+public enum NoteGrouping: Equatable {
+    public enum Kind: Equatable {
+        case tie
+        case slur
+        case tuplet(size: Int)
+    }
+
+    case none
+    case start(Kind)
+    case ongoing(Kind)
+    case end(Kind)
+    case transition(ending: Kind, starting: Kind)
 }
 
 public enum NoteParseError: Error {

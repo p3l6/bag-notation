@@ -81,29 +81,41 @@ struct Notes {
 
     @Test
     func ties() throws {
-        let notes = try makeCluster(from: "c+_cxc_d_e")
-        #expect(notes.map(\.tiedToNext) == [true, false, true, true, false])
+        let notes = try makeCluster(from: "c+_cxc_d_ef")
+        #expect(notes.map(\.grouping) == [.start(.tie), .end(.tie), .start(.tie), .ongoing(.tie), .end(.tie), .none])
     }
 
     @Test
     func triplets() throws {
         var notes = try makeCluster(from: "xxexd-e-fg")
-        #expect(notes.map(\.context.tupletSize) == [0, 3, 3, 3, 0])
-        #expect(notes.map(\.context.tupletNumber) == [0, 1, 2, 3, 0])
+        #expect(notes.map(\.grouping) == [.none, .start(.tuplet(size: 3)), .ongoing(.tuplet(size: 3)), .end(.tuplet(size: 3)), .none])
 
         notes = try makeCluster(from: "xd-e-fxe-d-c")
-        #expect(notes.map(\.context.tupletSize) == [3, 3, 3, 3, 3, 3])
-        #expect(notes.map(\.context.tupletNumber) == [1, 2, 3, 1, 2, 3])
+        #expect(notes.map(\.grouping) == [.start(.tuplet(size: 3)), .ongoing(.tuplet(size: 3)), .end(.tuplet(size: 3)),
+                                          .start(.tuplet(size: 3)), .ongoing(.tuplet(size: 3)), .end(.tuplet(size: 3))])
     }
 
     @Test
     func tuplets() throws {
         var notes = try makeCluster(from: "a-b-c-d-e-fgbd")
-        #expect(notes.map(\.context.tupletSize) == [6, 6, 6, 6, 6, 6, 0, 0, 0])
-        #expect(notes.map(\.context.tupletNumber) == [1, 2, 3, 4, 5, 6, 0, 0, 0])
+        #expect(notes.map(\.grouping) == [.start(.tuplet(size: 6)), .ongoing(.tuplet(size: 6)), .ongoing(.tuplet(size: 6)), .ongoing(.tuplet(size: 6)), .ongoing(.tuplet(size: 6)), .end(.tuplet(size: 6)), .none, .none, .none])
 
         notes = try makeCluster(from: "a+-b+-c+-d+")
-        #expect(notes.map(\.context.tupletSize) == [4, 4, 4, 4])
-        #expect(notes.map(\.context.tupletNumber) == [1, 2, 3, 4])
+        #expect(notes.map(\.grouping) == [.start(.tuplet(size: 4)), .ongoing(.tuplet(size: 4)), .ongoing(.tuplet(size: 4)), .end(.tuplet(size: 4))])
+    }
+
+    @Test
+    func slurs() throws {
+        var notes = try makeCluster(from: "a~b")
+        #expect(notes.map(\.grouping) == [.start(.slur), .end(.slur)])
+
+        notes = try makeCluster(from: "a~b_b-c-d")
+        #expect(notes.map(\.grouping) == [
+            .start(.slur),
+            .transition(ending: .slur, starting: .tie),
+            .transition(ending: .tie, starting: .tuplet(size: 3)),
+            .ongoing(.tuplet(size: 3)),
+            .end(.tuplet(size: 3))
+        ])
     }
 }
