@@ -434,7 +434,7 @@ private final class ClusterModeler: Modeler {
                 tupletSize = endIndex - index + 1
             }
 
-            let noteBody = Note.Context(cluster: body, tupletSize: tupletSize)
+            let noteBody = Note.Context(cluster: body, noteNumber: index + 1, tupletSize: tupletSize)
             flow = try nm.provideContext(head: flow, body: noteBody)
 
             if !nm.continuesTuplet && tupletSize > 0 {
@@ -522,7 +522,7 @@ private final class NoteModeler: Modeler {
 
     func provideContext(private head: FlowContext, body: Note.Context) throws -> FlowContext {
         embellishment = if let embellishmentStr = try children.optional(.embellishment)?.trimmedText(from: textSource) {
-            try Embellishment(string: embellishmentStr, from: head.previousPitch, on: pitch)
+            try Embellishment(string: embellishmentStr, from: head.previousPitch, on: pitch, noteContext: body)
         } else { nil }
 
         duration = try children.optional(.duration)?.trimmedText(from: textSource).toDuration(modifying: head.noteLength) ?? head.noteLength

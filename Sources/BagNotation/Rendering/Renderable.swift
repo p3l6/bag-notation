@@ -11,7 +11,7 @@ protocol Renderable<S> {
     associatedtype S: Sizable
     init(inside box: BoundingBox, rendering: S)
     var box: BoundingBox { get }
-    func render(in graphics: RenderCanvas)
+    func render(in graphics: RenderCanvas, with anchors: AnchorSet) throws
     func directChildren() throws -> [any Renderable]
 }
 
@@ -21,9 +21,10 @@ extension Renderable {
     /// This is to be used at the top level of the rendering stack, and only
     /// called once. It should not be called by any renderable for making calculations
     /// or layouts.
-    func collectAllRenderables() throws -> [any Renderable] {
+    func collectAllRenderables() throws -> ([any Renderable], AnchorSet) {
         var parents: [any Renderable] = [self]
         var renderables = parents
+        var anchors = AnchorSet()
 
         while !parents.isEmpty {
             let parent = parents.removeFirst()
@@ -32,7 +33,13 @@ extension Renderable {
             renderables.append(contentsOf: children)
         }
 
-        return renderables
+        for renderable in renderables {
+            if let anchorable = renderable as? any Anchorable {
+                anchors.add(anchorable)
+            }
+        }
+
+        return (renderables, anchors)
     }
 }
 
@@ -40,8 +47,6 @@ class BaseRenderable {
     var box: BoundingBox
     var reservedLeading: CGFloat = 0
     var reservedTrailing: CGFloat = 0
-    /// Callback to inform a parent item about layout results
-    var onLayout: (([LayoutResult]) throws -> Void)?
     /// Override layout method to provide a final width for each sizable item
     /// - Note: count must match count of sized items!
     var predefinedLayoutSizes: [CGFloat]?
@@ -125,7 +130,7 @@ class BaseRenderable {
 
         // create Render objects with bounding boxes
         var advance = reservedLeading
-        let results = zip(inputs, sizes).map { item, actual in
+        return zip(inputs, sizes).map { item, actual in
             let layoutBox = if direction == .horizontal {
                 BoundingBox(page: box.page,
                             left: box.left + advance,
@@ -143,9 +148,6 @@ class BaseRenderable {
             advance += itemSpacing
             return LayoutResult(sizable: item, box: layoutBox)
         }
-
-        try onLayout?(results)
-        return results
     }
 }
 
@@ -227,6 +229,29 @@ protocol Sizable {
     // :TODO: one of these should always be .full. Enforce that?
     var height: Length { get }
     var width: Length { get }
+}
+
+protocol Anchored {
+    associatedtype Anchors
+    var id: String { get }
+}
+
+protocol Anchorable {
+    associatedtype Anchor: Anchored
+    var anchor: Anchor { get }
+    func anchors() -> Anchor.Anchors
+}
+
+struct AnchorSet {
+    private var anchors = [String: Any]()
+    mutating func add(_ anchorable: any Anchorable) {
+        anchors[anchorable.anchor.id] = anchorable.anchors()
+    }
+
+    func anchors<A: Anchored>(for anchored: A) throws -> A.Anchors {
+        guard let stored = anchors[anchored.id] as? A.Anchors else { throw PdfError.unexpectedVariationAnchor }
+        return stored
+    }
 }
 
 struct LayoutResult {

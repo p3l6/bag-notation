@@ -29,7 +29,7 @@ public class PdfWriter {
 
         let doc = DocRenderer(inside: pageBounding, rendering: doc)
 
-        let renderables = try doc.collectAllRenderables()
+        let (renderables, anchors) = try doc.collectAllRenderables()
 
         let pages = Dictionary(grouping: renderables, by: { $0.box.page })
 
@@ -37,7 +37,7 @@ public class PdfWriter {
             let pageRenderables = pages[page]!
 
             context.beginPDFPage(nil)
-            pageRenderables.forEach { $0.render(in: canvas) }
+            try pageRenderables.forEach { try $0.render(in: canvas, with: anchors) }
             context.endPDFPage()
         }
 

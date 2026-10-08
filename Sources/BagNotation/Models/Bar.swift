@@ -6,6 +6,7 @@
 public struct Bar {
     public struct Context {
         let voice: Voice.Context
+        var identifier: String { "\(voice.identifier)b\(barNumber)" }
 
         /// First bar is 1
         var barNumber: Int

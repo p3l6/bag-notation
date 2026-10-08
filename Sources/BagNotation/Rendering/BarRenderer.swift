@@ -16,7 +16,7 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
         super.init(inside: box)
     }
 
-    func render(in _: RenderCanvas) {}
+    func render(in _: RenderCanvas, with _: AnchorSet) {}
 
     func directChildren() throws -> [any Renderable] {
         var sizables = [any Sizable]()
@@ -83,7 +83,7 @@ final class BarlineRenderer: BaseRenderable, Renderable<Barline> {
         super.init(inside: box)
     }
 
-    func render(in graphics: RenderCanvas) {
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
         switch barline {
         case .plain:
             graphics.drawLineVert(from: box.inset(x: Layout.barlineLineWidth / 2),

@@ -36,7 +36,7 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
         super.init(inside: box)
     }
 
-    func render(in graphics: RenderCanvas) {
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
         // Accidental
         if let accidental = note.accidental {
             graphics.drawSymbol(accidental.symbol, at: box.inset(x: centerJustifyAdvance + embellishmentAdvance, y: pitchOffset))

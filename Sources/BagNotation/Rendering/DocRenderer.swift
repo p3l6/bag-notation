@@ -21,7 +21,7 @@ final class DocRenderer: BaseRenderable, Renderable<Doc> {
         super.init(inside: box)
     }
 
-    func render(in _: RenderCanvas) {}
+    func render(in _: RenderCanvas, with _: AnchorSet) {}
 
     func directChildren() throws -> [any Renderable] {
         let tunes = doc.tunes
@@ -78,7 +78,7 @@ final class PageFooter: Renderable<Doc> {
         doc = rendering
     }
 
-    func render(in graphics: RenderCanvas) {
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
         guard let rev = doc.revision else { return }
         graphics.drawText("(rev: \(rev))", at: box.origin, fontSize: 8)
     }

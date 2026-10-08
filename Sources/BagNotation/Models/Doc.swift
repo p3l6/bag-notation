@@ -5,6 +5,8 @@
 
 public struct Doc {
     public struct Context {
+        var identifier: String { "doc" }
+
         let tuneCount: Int
     }
 

@@ -15,7 +15,7 @@ final class EmbellishmentRenderer: BaseRenderable, Renderable<Embellishment> {
         super.init(inside: box)
     }
 
-    func render(in graphics: RenderCanvas) {
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
         let maxPitch = embellishment.pitches.max()!
         let stemTop = box.bottom + maxPitch.yOffset + Layout.gracenoteStemIdealHeight
         var noteHeads = [CGPoint]()

@@ -6,19 +6,22 @@
 import Foundation
 
 public struct Embellishment {
+    let context: Note.Context
+
     let type: EmbellishmentType
     let playedOn: Pitch
     let pitches: [Pitch]
 
-    init(type: EmbellishmentType, from: Pitch, on pitch: Pitch) throws {
+    init(type: EmbellishmentType, from: Pitch, on pitch: Pitch, noteContext: Note.Context) throws {
         self.type = type
         playedOn = pitch
+        context = noteContext
 
         pitches = try pitchesFor(type, from: from, on: pitch)
     }
 
-    init(string: String, from: Pitch, on pitch: Pitch) throws {
-        try self.init(type: EmbellishmentType.from(string: string), from: from, on: pitch)
+    init(string: String, from: Pitch, on pitch: Pitch, noteContext: Note.Context) throws {
+        try self.init(type: EmbellishmentType.from(string: string), from: from, on: pitch, noteContext: noteContext)
     }
 }
 

@@ -15,7 +15,7 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
         super.init(inside: box)
     }
 
-    func render(in graphics: RenderCanvas) {
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
         guard line.voices.count > 1 else { return }
         // :TODO: Consider drawing U+E004 and U+E003 to make a bracket in addition / instead
         graphics.drawLineVert(from: CGPoint(x: box.left + Layout.barlineLineWidth / 2, y: box.bottom),

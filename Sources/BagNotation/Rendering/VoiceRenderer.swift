@@ -10,7 +10,6 @@ import CoreGraphics
 final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
     let voice: Voice
     private var timeSignature: TimeSignature?
-    private var variationAnchors = [VariationAnchor]()
     var barlineExtraHeight: CGFloat = 0
 
     init(inside box: BoundingBox, rendering voice: Voice) {
@@ -29,7 +28,7 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
         }
     }
 
-    func render(in graphics: RenderCanvas) {
+    func render(in graphics: RenderCanvas, with anchors: AnchorSet) throws {
         // Staff lines
         for lineIndex in 0 ..< 5 {
             let y = box.bottom + CGFloat(lineIndex) * Layout.staffLineSpacing
@@ -52,7 +51,7 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
 
         // Variations
         var horizStart: CGFloat?
-        for anchor in variationAnchors {
+        for anchor in try variationAnchors(set: anchors) {
             let y = box.top - Layout.variationBracketLineWidth / 2
 
             if let x = anchor.startX {
@@ -96,7 +95,6 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
                 renderables.append(barlineRenderer)
             case let bar as Bar:
                 let barRenderer = BarRenderer(inside: layoutItem.box, rendering: bar)
-                barRenderer.onLayout = collectVariations(from:)
                 barRenderer.barlineExtraHeight = barlineExtraHeight
                 renderables.append(barRenderer)
             default: throw PdfError.unexpectedSizable
@@ -106,18 +104,15 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
         return renderables
     }
 
-    func collectVariations(from grandchildren: [LayoutResult]) throws {
-        let anchors = try grandchildren.compactMap { grandchild -> VariationAnchor? in
-            guard let cluster = grandchild.sizable as? Cluster,
-                  !cluster.variation.isContinuation else {
-                return nil
-            }
-
-            return try VariationAnchor(clusterLeft: grandchild.box.left,
-                                       clusterRight: grandchild.box.right,
+    func variationAnchors(set: AnchorSet) throws -> [VariationAnchor] {
+        let clusters = voice.bars.flatMap { $0.contents.compactMap { if case let .cluster(c) = $0 { c } else { nil }} }
+        return try clusters.compactMap { cluster throws -> VariationAnchor? in
+            guard !cluster.variation.isContinuation else { return nil }
+            let anchors = try set.anchors(for: cluster)
+            return try VariationAnchor(clusterLeft: anchors.start,
+                                       clusterRight: anchors.end,
                                        variation: cluster.variation)
         }
-        variationAnchors.append(contentsOf: anchors)
     }
 }
 

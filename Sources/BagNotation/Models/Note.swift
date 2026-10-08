@@ -6,6 +6,10 @@
 public struct Note {
     public struct Context {
         let cluster: Cluster.Context
+        var identifier: String { "\(cluster.identifier)n\(noteNumber)" }
+
+        /// First note is 1
+        let noteNumber: Int
 
         let tupletSize: Int
     }

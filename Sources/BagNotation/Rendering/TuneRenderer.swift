@@ -16,7 +16,7 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
         reservedLeading = Layout.tuneHeaderHeight
     }
 
-    func render(in graphics: RenderCanvas) {
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
         graphics.drawText(tune.header.title, at: box.insetFromTop(x: box.width / 2, y: 20), fontSize: 20, kind: .italic, justify: .center)
         graphics.drawText(tune.header.composer, at: box.insetFromTopRight(y: 30), fontSize: 10, justify: .right)
         if let arr = tune.header.arranger {

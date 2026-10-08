@@ -6,6 +6,7 @@
 public struct Cluster {
     public struct Context {
         let bar: Bar.Context
+        var identifier: String { "\(bar.identifier)c\(clusterNumber)" }
 
         /// First cluster is 1
         let clusterNumber: Int

@@ -16,7 +16,7 @@ final class ClusterRenderer: BaseRenderable, Renderable<Cluster> {
         super.init(inside: box)
     }
 
-    func render(in graphics: RenderCanvas) {
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
         for beam in beams {
             beam.segments.forEach { $0.draw(in: graphics) }
             beam.flags.forEach { $0.draw(in: graphics) }
@@ -42,6 +42,23 @@ extension Cluster: Sizable {
     var height: Length { .full }
     var width: Length {
         notes.map(\.width).sum
+    }
+}
+
+extension Cluster: Anchored {
+    var id: String { context.identifier }
+    typealias Anchors = ClusterAnchors
+    struct ClusterAnchors {
+        let start: CGFloat
+        let end: CGFloat
+    }
+}
+
+extension ClusterRenderer: Anchorable {
+    typealias Anchor = Cluster
+    var anchor: Cluster { cluster }
+    func anchors() -> Cluster.ClusterAnchors {
+        .init(start: box.left, end: box.right)
     }
 }
 

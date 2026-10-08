@@ -6,6 +6,7 @@
 public struct Line {
     public struct Context {
         let tune: Tune.Context
+        var identifier: String { "\(tune.identifier)l\(lineNumber)" }
 
         /// First line is 1
         let lineNumber: Int
@@ -24,6 +25,7 @@ public struct Line {
 public struct Voice {
     public struct Context {
         let line: Line.Context
+        var identifier: String { "\(line.identifier)v\(voiceNumber)" }
 
         /// Melody is voice 0
         let voiceNumber: Int
