@@ -56,6 +56,7 @@ enum Layout {
     static let connectionNoteSeparation = 0.3 * baseScale
     static let connectionLabelSeparation = 0.25 * baseScale
     static let connectionFontSize = 1.75 * baseScale
+    static let annotationFontSize = 2 * baseScale
 
     /// Space used by various font elements
     /// These values are based on the ones included in the Bravura.json file downloaded with the font release

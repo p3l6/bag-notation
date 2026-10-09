@@ -97,6 +97,14 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
             }
             graphics.drawSymbol(.fermata, at: box.inset(x: x, y: y))
         }
+
+        // Annotation
+        if let annotation = note.annotation {
+            graphics.drawText(annotation,
+                              at: box.insetFromTop(x: embellishmentAdvance + centerJustifyAdvance + accidentalAdvance,
+                                                   y: -Layout.annotationFontSize/2),
+                              fontSize: Layout.annotationFontSize)
+        }
     }
 
     func directChildren() throws -> [any Renderable] {
