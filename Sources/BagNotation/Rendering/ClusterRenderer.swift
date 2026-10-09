@@ -21,6 +21,14 @@ final class ClusterRenderer: BaseRenderable, Renderable<Cluster> {
             beam.segments.forEach { $0.draw(in: graphics) }
             beam.flags.forEach { $0.draw(in: graphics) }
         }
+
+        // Tempo change
+        if let tempo = cluster.context.tempo, cluster.context.tempoChanged {
+            graphics.drawText("\(tempo) bpm",
+                              at: box.insetFromTop(x: 0,
+                                                   y: -Layout.annotationFontSize/2),
+                              fontSize: Layout.annotationFontSize)
+        }
     }
 
     func directChildren() throws -> [any Renderable] {

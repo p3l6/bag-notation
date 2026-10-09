@@ -9,7 +9,6 @@ import CoreGraphics
 
 final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
     let voice: Voice
-    private var timeSignature: TimeSignature?
     var barlineExtraHeight: CGFloat = 0
 
     init(inside box: BoundingBox, rendering voice: Voice) {
@@ -17,15 +16,6 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
         super.init(inside: box)
 
         reservedLeading = Layout.Advance.gClef + Layout.baseScale
-
-        if voice.context.line.lineNumber == 1 {
-            timeSignature = voice.bars.first?.context.timeSignature
-            reservedLeading += Layout.Advance.timeSig
-
-            if timeSignature == .time128 {
-                reservedLeading += Layout.Advance.timeSig
-            }
-        }
     }
 
     func render(in graphics: RenderCanvas, with anchors: AnchorSet) throws {
@@ -39,15 +29,6 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
 
         // Clef
         graphics.drawSymbol(.gClef, at: box.inset(x: 1, y: Layout.staffLineSpacing))
-
-        // Time signature
-        if let timeSignature {
-            let (top, bottom) = timeSignature.symbols
-            let bottomXExtra = timeSignature == .time128 ? Layout.Advance.timeSig / 2 : 0
-
-            graphics.drawSymbol(top, at: box.inset(x: Layout.Advance.gClef + Layout.baseScale / 2, y: 3 * Layout.baseScale))
-            graphics.drawSymbol(bottom, at: box.inset(x: Layout.Advance.gClef + Layout.baseScale / 2 + bottomXExtra, y: 1 * Layout.baseScale))
-        }
 
         // Variations
         var horizStart: CGFloat?
@@ -97,6 +78,9 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
 
     func directChildren() throws -> [any Renderable] {
         var sizables = [any Sizable]()
+        if let firstBar = voice.bars.first, firstBar.context.isFirstBarOfTune {
+            sizables.append(firstBar.context.timeSignature)
+        }
         if let leadingLine = voice.leadingBarline {
             sizables.append(leadingLine)
         }
@@ -105,6 +89,8 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
         var renderables = [any Renderable]()
         for layoutItem in try layout(.horizontal, sizables) {
             switch layoutItem.sizable {
+            case let timeSignature as TimeSignature:
+                renderables.append(TimeSignatureRenderer(inside: layoutItem.box, rendering: timeSignature))
             case let barline as Barline:
                 let barlineRenderer = BarlineRenderer(inside: layoutItem.box, rendering: barline)
                 barlineRenderer.extraHeight = barlineExtraHeight
@@ -242,9 +228,26 @@ struct Swoop {
     }
 }
 
-extension TimeSignature {
+final class TimeSignatureRenderer: BaseRenderable, Renderable<TimeSignature> {
+    let timeSignature: TimeSignature
+
+    init(inside box: BoundingBox, rendering timeSignature: TimeSignature) {
+        self.timeSignature = timeSignature
+        super.init(inside: box)
+    }
+
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
+        let (top, bottom) = symbols
+        let bottomXExtra = timeSignature == .time128 ? Layout.Advance.timeSig / 2 : 0
+
+        graphics.drawSymbol(top, at: box.inset(x:  Layout.baseScale/2, y: 3 * Layout.baseScale))
+        graphics.drawSymbol(bottom, at: box.inset(x:  Layout.baseScale/2 + bottomXExtra, y: Layout.baseScale))
+    }
+
+    func directChildren() throws -> [any Renderable] { [] }
+
     var symbols: (BravuraSymbol, BravuraSymbol) {
-        switch self {
+        switch timeSignature {
         case .time22: (.timeSig2, .timeSig2)
         case .time24: (.timeSig2, .timeSig4)
         case .time32: (.timeSig3, .timeSig2)
@@ -256,6 +259,14 @@ extension TimeSignature {
         case .time98: (.timeSig9, .timeSig8)
         case .time128: (.timeSig12, .timeSig8)
         }
+    }
+}
+
+extension TimeSignature: Sizable {
+    var height: Length { .full }
+    var width: Length {
+        .exact(self == .time128 ? 2 * Layout.Advance.timeSig : Layout.Advance.timeSig)
+        + .exact(Layout.baseScale)
     }
 }
 

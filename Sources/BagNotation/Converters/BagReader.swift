@@ -371,11 +371,12 @@ private final class BarModeler: Modeler {
                 flow = try modeler.provideContext(head: flow, body: ())
             case let .cluster(modeler):
                 number += 1
+                let previousTempo = previousCluster?.context?.tail.tempo ?? head.tempo
                 let clusterBody = Cluster.Context(bar: barContext,
                                                   clusterNumber: number,
                                                   noteLength: flow.noteLength,
                                                   tempo: flow.tempo,
-                                                  tempoChanged: flow.tempo != head.tempo)
+                                                  tempoChanged: flow.tempo != previousTempo)
 
                 // last cluster on a line always ends a variation
                 if clusterBody.isFinalClusterOfVoice && flow.variation.isEndable {

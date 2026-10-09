@@ -20,6 +20,9 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
 
     func directChildren() throws -> [any Renderable] {
         var sizables = [any Sizable]()
+        if bar.context.timeSignatureChanged {
+            sizables.append(bar.context.timeSignature)
+        }
         for item in bar.contents {
             switch item {
             case let .cluster(cluster):
@@ -33,6 +36,8 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
         var renderables = [any Renderable]()
         for layoutItem in try layout(.horizontal, sizables) {
             switch layoutItem.sizable {
+            case let timeSignature as TimeSignature:
+                renderables.append(TimeSignatureRenderer(inside: layoutItem.box, rendering: timeSignature))
             case let barline as Barline:
                 let barlineRenderer = BarlineRenderer(inside: layoutItem.box, rendering: barline)
                 barlineRenderer.extraHeight = barlineExtraHeight
@@ -48,8 +53,9 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
 }
 
 extension Bar: Sizable {
+    var height: Length { .full }
     var width: Length {
-        var width: Length = .zero
+        var width: Length = context.timeSignatureChanged ? context.timeSignature.width : .zero
         for item in contents {
             switch item {
             case let .cluster(cluster):
@@ -68,8 +74,6 @@ extension Bar: Sizable {
         width += trailingBarline.width
         return isPickup ? .exact(width.advance) + .exact(Layout.baseScale) : width
     }
-
-    var height: Length { .full }
 }
 
 // MARK: Barline

@@ -15,6 +15,10 @@ public struct Bar {
         let timeSignature: TimeSignature
         /// True if the time signature has just changed for this bar, false if it continues from previous
         let timeSignatureChanged: Bool
+
+        var isFirstBarOfTune: Bool {
+            voice.line.lineNumber == 1 && barNumber == 1
+        }
     }
 
     let context: Context
