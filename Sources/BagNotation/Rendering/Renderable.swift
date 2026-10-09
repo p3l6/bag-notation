@@ -249,7 +249,7 @@ struct AnchorSet {
     }
 
     func anchors<A: Anchored>(for anchored: A) throws -> A.Anchors {
-        guard let stored = anchors[anchored.id] as? A.Anchors else { throw PdfError.unexpectedVariationAnchor }
+        guard let stored = anchors[anchored.id] as? A.Anchors else { throw PdfError.missingAnchor }
         return stored
     }
 }

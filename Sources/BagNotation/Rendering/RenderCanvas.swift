@@ -37,6 +37,16 @@ struct RenderCanvas {
         drawLine(from: from, to: CGPoint(x: from.x + length, y: from.y), width: width)
     }
 
+    func drawCurveQ(from start: CGPoint, control: CGPoint, to end: CGPoint, width: CGFloat) {
+        graphics.saveGState()
+        graphics.setStrokeColor(CGColor.black)
+        graphics.setLineWidth(width)
+        graphics.move(to: start)
+        graphics.addQuadCurve(to: end, control: control)
+        graphics.strokePath()
+        graphics.restoreGState()
+    }
+
     enum Justification {
         case left
         case center

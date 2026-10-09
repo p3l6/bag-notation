@@ -124,6 +124,26 @@ extension Note: Sizable {
     }
 }
 
+extension Note: Anchored {
+    var id: String { context.identifier }
+    typealias Anchors = Notenchors
+    struct Notenchors {
+        var noteheadLeft: CGFloat
+        var noteheadRight: CGFloat
+        var noteheadTop: CGFloat
+    }
+}
+
+extension NoteRenderer: Anchorable {
+    typealias Anchor = Note
+    var anchor: Note { note }
+    func anchors() -> Note.Notenchors {
+        return .init(noteheadLeft: stemX,
+                     noteheadRight: stemX + noteheadAdvance,
+                     noteheadTop:  box.bottom + note.pitch.yOffset + Layout.noteStep)
+    }
+}
+
 extension Pitch {
     var yOffset: CGFloat {
         let steps = switch self {

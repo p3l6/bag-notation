@@ -51,6 +51,11 @@ enum Layout {
     static let barlineThickLineWidth = 0.5 * baseScale
     static let variationBracketLineWidth = 0.12 * baseScale
     static let variationBracketHeight = 2.8 * baseScale
+    static let connectionLineWidth = 0.2 * baseScale
+    static let connectionArcHeight = 1.6 * baseScale
+    static let connectionNoteSeparation = 0.3 * baseScale
+    static let connectionLabelSeparation = 0.25 * baseScale
+    static let connectionFontSize = 1.75 * baseScale
 
     /// Space used by various font elements
     /// These values are based on the ones included in the Bravura.json file downloaded with the font release
@@ -67,15 +72,6 @@ enum Layout {
         static let accidentalSharp = 0.996 * baseScale
         static let accidentalNatural = 0.672 * baseScale
     }
-
-    /*
-
-     TBD
-
-     "tieEndpointThickness": 0.1,
-     "tieMidpointThickness": 0.22,
-     "tupletBracketThickness": 0.16
-     */
 }
 
 enum BravuraSymbol: String {

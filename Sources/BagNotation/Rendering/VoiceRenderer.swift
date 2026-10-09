@@ -77,6 +77,22 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
                                        width: Layout.variationBracketLineWidth)
             }
         }
+
+        // Grouping connector swoops
+        for swoop in try connectionAnchors(set: anchors) {
+            graphics.drawCurveQ(from: swoop.start,
+                                control: offsetMidpoint(a: swoop.start, b: swoop.end, d: Layout.connectionArcHeight),
+                                to: swoop.end,
+                                width: Layout.connectionLineWidth)
+            if let label = swoop.label {
+                graphics.drawText(label,
+                                  at: CGPoint(x: (swoop.start.x + swoop.end.x) / 2,
+                                              y: (swoop.start.y + swoop.end.y) / 2 + Layout.connectionArcHeight + Layout.connectionLabelSeparation),
+                                  fontSize: Layout.connectionFontSize,
+                                  justify: .center)
+
+            }
+        }
     }
 
     func directChildren() throws -> [any Renderable] {
@@ -113,6 +129,43 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
                                        clusterRight: anchors.end,
                                        variation: cluster.variation)
         }
+    }
+
+    func connectionAnchors(set: AnchorSet) throws -> [Swoop] {
+        let clusters = voice.bars.flatMap { $0.contents.compactMap { if case let .cluster(c) = $0 { c } else { nil }} }
+        let notes = clusters.flatMap { $0.notes }
+
+        var connections = [Swoop]()
+        var openConnection: (kind: NoteGrouping.Kind, start: Note.Anchors)?
+
+        for note in notes {
+            let anchors = try set.anchors(for: note)
+            switch note.grouping {
+            case let .start(kind):
+                openConnection = (kind, anchors)
+            case let .end(kind):
+                if let openConnection {
+                    connections.append(Swoop(kind, from: openConnection.start, to: anchors))
+                } else {
+                    connections.append(Swoop(kind, wrappedFrom: box.left + reservedLeading, to: anchors))
+                }
+                openConnection = nil
+            case let .transition(ending: ending, starting: starting):
+                if let openConnection {
+                    connections.append(Swoop(ending, from: openConnection.start, to: anchors))
+                } else {
+                    connections.append(Swoop(ending, wrappedFrom: box.left + reservedLeading, to: anchors))
+                }
+                openConnection = (starting, anchors)
+            default:
+                break
+            }
+        }
+
+        if let openConnection {
+            connections.append(Swoop(openConnection.kind,  from: openConnection.start, wrappedAt: box.right))
+        }
+        return connections
     }
 }
 
@@ -157,6 +210,35 @@ struct VariationAnchor {
             startX = nil
             label = nil
         }
+    }
+}
+
+struct Swoop {
+    let start: CGPoint
+    let end: CGPoint
+    var label: String?
+
+    init(_ kind: NoteGrouping.Kind, from start: Note.Anchors, to end: Note.Anchors) {
+        label = if case let .tuplet(size) = kind { String(size) } else { nil }
+
+        self.start = CGPoint(x: start.noteheadRight, y: start.noteheadTop + Layout.connectionNoteSeparation)
+        self.end = CGPoint(x: end.noteheadLeft, y: end.noteheadTop + Layout.connectionNoteSeparation)
+    }
+
+    init(_ kind: NoteGrouping.Kind, wrappedFrom start: CGFloat, to end: Note.Anchors) {
+        label = if case let .tuplet(size) = kind { String(size) } else { nil }
+
+        let y = end.noteheadTop + Layout.connectionNoteSeparation
+        self.start = CGPoint(x: start, y: y)
+        self.end = CGPoint(x: end.noteheadLeft, y: y)
+    }
+
+    init(_ kind: NoteGrouping.Kind, from start: Note.Anchors, wrappedAt end: CGFloat) {
+        label = if case let .tuplet(size) = kind { String(size) } else { nil }
+
+        let y = start.noteheadTop + Layout.connectionNoteSeparation
+        self.start = CGPoint(x: start.noteheadRight, y: y)
+        self.end = CGPoint(x: end, y: y)
     }
 }
 
