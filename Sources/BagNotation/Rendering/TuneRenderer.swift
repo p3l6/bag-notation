@@ -17,14 +17,21 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
     }
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
-        graphics.drawText(tune.header.title, at: box.insetFromTop(x: box.width / 2, y: 20), fontSize: 20, kind: .italic, justify: .center)
-        graphics.drawText(tune.header.composer, at: box.insetFromTopRight(y: 30), fontSize: 10, justify: .right)
-        if let arr = tune.header.arranger {
-            graphics.drawText("Arr: \(arr)", at: box.insetFromTopRight(y: 42), fontSize: 9, justify: .right)
-        }
-        graphics.drawText(styleText, at: box.insetFromTop(y: 30), fontSize: 10)
+        let titleY = Layout.titleFontSize
+        let infoY = titleY + Layout.infoFontSize
+        let detailY = infoY + Layout.detailFontSize + 3
+        
+        graphics.drawText(tune.header.title, at: box.insetFromTop(x: box.width / 2, y: titleY), fontSize: Layout.titleFontSize, kind: .italic, justify: .center)
+        
+        graphics.drawText(tune.header.composer, at: box.insetFromTopRight(y: infoY), fontSize: Layout.infoFontSize, justify: .right)
+        graphics.drawText(styleText, at: box.insetFromTop(y: infoY), fontSize: Layout.infoFontSize)
+
         if let tempo = tune.header.tempo {
-            graphics.drawText("\(tempo) bpm", at: box.insetFromTop(y: 42), fontSize: 9)
+            graphics.drawText("\(tempo) bpm", at: box.insetFromTop(y: detailY), fontSize: Layout.detailFontSize)
+        }
+
+        if let arr = tune.header.arranger {
+            graphics.drawText("Arr: \(arr)", at: box.insetFromTopRight(y: detailY), fontSize: Layout.detailFontSize, justify: .right)
         }
     }
 

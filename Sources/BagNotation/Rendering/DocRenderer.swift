@@ -80,9 +80,8 @@ final class PageFooter: Renderable<Doc> {
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
         guard let rev = doc.revision else { return }
-        // :TODO: collect this font size and header fonts into Layout
-        graphics.drawText("(rev: \(rev))", at: box.origin, fontSize: 8)
-        graphics.drawText("[p \(box.page + 1)]", at: box.bottomRight, fontSize: 8, justify: .right)
+        graphics.drawText("(rev: \(rev))", at: box.origin, fontSize: Layout.footerFontSize)
+        graphics.drawText("[p \(box.page + 1)]", at: box.bottomRight, fontSize: Layout.footerFontSize, justify: .right)
     }
 
     func directChildren() throws -> [any Renderable] { [] }
