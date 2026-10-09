@@ -71,7 +71,6 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
                                               y: (swoop.start.y + swoop.end.y) / 2 + Layout.connectionArcHeight + Layout.connectionLabelSeparation),
                                   fontSize: Layout.connectionFontSize,
                                   justify: .center)
-
             }
         }
     }
@@ -119,7 +118,7 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
 
     func connectionAnchors(set: AnchorSet) throws -> [Swoop] {
         let clusters = voice.bars.flatMap { $0.contents.compactMap { if case let .cluster(c) = $0 { c } else { nil }} }
-        let notes = clusters.flatMap { $0.notes }
+        let notes = clusters.flatMap(\.notes)
 
         var connections = [Swoop]()
         var openConnection: (kind: NoteGrouping.Kind, start: Note.Anchors)?
@@ -149,7 +148,7 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
         }
 
         if let openConnection {
-            connections.append(Swoop(openConnection.kind,  from: openConnection.start, wrappedAt: box.right))
+            connections.append(Swoop(openConnection.kind, from: openConnection.start, wrappedAt: box.right))
         }
         return connections
     }
@@ -240,8 +239,8 @@ final class TimeSignatureRenderer: BaseRenderable, Renderable<TimeSignature> {
         let (top, bottom) = symbols
         let bottomXExtra = timeSignature == .time128 ? Layout.Advance.timeSig / 2 : 0
 
-        graphics.drawSymbol(top, at: box.inset(x:  Layout.baseScale/2, y: 3 * Layout.baseScale))
-        graphics.drawSymbol(bottom, at: box.inset(x:  Layout.baseScale/2 + bottomXExtra, y: Layout.baseScale))
+        graphics.drawSymbol(top, at: box.inset(x: Layout.baseScale / 2, y: 3 * Layout.baseScale))
+        graphics.drawSymbol(bottom, at: box.inset(x: Layout.baseScale / 2 + bottomXExtra, y: Layout.baseScale))
     }
 
     func directChildren() throws -> [any Renderable] { [] }
@@ -266,7 +265,7 @@ extension TimeSignature: Sizable {
     var height: Length { .full }
     var width: Length {
         .exact(self == .time128 ? 2 * Layout.Advance.timeSig : Layout.Advance.timeSig)
-        + .exact(Layout.baseScale)
+            + .exact(Layout.baseScale)
     }
 }
 

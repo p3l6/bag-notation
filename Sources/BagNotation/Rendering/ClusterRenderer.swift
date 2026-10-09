@@ -26,7 +26,7 @@ final class ClusterRenderer: BaseRenderable, Renderable<Cluster> {
         if let tempo = cluster.context.tempo, cluster.context.tempoChanged {
             graphics.drawText("\(tempo) bpm",
                               at: box.insetFromTop(x: 0,
-                                                   y: -Layout.annotationFontSize/2),
+                                                   y: -Layout.annotationFontSize / 2),
                               fontSize: Layout.annotationFontSize)
         }
     }

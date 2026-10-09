@@ -102,7 +102,7 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
         if let annotation = note.annotation {
             graphics.drawText(annotation,
                               at: box.insetFromTop(x: embellishmentAdvance + centerJustifyAdvance + accidentalAdvance,
-                                                   y: -Layout.annotationFontSize/2),
+                                                   y: -Layout.annotationFontSize / 2),
                               fontSize: Layout.annotationFontSize)
         }
     }
@@ -146,9 +146,9 @@ extension NoteRenderer: Anchorable {
     typealias Anchor = Note
     var anchor: Note { note }
     func anchors() -> Note.Notenchors {
-        return .init(noteheadLeft: stemX,
-                     noteheadRight: stemX + noteheadAdvance,
-                     noteheadTop:  box.bottom + note.pitch.yOffset + Layout.noteStep)
+        .init(noteheadLeft: stemX,
+              noteheadRight: stemX + noteheadAdvance,
+              noteheadTop: box.bottom + note.pitch.yOffset + Layout.noteStep)
     }
 }
 

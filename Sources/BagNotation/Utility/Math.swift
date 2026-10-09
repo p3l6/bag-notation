@@ -12,7 +12,7 @@ func offsetMidpoint(a: CGPoint, b: CGPoint, d: CGFloat) -> CGPoint {
     let rise = b.y - a.y
     let run = b.x - a.x
     let abLen = sqrt(pow(rise, 2) + pow(run, 2))
-    let midpoint = CGPoint(x: (a.x + b.x)/2, y: (a.y + b.y)/2)
+    let midpoint = CGPoint(x: (a.x + b.x) / 2, y: (a.y + b.y) / 2)
 
     // There are two points that satisfy conditions
     let option1 = CGPoint(x: midpoint.x + d * rise / abLen,
