@@ -13,6 +13,8 @@ public struct Bar {
         let clusterCount: Int
         /// Time signatures can only change on bar boundaries
         let timeSignature: TimeSignature
+        /// True if the time signature has just changed for this bar, false if it continues from previous
+        let timeSignatureChanged: Bool
     }
 
     let context: Context

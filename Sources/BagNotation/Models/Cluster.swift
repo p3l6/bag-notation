@@ -13,6 +13,8 @@ public struct Cluster {
 
         let noteLength: Duration
         let tempo: Int?
+        /// True if the tempo has just changed for this cluster, false if it continues from previous
+        let tempoChanged: Bool
 
         var isFinalClusterOfVoice: Bool {
             bar.barNumber == bar.voice.barCount &&

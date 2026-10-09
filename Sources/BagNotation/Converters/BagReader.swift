@@ -271,7 +271,7 @@ private final class VoiceModeler: Modeler {
         }
 
         for (idx, barModeler) in barModelers.enumerated() {
-            let barBody = Bar.Context(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count, timeSignature: flow.timeSignature)
+            let barBody = Bar.Context(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count, timeSignature: flow.timeSignature, timeSignatureChanged: false)
             flow = try barModeler.provideContext(head: flow, body: barBody)
         }
 
@@ -364,7 +364,8 @@ private final class BarModeler: Modeler {
                     barContext = Bar.Context(voice: barContext.voice,
                                              barNumber: barContext.barNumber,
                                              clusterCount: barContext.clusterCount,
-                                             timeSignature: flow.timeSignature)
+                                             timeSignature: flow.timeSignature,
+                                             timeSignatureChanged: true)
                 }
             case let .rest(modeler):
                 flow = try modeler.provideContext(head: flow, body: ())
@@ -373,7 +374,8 @@ private final class BarModeler: Modeler {
                 let clusterBody = Cluster.Context(bar: barContext,
                                                   clusterNumber: number,
                                                   noteLength: flow.noteLength,
-                                                  tempo: flow.tempo)
+                                                  tempo: flow.tempo,
+                                                  tempoChanged: flow.tempo != head.tempo)
 
                 // last cluster on a line always ends a variation
                 if clusterBody.isFinalClusterOfVoice && flow.variation.isEndable {

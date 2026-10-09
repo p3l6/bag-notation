@@ -52,9 +52,6 @@ public class AbcWriter {
 
 extension Tune: AbcSourceConverting {
     fileprivate func abcSource(ctx: AbcActiveContext) -> String {
-        ctx.currentTempo = header.tempo
-        ctx.currentTimeSignature = header.timeSignature
-
         var abc = header.abcSource(ctx: ctx) + "\n"
         abc += lines.mapToAbc(joined: "\n", ctx: ctx)
         return abc
@@ -154,9 +151,8 @@ extension Voice: AbcSourceConverting {
 extension Bar: AbcSourceConverting {
     fileprivate func abcSource(ctx: AbcActiveContext) -> String {
         var abc = ""
-        if context.timeSignature != ctx.currentTimeSignature {
+        if context.timeSignatureChanged {
             abc += "[M:\(context.timeSignature.abcSource(ctx: ctx))]"
-            ctx.currentTimeSignature = context.timeSignature
         }
 
         abc += contents.map { element in
@@ -209,7 +205,7 @@ extension Cluster: AbcSourceConverting {
             }
         }
 
-        if let tempo = context.tempo, tempo != ctx.currentTempo {
+        if let tempo = context.tempo, context.tempoChanged {
             abc += "[Q:\(context.bar.timeSignature.beatLength.representedNote())=\(tempo)]"
         }
 
@@ -332,8 +328,6 @@ private protocol AbcSourceConverting {
 }
 
 private class AbcActiveContext {
-    var currentTimeSignature: TimeSignature!
-    var currentTempo: Int?
     var currentVoiceCount = 0
 }
 
