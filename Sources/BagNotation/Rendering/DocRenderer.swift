@@ -45,7 +45,7 @@ final class DocRenderer: BaseRenderable, Renderable<Doc> {
 
             let tuneBounding = BoundingBox(page: currentPage,
                                            left: Layout.pageMargin,
-                                           bottom: pageSafeArea.height - pageAdvance - tuneHeight,
+                                           bottom: Layout.pageMargin + pageSafeArea.height - pageAdvance - tuneHeight,
                                            width: pageSafeArea.width,
                                            height: tuneHeight)
 
@@ -68,7 +68,7 @@ final class PageFooter: Renderable<Doc> {
         let box = BoundingBox(page: page,
                               left: Layout.pageMargin,
                               bottom: Layout.pageMargin / 2,
-                              width: pageSize.width / 2,
+                              width: pageSize.width - Layout.pageMargin * 2,
                               height: 10)
         self.init(inside: box, rendering: doc)
     }
@@ -80,7 +80,9 @@ final class PageFooter: Renderable<Doc> {
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
         guard let rev = doc.revision else { return }
+        // :TODO: collect this font size and header fonts into Layout
         graphics.drawText("(rev: \(rev))", at: box.origin, fontSize: 8)
+        graphics.drawText("[p \(box.page + 1)]", at: box.bottomRight, fontSize: 8, justify: .right)
     }
 
     func directChildren() throws -> [any Renderable] { [] }
