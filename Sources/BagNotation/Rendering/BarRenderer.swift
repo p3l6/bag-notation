@@ -64,6 +64,7 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
 }
 
 extension Bar: Sizable {
+    var kernableLeader: CGFloat? { nil }
     var height: Length { .full }
     var width: Length {
         var width: Length = context.timeSignatureChanged ? context.timeSignature.width : .zero
@@ -90,8 +91,8 @@ private enum Rest: Sizable {
     case bar
     case emptyBar
 
+    var kernableLeader: CGFloat? { nil }
     var height: Length { .full }
-
     var width: Length {
         var advance = symbolAdvance
         if case let .duration(duration) = self, duration.isDotted {
@@ -214,6 +215,7 @@ final class BarlineRenderer: BaseRenderable, Renderable<Barline> {
 }
 
 extension Barline: Sizable {
+    var kernableLeader: CGFloat? { nil }
     var height: Length { .full }
     var width: Length {
         switch self {

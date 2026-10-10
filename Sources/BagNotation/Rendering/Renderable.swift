@@ -60,21 +60,29 @@ class BaseRenderable {
         case vertical
     }
 
-    func stretch(_ direction: LayoutDirection, _ inputs: [Sizable], in available: CGFloat, spacing: CGFloat? = nil) throws -> [CGFloat] {
-        let itemSpacing = spacing ?? 0
+    func stretch(_ direction: LayoutDirection, _ inputs: [Sizable], in available: CGFloat, spacing: CGFloat? = nil) throws -> [(spaceBefore: CGFloat, size: CGFloat)] {
+        var spaceBefore = inputs.map { item in
+            guard let spacing else { return 0.0 }
+            guard let kern = item.kernableLeader else { return spacing }
+            return max(0, spacing - kern)
+        }
+        if !spaceBefore.isEmpty {
+            spaceBefore[0] = 0
+        }
+
         let sizes = inputs.map(direction == .horizontal ? \.width : \.height)
 
         // Sum of all the individual parts
         var totalSize: CGFloat = 0
         var stretchableCount = 0
-        for size in sizes {
+        for (space, size) in zip(spaceBefore, sizes) {
             switch size {
             case .zero:
-                totalSize += itemSpacing
+                totalSize += space
             case let .exact(value):
-                totalSize += value + itemSpacing
+                totalSize += value + space
             case let .atLeast(value):
-                totalSize += value + itemSpacing
+                totalSize += value + space
                 stretchableCount += 1
             case .full:
                 throw PdfError.insufficientSpace
@@ -93,20 +101,20 @@ class BaseRenderable {
         let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
 
         // calculate a stretched size for each box
-        return try inputs.map { item in
+        return try zip(spaceBefore, inputs).map { space, item in
             switch direction == .horizontal ? item.width : item.height {
-            case .zero: 0.0
-            case let .exact(value): value
-            case let .atLeast(value): value + stretch
+            case .zero: (space, 0.0)
+            case let .exact(value): (space, value)
+            case let .atLeast(value): (space, value + stretch)
             case .full:
                 throw PdfError.insufficientSpace
             }
         }
     }
 
-    private func layoutSizes(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [CGFloat] {
+    private func layoutSizes(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [(spaceBefore: CGFloat, size: CGFloat)] {
         if let predefinedLayoutSizes {
-            return predefinedLayoutSizes
+            return predefinedLayoutSizes.map { (0, $0) }
         }
         let available = (direction == .horizontal ? box.width : box.height) - reservedLeading - reservedTrailing
         return try stretch(direction, inputs, in: available, spacing: spacing)
@@ -114,23 +122,17 @@ class BaseRenderable {
 
     func layout(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [LayoutResult] {
         let itemCount = inputs.count
-        let sizes = try layoutSizes(direction, inputs)
-        guard itemCount > 0 && itemCount == sizes.count && sizes.allSatisfy({ $0 >= 0 }) else {
+        let spaceAndSizes = try layoutSizes(direction, inputs, spacing: spacing)
+        guard itemCount > 0 && itemCount == spaceAndSizes.count && spaceAndSizes.allSatisfy({ $0.size >= 0 }) else {
             throw PdfError.invalidLayoutParameters
-        }
-
-        // make sure they fit, or error
-        let itemSpacing = spacing ?? 0
-        let totalSize = itemSpacing * CGFloat(itemCount - 1) + sizes.reduce(0, +)
-        let available = (direction == .horizontal ? box.width : box.height) - reservedLeading - reservedTrailing
-        // :TODO: remove this accomidation for floating point precision
-        guard totalSize <= available * 1.001 else {
-            throw PdfError.insufficientSpace
         }
 
         // create Render objects with bounding boxes
         var advance = reservedLeading
-        return zip(inputs, sizes).map { item, actual in
+        return zip(inputs, spaceAndSizes).map { item, spaceAndSizes in
+            let (spaceBefore, actual) = spaceAndSizes
+            advance += spaceBefore
+
             let layoutBox = if direction == .horizontal {
                 BoundingBox(page: box.page,
                             left: box.left + advance,
@@ -145,7 +147,6 @@ class BaseRenderable {
                             height: actual)
             }
             advance += actual
-            advance += itemSpacing
             return LayoutResult(sizable: item, box: layoutBox)
         }
     }
@@ -225,6 +226,8 @@ extension [Length] {
 }
 
 protocol Sizable {
+    /// The amount of space which may be ommited from the spacing between this and the previous item, if any spacing is present.
+    var kernableLeader: CGFloat? { get }
     // :TODO: Should cache these somehow
     // :TODO: one of these should always be .full. Enforce that?
     var height: Length { get }

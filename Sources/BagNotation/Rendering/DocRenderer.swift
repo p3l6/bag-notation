@@ -88,6 +88,7 @@ final class PageFooter: Renderable<Doc> {
 }
 
 extension Doc: Sizable {
+    var kernableLeader: CGFloat? { nil }
     var width: Length { .full }
     var height: Length { .full }
 }

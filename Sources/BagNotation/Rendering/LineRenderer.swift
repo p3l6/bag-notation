@@ -67,13 +67,13 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
         if let leadingBarline = line.melody.leadingBarline {
             sizeables.insert(leadingBarline, at: 0)
         }
-        return try stretch(.horizontal, sizeables, in: availableWidth)
+        return try stretch(.horizontal, sizeables, in: availableWidth).map(\.size)
     }
 }
 
 extension Line: Sizable {
+    var kernableLeader: CGFloat? { voices.first?.kernableLeader }
     var width: Length { .full }
-
     var height: Length {
         voices.map(\.height).sum
             + .exact(Layout.staffJoinedSeparation * CGFloat(voices.count - 1))

@@ -155,10 +155,10 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
 }
 
 extension Voice: Sizable {
+    var kernableLeader: CGFloat? { hasAnyVariations ? Layout.variationBracketHeight : nil }
     var width: Length { .full }
     var height: Length {
         .exact(Layout.staffLineSpacing * 7) +
-            // :TODO: somehow kern this into the staff separation buffer
             (hasAnyVariations ? .exact(Layout.variationBracketHeight) : .zero)
     }
 
@@ -262,6 +262,7 @@ final class TimeSignatureRenderer: BaseRenderable, Renderable<TimeSignature> {
 }
 
 extension TimeSignature: Sizable {
+    var kernableLeader: CGFloat? { nil }
     var height: Length { .full }
     var width: Length {
         .exact(self == .time128 ? 2 * Layout.Advance.timeSig : Layout.Advance.timeSig)

@@ -47,6 +47,7 @@ final class ClusterRenderer: BaseRenderable, Renderable<Cluster> {
 }
 
 extension Cluster: Sizable {
+    var kernableLeader: CGFloat? { nil }
     var height: Length { .full }
     var width: Length {
         notes.map(\.width).sum

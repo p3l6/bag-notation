@@ -116,6 +116,7 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
 }
 
 extension Note: Sizable {
+    var kernableLeader: CGFloat? { nil }
     var height: Length { .full }
     var width: Length {
         var min = Layout.Advance.noteHead

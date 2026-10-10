@@ -68,6 +68,7 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
 }
 
 extension Tune: Sizable {
+    var kernableLeader: CGFloat? { nil }
     var width: Length { .full }
     var height: Length {
         .exact(Layout.tuneHeaderHeight)

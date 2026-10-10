@@ -64,6 +64,7 @@ final class EmbellishmentRenderer: BaseRenderable, Renderable<Embellishment> {
 }
 
 extension Embellishment: Sizable {
+    var kernableLeader: CGFloat? { nil }
     var height: Length { .full }
     var width: Length {
         .exact(CGFloat(pitches.count) * Layout.Advance.gracenoteHead
