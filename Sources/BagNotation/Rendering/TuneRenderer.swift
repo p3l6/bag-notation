@@ -20,9 +20,9 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
         let titleY = Layout.titleFontSize
         let infoY = titleY + Layout.infoFontSize
         let detailY = infoY + Layout.detailFontSize + 3
-        
+
         graphics.drawText(tune.header.title, at: box.insetFromTop(x: box.width / 2, y: titleY), fontSize: Layout.titleFontSize, kind: .italic, justify: .center)
-        
+
         graphics.drawText(tune.header.composer, at: box.insetFromTopRight(y: infoY), fontSize: Layout.infoFontSize, justify: .right)
         graphics.drawText(styleText, at: box.insetFromTop(y: infoY), fontSize: Layout.infoFontSize)
 

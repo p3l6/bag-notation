@@ -12,6 +12,7 @@ Types of changes: New, Improved, Fixed, Removed.
 - (In progress): Native rendering (macos only)
 - New: Added `--legacy` flag to the `pdf` command, to fall back to abmc2ps->ps2pdf rendering pipeline 
 - Deprecated: Spacers are not considered in new renderer, and are deprecated. Instead, for full bar spacers, bars may be left blank `|      |`
+- Deprecated: Dense mode is not considered in the new renderer, and is deprecated.
 
 ## [1.0.1] - 17 Apr 2026
 
