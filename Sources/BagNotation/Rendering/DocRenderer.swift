@@ -35,7 +35,7 @@ final class DocRenderer: BaseRenderable, Renderable<Doc> {
             let tuneHeight = tune.height.advance
             let pageAvailable = pageSafeArea.height - pageAdvance
 
-            if tuneHeight > pageAvailable {
+            if tuneHeight > pageAvailable || tune.header.forceNewPage {
                 currentPage += 1
                 pageAdvance = 0
 
