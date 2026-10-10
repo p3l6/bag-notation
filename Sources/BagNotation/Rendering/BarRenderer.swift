@@ -27,10 +27,19 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
             switch item {
             case let .cluster(cluster):
                 sizables.append(cluster)
+            case let .rest(duration):
+                sizables.append(Rest.duration(duration))
+            case .barRest:
+                sizables.append(Rest.bar)
             default:
                 continue
             }
         }
+
+        if bar.contents.isEmpty {
+            sizables.append(Rest.emptyBar)
+        }
+
         sizables.append(bar.trailingBarline)
 
         var renderables = [any Renderable]()
@@ -44,6 +53,8 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
                 renderables.append(barlineRenderer)
             case let cluster as Cluster:
                 renderables.append(ClusterRenderer(inside: layoutItem.box, rendering: cluster))
+            case let rest as Rest:
+                renderables.append(RestRenderer(inside: layoutItem.box, rendering: rest))
             default: throw PdfError.unexpectedSizable
             }
         }
@@ -60,20 +71,86 @@ extension Bar: Sizable {
             switch item {
             case let .cluster(cluster):
                 width += cluster.notes.map(\.width)
-//            case .rest(let duration):
-//                fallthrough
-//            case .barRest:
-//                fallthrough
-//            case .spacer(let duration):
-//                fallthrough
-//            case .barSpacer:
-//                fallthrough
+            case let .rest(duration):
+                width += Rest.duration(duration).width
+            case .barRest:
+                width += Rest.bar.width
             default: break
             }
         }
         width += trailingBarline.width
-        return isPickup ? .exact(width.advance) + .exact(Layout.baseScale) : width
+        return isPickup ? .exact(width.advance) + .exact(Layout.baseScale) : .atLeast(width.advance)
     }
+}
+
+// MARK: Rest
+
+private enum Rest: Sizable {
+    case duration(Duration)
+    case bar
+    case emptyBar
+
+    var height: Length { .full }
+
+    var width: Length {
+        var advance = symbolAdvance
+        if case let .duration(duration) = self, duration.isDotted {
+            advance += Layout.noteDotSeparation + Layout.Advance.noteDot
+        }
+        return .atLeast(advance)
+    }
+
+    var symbol: BravuraSymbol? {
+        switch self {
+        case .bar: .restHBar
+        case .emptyBar: nil
+        case .duration(.whole), .duration(.wholeDotted): .restWhole
+        case .duration(.half), .duration(.halfDotted): .restHalf
+        case .duration(.quarter), .duration(.quarterDotted): .restQuarter
+        case .duration(.eighth), .duration(.eighthDotted): .restEighth
+        case .duration(.sixteenth), .duration(.sixteenthDotted): .rest16th
+        case .duration(.thirtysecond), .duration(.thirtysecondDotted): .rest32nd
+        case .duration(.sixtyfourth), .duration(.sixtyfourthDotted): .rest64th
+        }
+    }
+
+    var symbolAdvance: CGFloat {
+        switch self {
+        case .bar, .emptyBar: Layout.Advance.restHBar
+        case .duration(.whole), .duration(.wholeDotted): Layout.Advance.restWhole
+        case .duration(.half), .duration(.halfDotted): Layout.Advance.restHalf
+        case .duration(.quarter), .duration(.quarterDotted): Layout.Advance.restQuarter
+        case .duration(.eighth), .duration(.eighthDotted): Layout.Advance.restEighth
+        case .duration(.sixteenth), .duration(.sixteenthDotted): Layout.Advance.rest16th
+        case .duration(.thirtysecond), .duration(.thirtysecondDotted): Layout.Advance.rest32nd
+        case .duration(.sixtyfourth), .duration(.sixtyfourthDotted): Layout.Advance.rest64th
+        }
+    }
+}
+
+private final class RestRenderer: BaseRenderable, Renderable<Rest> {
+    let rest: Rest
+
+    init(inside box: BoundingBox, rendering rest: Rest) {
+        self.rest = rest
+        super.init(inside: box)
+    }
+
+    func render(in graphics: RenderCanvas, with _: AnchorSet) {
+        let x = (box.width - rest.width.advance) / 2
+        let y = 4 * Layout.noteStep
+        if let symbol = rest.symbol {
+            graphics.drawSymbol(symbol, at: box.inset(x: x, y: y))
+        }
+
+        if case let .duration(duration) = rest, duration.isDotted {
+            graphics.drawSymbol(.dotted, at: box.inset(
+                x: x + rest.symbolAdvance + Layout.noteDotSeparation,
+                y: y))
+        }
+    }
+
+    func directChildren() throws -> [any Renderable] { [] }
 }
 
 // MARK: Barline

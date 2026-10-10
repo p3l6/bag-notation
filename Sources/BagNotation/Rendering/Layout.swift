@@ -76,6 +76,14 @@ enum Layout {
         static let accidentalFlat = 0.904 * baseScale
         static let accidentalSharp = 0.996 * baseScale
         static let accidentalNatural = 0.672 * baseScale
+        static let restWhole = 1.132 * baseScale
+        static let restHalf = 1.132 * baseScale
+        static let restQuarter = 1.08 * baseScale
+        static let restEighth = 1.0 * baseScale
+        static let rest16th = 1.28 * baseScale
+        static let rest32nd = 1.452 * baseScale
+        static let rest64th = 1.696 * baseScale
+        static let restHBar = 3.136 * baseScale
     }
 }
 
@@ -105,6 +113,14 @@ enum BravuraSymbol: String {
     case accidentalNat = "\u{E261}"
     case accidentalFlat = "\u{E260}"
     case accidentalSharp = "\u{E262}"
+    case restWhole = "\u{E4E3}"
+    case restHalf = "\u{E4E4}"
+    case restQuarter = "\u{E4E5}"
+    case restEighth = "\u{E4E6}"
+    case rest16th = "\u{E4E7}"
+    case rest32nd = "\u{E4E8}"
+    case rest64th = "\u{E4E9}"
+    case restHBar = "\u{E4EE}"
 
     // More: https://smufl.formats.music/latest/tables/staff-brackets-and-dividers.html
 }

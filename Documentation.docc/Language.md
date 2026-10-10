@@ -145,6 +145,7 @@ All possible field labels are listed here. Most require values, unless stated.
     * The value may be ommitted, in which case the base note lengh is used
     * The value may also be `bar`. This would create a whole bar rest, ie `| (rest: bar) |`. _Note:_ do not put other notes in the bar, this is undefined. 
 * `spacer`: Similar to `rest`, but doesn't print the rest symbol
+    * **Note:** Spacers are deprecated, and only affect the legacy render pipeline!
     * Takes the same values as `rest`
     * Useful for filling out underful harmony bars, to line up the barlines. (Note: this is really a technical limitation in the underlying abc renderer, hopefully to be fixed someday)
 * `sharp`: Marks the next note as a sharp accidental
@@ -181,7 +182,8 @@ trad
 Each line starts with an optional field, an optional leading barline, then followed by as many bars as needed.
 Every line should have at least one bar (unless it's completely blank), that means, inline fields cannot be on a line by themselves (even if followed by a barline, as that would be the leading barline).
 
-Each bar consists of a series of note clusters or fields, and ends with a barline. A bar must contain at least one of these items.
+Each bar consists of a series of note clusters or fields, and ends with a barline. 
+A bar may be empty, but this is an error in the legacy renderer.
 Whitespace is required between the final cluster in a bar and the barline; and between any cluster and a field parentheses.
 
 Canonical barlines are `|` or `||` or `:|` or `|:`. The beginning and end of parts should use the double barline.
