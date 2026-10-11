@@ -33,7 +33,7 @@ final class DocRenderer: BaseRenderable, Renderable<Doc> {
 
         for tune in tunes {
             let tuneHeight = tune.height.advance
-            let pageAvailable = pageSafeArea.height - pageAdvance
+            let pageAvailable = pageSafeArea.height - Layout.pageFooterHeight - pageAdvance
 
             if tuneHeight > pageAvailable || tune.header.forceNewPage {
                 currentPage += 1
@@ -67,9 +67,9 @@ final class PageFooter: Renderable<Doc> {
     convenience init(page: Int, pageSize: CGSize, doc: Doc) {
         let box = BoundingBox(page: page,
                               left: Layout.pageMargin,
-                              bottom: Layout.pageMargin / 2,
+                              bottom: Layout.pageMargin,
                               width: pageSize.width - Layout.pageMargin * 2,
-                              height: 10)
+                              height: Layout.pageFooterHeight)
         self.init(inside: box, rendering: doc)
     }
 

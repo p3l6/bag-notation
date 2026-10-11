@@ -17,8 +17,9 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
     }
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
+        graphics.debugOutline(box: box)
         let titleY = Layout.titleFontSize
-        let infoY = titleY + Layout.infoFontSize
+        let infoY = titleY + Layout.infoFontSize / 2
         let detailY = infoY + Layout.detailFontSize + 3
 
         graphics.drawText(tune.header.title, at: box.insetFromTop(x: box.width / 2, y: titleY), fontSize: Layout.titleFontSize, kind: .italic, justify: .center)

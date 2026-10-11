@@ -15,11 +15,12 @@ enum Layout {
 
     // Other explicit constants
 
-    static let tuneSeparation: CGFloat = 10
+    static let tuneSeparation: CGFloat = 15
     static let staffSeparation: CGFloat = 20
     static let staffJoinedSeparation: CGFloat = 12
     static let pageMargin: CGFloat = 20
-    static let tuneHeaderHeight: CGFloat = 50
+    static let pageFooterHeight: CGFloat = 10
+    static let tuneHeaderHeight: CGFloat = 42
     static let titleFontSize: CGFloat = 20
     static let infoFontSize: CGFloat = 10
     static let detailFontSize: CGFloat = 9
