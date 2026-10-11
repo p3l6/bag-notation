@@ -31,6 +31,8 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
                 sizables.append(Rest.duration(duration))
             case .barRest:
                 sizables.append(Rest.bar)
+            case .barSpacer:
+                sizables.append(Rest.emptyBar)
             default:
                 continue
             }
@@ -71,7 +73,7 @@ extension Bar: Sizable {
         for item in contents {
             switch item {
             case let .cluster(cluster):
-                width += cluster.notes.map(\.width)
+                width += cluster.width
             case let .rest(duration):
                 width += Rest.duration(duration).width
             case .barRest:

@@ -60,12 +60,15 @@ final class LineRenderer: BaseRenderable, Renderable<Line> {
         var maxBarPerGroup = [Bar]()
         for barIndex in line.melody.bars.indices {
             let bars = line.voices.map { $0.bars[barIndex] }
-            maxBarPerGroup.append(bars.max(by: ({ $0.width.advance > $1.width.advance }))!)
+            maxBarPerGroup.append(bars.max(by: ({ $0.width.advance < $1.width.advance }))!)
         }
 
         var sizeables: [any Sizable] = maxBarPerGroup
         if let leadingBarline = line.melody.leadingBarline {
             sizeables.insert(leadingBarline, at: 0)
+        }
+        if let firstBar = line.melody.bars.first, firstBar.context.isFirstBarOfTune {
+            sizeables.insert(firstBar.context.timeSignature, at: 0)
         }
         return try stretch(.horizontal, sizeables, in: availableWidth).map(\.size)
     }
