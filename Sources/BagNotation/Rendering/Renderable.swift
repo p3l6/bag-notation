@@ -65,8 +65,8 @@ extension Renderable {
 
         // create bounding boxes for inputs
         var advance = input.reserved.leading
-        return zip(inputs, spaceAndSizes).map { item, spaceAndSizes in
-            let (spaceBefore, actual) = spaceAndSizes
+        return zip(inputs, spaceAndSizes).map { item, spaceAndSize in
+            let (spaceBefore, actual) = spaceAndSize
             advance += spaceBefore
 
             let layoutBox = if input.childDirection == .horizontal {
@@ -85,6 +85,47 @@ extension Renderable {
             advance += actual
             return LayoutResult(sizable: item, box: layoutBox)
         }
+    }
+
+    /// Lays vertical children out across a sequence of page regions.
+    /// Each child remains whole, and inter-child spacing is omitted at a page break.
+    func layout(_ input: Sizable, in boxes: [BoundingBox]) throws -> [LayoutResult] {
+        guard input.childDirection == .vertical, !boxes.isEmpty else {
+            throw PdfError.invalidLayoutParameters
+        }
+
+        let inputs = input.childSizables
+        guard !inputs.isEmpty else { return [] }
+
+        let spaceAndSizes = try input.stretchChildren(in: input.totalChildSize.advance)
+        var boxIndex = 0
+        var advance = input.reserved.leading
+        var results = [LayoutResult]()
+
+        for (item, spaceAndSize) in zip(inputs, spaceAndSizes) {
+            let (spaceBefore, actual) = spaceAndSize
+            var spacing = spaceBefore
+            if advance + spacing + actual > boxes[boxIndex].height {
+                boxIndex += 1
+                guard boxIndex < boxes.count else { throw PdfError.insufficientSpace }
+                advance = 0
+                spacing = 0
+            }
+
+            let currentBox = boxes[boxIndex]
+            guard actual <= currentBox.height else { throw PdfError.insufficientSpace }
+
+            advance += spacing
+            let childBox = BoundingBox(page: currentBox.page,
+                                       left: currentBox.left,
+                                       bottom: currentBox.top - advance - actual,
+                                       width: currentBox.width,
+                                       height: actual)
+            advance += actual
+            results.append(LayoutResult(sizable: item, box: childBox))
+        }
+
+        return results
     }
 }
 
@@ -183,7 +224,7 @@ protocol Sizable {
 }
 
 extension Sizable {
-    fileprivate func kern(into spacing: CGFloat) -> CGFloat {
+    func kern(into spacing: CGFloat) -> CGFloat {
         guard let kern = kernableLeader else { return spacing }
         return max(0, spacing - kern)
     }
