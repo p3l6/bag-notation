@@ -9,8 +9,6 @@ import CoreGraphics
 
 // :TODO: Should this be configurable? instead of global? via settings, based on page size, etc?
 enum Layout {
-    // :TODO: Eventual target around 4 to match previous methods
-    // Then of course staff separation will play a big part too
     static let baseScale: CGFloat = 4
 
     // Other explicit constants

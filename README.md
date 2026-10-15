@@ -9,9 +9,12 @@ Install via homebrew:
 ```
 brew install p3l6/tap/bag-notation
 ```
-This will also install dependencies required for pdf generation: 
+This will also install dependencies required for pdf generation (on linux): 
 - `abcm2ps`, of a fork with a [few custom changes](https://github.com/p3l6/abcm2ps)
 - `ghostscript`, for the ps2pdf tool
+
+Note: These dependencies are not needed on macos, unless explicitly rendering with the `--legacy` flag.
+In this case, the dependencies must be installed manually.
 
 ## Running
 

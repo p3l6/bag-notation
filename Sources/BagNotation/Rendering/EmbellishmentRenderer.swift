@@ -66,8 +66,12 @@ extension Embellishment: Sizable {
     var size: Length {
         .exact(CGFloat(pitches.count) * Layout.Advance.gracenoteHead
             + CGFloat(pitches.count - 1) * Layout.gracenoteSeparation
-            // :TODO: singlings that are lower than note need more padding
-            + Layout.noteGracenoteSeparation)
+            + paddingBefore)
+    }
+
+    var paddingBefore: CGFloat {
+        guard let lastGrace = pitches.last else { return 0.0 }
+        return lastGrace < playedOn ? 2 * Layout.noteGracenoteSeparation : Layout.noteGracenoteSeparation
     }
 }
 
