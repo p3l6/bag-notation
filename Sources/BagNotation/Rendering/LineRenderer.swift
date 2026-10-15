@@ -15,6 +15,7 @@ struct LineRenderer: Renderable {
         guard line.voices.count > 1 else { return }
         // :TODO: Consider drawing U+E004 and U+E003 to make a bracket in addition / instead
         graphics.drawLineVert(from: CGPoint(x: box.left + Layout.barlineLineWidth / 2, y: box.bottom),
+                              // :TODO: If the first voice has a variation, this is too high
                               length: box.height - Layout.staffLineSpacing * 3,
                               width: Layout.barlineLineWidth)
     }

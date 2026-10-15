@@ -25,6 +25,7 @@ struct NoteRenderer: Renderable {
         self.flag = flag
         embellishmentAdvance = note.embellishment?.size.advance ?? 0
         accidentalAdvance = note.accidental?.width ?? 0
+        // :TODO: Avoid centering when a bar has only a single note. 
         centerJustifyAdvance = (box.width - note.size.advance) / 2
         stemX = box.left + centerJustifyAdvance + embellishmentAdvance + accidentalAdvance
 
@@ -101,6 +102,7 @@ struct NoteRenderer: Renderable {
 
         // Annotation
         if let annotation = note.annotation {
+            // :TODO: Consider variation space, should be inline or under, non on top
             graphics.drawText(annotation,
                               at: box.insetFromTop(x: embellishmentAdvance + centerJustifyAdvance + accidentalAdvance,
                                                    y: -Layout.annotationFontSize / 2),

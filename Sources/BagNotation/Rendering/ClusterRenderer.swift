@@ -130,9 +130,12 @@ private struct Beam {
     let stemExtensions: [StemExtension]
     let slope: Slope
 
+    // :TODO: Beams can overlap with embellishments, ie `hvh.e/`
+
     init(notes: [Note], anchors anchorSet: AnchorSet) throws {
         let anchors = try notes.map { try anchorSet.anchors(for: $0) }
         if anchors.count > 1 {
+            // :TODO: Have a maximum slope. going from a to high a is pretty steep
             let m = (anchors.last!.stemBottom - anchors.first!.stemBottom) /
                 (anchors.last!.stemX - anchors.first!.stemX)
             let intercepts = anchors.map { $0.stemBottom - $0.stemX * m }

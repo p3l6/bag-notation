@@ -64,7 +64,7 @@ extension Bar: Sizable {
         return sizables
     }
 
-    var size: Length { isPickup ? .exact(totalChildSize.advance) + .exact(Layout.baseScale) : totalChildSize }
+    var size: Length { isPickup ? .exact(totalChildSize.advance) + .exact(2 * Layout.baseScale) : totalChildSize }
 }
 
 // MARK: Rest

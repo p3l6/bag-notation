@@ -44,13 +44,16 @@ struct VoiceRenderer: Renderable {
                 }
             }
 
-            if let x = anchor.endX, let horizStart {
+            if let x = anchor.endX {
                 graphics.drawLineVert(from: CGPoint(x: x, y: y),
                                       length: -Layout.variationBracketHeight,
                                       width: Layout.variationBracketLineWidth)
-                graphics.drawLineHoriz(from: CGPoint(x: horizStart, y: y),
-                                       length: x - horizStart,
-                                       width: Layout.variationBracketLineWidth)
+                if anchor.breakHorizLine, let start = horizStart {
+                    graphics.drawLineHoriz(from: CGPoint(x: start, y: y),
+                                           length: x - start,
+                                           width: Layout.variationBracketLineWidth)
+                    horizStart = nil
+                }
             }
         }
 
@@ -121,6 +124,14 @@ struct VoiceRenderer: Renderable {
                     connections.append(Swoop(ending, wrappedFrom: box.left + voice.reserved.leading, to: anchors))
                 }
                 openConnection = (starting, anchors)
+            case .ongoing(.tie):
+                // Ties should not span multiple notes, but have a swoop for each pair
+                if let openConnection {
+                    connections.append(Swoop(.tie, from: openConnection.start, to: anchors))
+                } else {
+                    connections.append(Swoop(.tie, wrappedFrom: box.left + voice.reserved.leading, to: anchors))
+                }
+                openConnection = (.tie, anchors)
             default:
                 break
             }
@@ -161,6 +172,12 @@ extension Voice: Sizable {
             .contains { !$0.variation.isContinuation }
     }
 }
+
+// :TODO: The legacy pipeline only places variation on the first voice
+// It looks better, but has challenges.
+// - Language: update so only requried/considered on melody. Or error if inconsistent?
+// - Align all beats between voices **Important**
+// - render variations based on melody at the line level
 
 struct VariationAnchor {
     let label: String?

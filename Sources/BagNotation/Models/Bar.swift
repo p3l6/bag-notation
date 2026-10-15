@@ -43,6 +43,7 @@ public struct Bar {
 
     var isPickup: Bool {
         // TODO: improve logic when contents is only rests
+        // TODO: instead of counting clusters, count total duration (ie half notes)
         context.barNumber == 1 && contents.count < context.timeSignature.beatsPerBar
     }
 }

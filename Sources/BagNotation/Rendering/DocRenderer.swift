@@ -100,9 +100,9 @@ struct PageFooter: Renderable {
     }
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
+        graphics.drawText("[p \(box.page + 1)]", at: box.bottomRight, fontSize: Layout.footerFontSize, justify: .right)
         guard let rev = doc.revision else { return }
         graphics.drawText("(rev: \(rev))", at: box.origin, fontSize: Layout.footerFontSize)
-        graphics.drawText("[p \(box.page + 1)]", at: box.bottomRight, fontSize: Layout.footerFontSize, justify: .right)
     }
 
     func directChildren() throws -> [any Renderable] { [] }
