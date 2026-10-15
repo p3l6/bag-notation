@@ -25,7 +25,7 @@ struct NoteRenderer: Renderable {
         self.flag = flag
         embellishmentAdvance = note.embellishment?.size.advance ?? 0
         accidentalAdvance = note.accidental?.width ?? 0
-        // :TODO: Avoid centering when a bar has only a single note. 
+        // :TODO: Avoid centering when a bar has only a single note.
         centerJustifyAdvance = (box.width - note.size.advance) / 2
         stemX = box.left + centerJustifyAdvance + embellishmentAdvance + accidentalAdvance
 

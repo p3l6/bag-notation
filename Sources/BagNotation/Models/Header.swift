@@ -19,7 +19,7 @@ public struct Header {
     let denseSpacing: Bool
 }
 
-public enum TuneStyle {
+public enum TuneStyle: Equatable {
     case march(timeSig: TimeSignature?)
 
     case strathspey

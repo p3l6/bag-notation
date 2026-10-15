@@ -41,10 +41,68 @@ public struct Bar {
         self.trailingBarline = trailingBarline == .double && context.barNumber == context.voice.barCount ? .partEnd : trailingBarline
     }
 
+    /// A bar is a pickup if it is missing at least one full beat
     var isPickup: Bool {
-        // TODO: improve logic when contents is only rests
-        // TODO: instead of counting clusters, count total duration (ie half notes)
-        context.barNumber == 1 && contents.count < context.timeSignature.beatsPerBar
+        // Piob is too flexible with timing, and finds more false positives than correct.
+        guard context.barNumber == 1, context.voice.line.tune.style != .piob else { return false }
+
+        struct TimeAmount {
+            let beatSize: Duration
+            var beats: Int = 0
+            var extra = 0
+
+            private func units(for duration: Duration) -> Int {
+                switch duration {
+                case .sixtyfourth: 2
+                case .sixtyfourthDotted: 3
+                case .thirtysecond: 4
+                case .thirtysecondDotted: 6
+                case .sixteenth: 8
+                case .sixteenthDotted: 12
+                case .eighth: 16
+                case .eighthDotted: 24
+                case .quarter: 32
+                case .quarterDotted: 48
+                case .half: 64
+                case .halfDotted: 96
+                case .whole: 128
+                case .wholeDotted: 192
+                }
+            }
+
+            mutating func add(_ other: TimeAmount) {
+                let beatUnits = units(for: beatSize)
+                let totalUnits = beats * beatUnits
+                    + extra
+                    + other.beats * units(for: other.beatSize)
+                    + other.extra
+
+                beats = totalUnits / beatUnits
+                extra = totalUnits % beatUnits
+            }
+
+            mutating func add(_ duration: Duration) {
+                let beatUnits = units(for: beatSize)
+                let totalUnits = extra + units(for: duration)
+
+                beats += totalUnits / beatUnits
+                extra = totalUnits % beatUnits
+            }
+        }
+
+        var time = TimeAmount(beatSize: context.timeSignature.beatLength)
+
+        for content in contents {
+            switch content {
+            case let .cluster(cluster): cluster.notes.map(\.duration).forEach { time.add($0) }
+            case let .rest(duration): time.add(duration)
+            case .barRest: return false
+            case let .spacer(duration): time.add(duration)
+            case .barSpacer: return false
+            }
+        }
+
+        return time.beats <= context.timeSignature.beatsPerBar - (time.extra == 0 ? 1 : 2)
     }
 }
 

@@ -87,7 +87,7 @@ private final class DocModeler: Modeler {
         var flow = head
 
         for (idx, tm) in tuneModelers.enumerated() {
-            let tuneContext = Tune.Context(tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
+            let tuneContext = Tune.Context(style: tm.header.style, tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
             let headerFlow = FlowContext(timeSignature: tm.header.timeSignature,
                                          noteLength: tm.header.noteLength,
                                          tempo: tm.header.tempo)

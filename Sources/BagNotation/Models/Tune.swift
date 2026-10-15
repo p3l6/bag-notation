@@ -6,6 +6,7 @@
 public struct Tune {
     public struct Context {
         var identifier: String { "t\(tuneNumber)" }
+        let style: TuneStyle
 
         /// First tune is 1
         let tuneNumber: Int
