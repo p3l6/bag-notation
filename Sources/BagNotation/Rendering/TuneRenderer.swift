@@ -7,17 +7,11 @@
 
 import CoreGraphics
 
-final class TuneRenderer: BaseRenderable, Renderable<Tune> {
+struct TuneRenderer: Renderable {
+    let box: BoundingBox
     let tune: Tune
 
-    init(inside box: BoundingBox, rendering tune: Tune) {
-        self.tune = tune
-        super.init(inside: box)
-        reservedLeading = Layout.tuneHeaderHeight
-    }
-
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
-        graphics.debugOutline(box: box)
         let titleY = Layout.titleFontSize
         let infoY = titleY + Layout.infoFontSize / 2
         let detailY = infoY + Layout.detailFontSize + 3
@@ -37,18 +31,13 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
     }
 
     func directChildren() throws -> [any Renderable] {
-        let lines = tune.lines
-
-        var renderables = [LineRenderer]()
-        for layoutItem in try layout(.vertical, lines, spacing: Layout.staffSeparation) {
+        try layout(tune).map { layoutItem in
             switch layoutItem.sizable {
             case let line as Line:
-                renderables.append(LineRenderer(inside: layoutItem.box, rendering: line))
+                return LineRenderer(box: layoutItem.box, line: line)
             default: throw PdfError.unexpectedSizable
             }
         }
-
-        return renderables
     }
 
     fileprivate var styleText: String {
@@ -69,13 +58,12 @@ final class TuneRenderer: BaseRenderable, Renderable<Tune> {
 }
 
 extension Tune: Sizable {
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (Layout.tuneHeaderHeight, .zero) }
     var kernableLeader: CGFloat? { nil }
-    var width: Length { .full }
-    var height: Length {
-        .exact(Layout.tuneHeaderHeight)
-            + lines.map(\.height).sum
-            + .exact(Layout.staffSeparation * CGFloat(lines.count - 1))
-    }
+    var childDirection: LayoutDirection { .vertical }
+    var childSpacing: CGFloat { Layout.staffSeparation }
+    var childSizables: [any Sizable] { lines }
+    var size: Length { .exact(Layout.tuneHeaderHeight) + totalChildSize }
 }
 
 #endif // !os(Linux)

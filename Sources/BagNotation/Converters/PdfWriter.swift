@@ -56,6 +56,7 @@ public enum PdfError: Error {
     case missingAnchor
     case invalidLayoutParameters
     case inconsistentVoiceLayout
+    case singleNoteBeam
 }
 
 #endif // !os(Linux)

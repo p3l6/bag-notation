@@ -7,23 +7,41 @@
 
 import CoreGraphics
 
-final class BarRenderer: BaseRenderable, Renderable<Bar> {
+struct BarRenderer: Renderable {
+    let box: BoundingBox
     let bar: Bar
-    var barlineExtraHeight: CGFloat = 0
-
-    init(inside box: BoundingBox, rendering bar: Bar) {
-        self.bar = bar
-        super.init(inside: box)
-    }
+    let barlineExtraHeight: CGFloat
 
     func render(in _: RenderCanvas, with _: AnchorSet) {}
 
     func directChildren() throws -> [any Renderable] {
-        var sizables = [any Sizable]()
-        if bar.context.timeSignatureChanged {
-            sizables.append(bar.context.timeSignature)
+        try layout(bar).map { layoutItem in
+            switch layoutItem.sizable {
+            case let timeSignature as TimeSignature:
+                TimeSignatureRenderer(box: layoutItem.box, timeSignature: timeSignature)
+            case let barline as Barline:
+                BarlineRenderer(box: layoutItem.box, barline: barline, extraHeight: barlineExtraHeight)
+            case let cluster as Cluster:
+                ClusterRenderer(box: layoutItem.box, cluster: cluster)
+            case let rest as Rest:
+                RestRenderer(box: layoutItem.box, rest: rest)
+            default: throw PdfError.unexpectedSizable
+            }
         }
-        for item in bar.contents {
+    }
+}
+
+extension Bar: Sizable {
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (.zero, .zero) }
+    var kernableLeader: CGFloat? { nil }
+    var childDirection: LayoutDirection { .horizontal }
+    var childSpacing: CGFloat { .zero }
+    var childSizables: [any Sizable] {
+        var sizables = [any Sizable]()
+        if context.timeSignatureChanged {
+            sizables.append(context.timeSignature)
+        }
+        for item in contents {
             switch item {
             case let .cluster(cluster):
                 sizables.append(cluster)
@@ -38,52 +56,15 @@ final class BarRenderer: BaseRenderable, Renderable<Bar> {
             }
         }
 
-        if bar.contents.isEmpty {
+        if contents.isEmpty {
             sizables.append(Rest.emptyBar)
         }
 
-        sizables.append(bar.trailingBarline)
-
-        var renderables = [any Renderable]()
-        for layoutItem in try layout(.horizontal, sizables) {
-            switch layoutItem.sizable {
-            case let timeSignature as TimeSignature:
-                renderables.append(TimeSignatureRenderer(inside: layoutItem.box, rendering: timeSignature))
-            case let barline as Barline:
-                let barlineRenderer = BarlineRenderer(inside: layoutItem.box, rendering: barline)
-                barlineRenderer.extraHeight = barlineExtraHeight
-                renderables.append(barlineRenderer)
-            case let cluster as Cluster:
-                renderables.append(ClusterRenderer(inside: layoutItem.box, rendering: cluster))
-            case let rest as Rest:
-                renderables.append(RestRenderer(inside: layoutItem.box, rendering: rest))
-            default: throw PdfError.unexpectedSizable
-            }
-        }
-
-        return renderables
+        sizables.append(trailingBarline)
+        return sizables
     }
-}
 
-extension Bar: Sizable {
-    var kernableLeader: CGFloat? { nil }
-    var height: Length { .full }
-    var width: Length {
-        var width: Length = context.timeSignatureChanged ? context.timeSignature.width : .zero
-        for item in contents {
-            switch item {
-            case let .cluster(cluster):
-                width += cluster.width
-            case let .rest(duration):
-                width += Rest.duration(duration).width
-            case .barRest:
-                width += Rest.bar.width
-            default: break
-            }
-        }
-        width += trailingBarline.width
-        return isPickup ? .exact(width.advance) + .exact(Layout.baseScale) : .atLeast(width.advance)
-    }
+    var size: Length { isPickup ? .exact(totalChildSize.advance) + .exact(Layout.baseScale) : totalChildSize }
 }
 
 // MARK: Rest
@@ -93,9 +74,12 @@ private enum Rest: Sizable {
     case bar
     case emptyBar
 
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (.zero, .zero) }
     var kernableLeader: CGFloat? { nil }
-    var height: Length { .full }
-    var width: Length {
+    var childDirection: LayoutDirection { .horizontal }
+    var childSpacing: CGFloat { .zero }
+    var childSizables: [any Sizable] { [] }
+    var size: Length {
         var advance = symbolAdvance
         if case let .duration(duration) = self, duration.isDotted {
             advance += Layout.noteDotSeparation + Layout.Advance.noteDot
@@ -131,16 +115,12 @@ private enum Rest: Sizable {
     }
 }
 
-private final class RestRenderer: BaseRenderable, Renderable<Rest> {
+private struct RestRenderer: Renderable {
+    let box: BoundingBox
     let rest: Rest
 
-    init(inside box: BoundingBox, rendering rest: Rest) {
-        self.rest = rest
-        super.init(inside: box)
-    }
-
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
-        let x = (box.width - rest.width.advance) / 2
+        let x = (box.width - rest.size.advance) / 2
         let y = 4 * Layout.noteStep
         if let symbol = rest.symbol {
             graphics.drawSymbol(symbol, at: box.inset(x: x, y: y))
@@ -158,14 +138,10 @@ private final class RestRenderer: BaseRenderable, Renderable<Rest> {
 
 // MARK: Barline
 
-final class BarlineRenderer: BaseRenderable, Renderable<Barline> {
+struct BarlineRenderer: Renderable {
+    let box: BoundingBox
     let barline: Barline
-    var extraHeight: CGFloat = 0
-
-    init(inside box: BoundingBox, rendering barline: Barline) {
-        self.barline = barline
-        super.init(inside: box)
-    }
+    let extraHeight: CGFloat
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
         switch barline {
@@ -217,9 +193,12 @@ final class BarlineRenderer: BaseRenderable, Renderable<Barline> {
 }
 
 extension Barline: Sizable {
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (.zero, .zero) }
     var kernableLeader: CGFloat? { nil }
-    var height: Length { .full }
-    var width: Length {
+    var childDirection: LayoutDirection { .horizontal }
+    var childSpacing: CGFloat { .zero }
+    var childSizables: [any Sizable] { [] }
+    var size: Length {
         switch self {
         case .plain:
             .exact(Layout.barlineLineWidth)

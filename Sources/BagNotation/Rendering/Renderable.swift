@@ -7,9 +7,7 @@
 
 import CoreGraphics
 
-protocol Renderable<S> {
-    associatedtype S: Sizable
-    init(inside box: BoundingBox, rendering: S)
+protocol Renderable {
     var box: BoundingBox { get }
     func render(in graphics: RenderCanvas, with anchors: AnchorSet) throws
     func directChildren() throws -> [any Renderable]
@@ -43,97 +41,35 @@ extension Renderable {
     }
 }
 
-class BaseRenderable {
-    var box: BoundingBox
-    var reservedLeading: CGFloat = 0
-    var reservedTrailing: CGFloat = 0
-    /// Override layout method to provide a final width for each sizable item
+extension Renderable {
+    /// - Parameter overrideSizes: Overrides stretch method to provide a final width for each sizable item
     /// - Note: count must match count of sized items!
-    var predefinedLayoutSizes: [CGFloat]?
+    func layout(_ input: Sizable, overrideSizes: [CGFloat]? = nil) throws -> [LayoutResult] {
+        let inputs = input.childSizables
 
-    init(inside box: BoundingBox) {
-        self.box = box
-    }
-
-    enum LayoutDirection {
-        case horizontal
-        case vertical
-    }
-
-    func stretch(_ direction: LayoutDirection, _ inputs: [Sizable], in available: CGFloat, spacing: CGFloat? = nil) throws -> [(spaceBefore: CGFloat, size: CGFloat)] {
-        var spaceBefore = inputs.map { item in
-            guard let spacing else { return 0.0 }
-            guard let kern = item.kernableLeader else { return spacing }
-            return max(0, spacing - kern)
-        }
-        if !spaceBefore.isEmpty {
-            spaceBefore[0] = 0
-        }
-
-        let sizes = inputs.map(direction == .horizontal ? \.width : \.height)
-
-        // Sum of all the individual parts
-        var totalSize: CGFloat = 0
-        var stretchableCount = 0
-        for (space, size) in zip(spaceBefore, sizes) {
-            switch size {
-            case .zero:
-                totalSize += space
-            case let .exact(value):
-                totalSize += value + space
-            case let .atLeast(value):
-                totalSize += value + space
-                stretchableCount += 1
-            case .full:
-                throw PdfError.insufficientSpace
-            }
-        }
-
-        // make sure they fit, or error
-        let extra = available - totalSize
-        guard extra >= 0 else {
-            // :TODO: Consider alternatives, such as rendering what can be fit.
-            // perhaps configuable, this is only desired on line layouts?
-            throw PdfError.insufficientSpace
-        }
-
-        // strech value per adjustable block if needed
-        let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
-
-        // calculate a stretched size for each box
-        return try zip(spaceBefore, inputs).map { space, item in
-            switch direction == .horizontal ? item.width : item.height {
-            case .zero: (space, 0.0)
-            case let .exact(value): (space, value)
-            case let .atLeast(value): (space, value + stretch)
-            case .full:
-                throw PdfError.insufficientSpace
-            }
-        }
-    }
-
-    private func layoutSizes(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [(spaceBefore: CGFloat, size: CGFloat)] {
-        if let predefinedLayoutSizes {
-            return predefinedLayoutSizes.map { (0, $0) }
-        }
-        let available = (direction == .horizontal ? box.width : box.height) - reservedLeading - reservedTrailing
-        return try stretch(direction, inputs, in: available, spacing: spacing)
-    }
-
-    func layout(_ direction: LayoutDirection, _ inputs: [Sizable], spacing: CGFloat? = nil) throws -> [LayoutResult] {
         let itemCount = inputs.count
-        let spaceAndSizes = try layoutSizes(direction, inputs, spacing: spacing)
+        var spaceAndSizes: [(spaceBefore: CGFloat, size: CGFloat)]!
+        if let overrideSizes {
+            guard itemCount == overrideSizes.count else {
+                throw PdfError.invalidLayoutParameters
+            }
+            spaceAndSizes = overrideSizes.map { (0, $0) }
+        } else {
+            let available = (input.childDirection == .horizontal ? box.width : box.height) - input.reserved.leading - input.reserved.trailing
+            spaceAndSizes = try input.stretchChildren(in: available)
+        }
+
         guard itemCount > 0 && itemCount == spaceAndSizes.count && spaceAndSizes.allSatisfy({ $0.size >= 0 }) else {
             throw PdfError.invalidLayoutParameters
         }
 
-        // create Render objects with bounding boxes
-        var advance = reservedLeading
+        // create bounding boxes for inputs
+        var advance = input.reserved.leading
         return zip(inputs, spaceAndSizes).map { item, spaceAndSizes in
             let (spaceBefore, actual) = spaceAndSizes
             advance += spaceBefore
 
-            let layoutBox = if direction == .horizontal {
+            let layoutBox = if input.childDirection == .horizontal {
                 BoundingBox(page: box.page,
                             left: box.left + advance,
                             bottom: box.bottom,
@@ -221,17 +157,69 @@ enum Length {
 
 extension [Length] {
     var sum: Length {
-        reduce(.exact(0), +)
+        reduce(.zero, +)
     }
 }
 
+enum LayoutDirection {
+    case horizontal
+    case vertical
+}
+
 protocol Sizable {
+    /// Amounts of space that should be excluded from child layout
+    var reserved: (leading: CGFloat, trailing: CGFloat) { get }
     /// The amount of space which may be ommited from the spacing between this and the previous item, if any spacing is present.
     var kernableLeader: CGFloat? { get }
-    // :TODO: Should cache these somehow
-    // :TODO: one of these should always be .full. Enforce that?
-    var height: Length { get }
-    var width: Length { get }
+    /// The size of this item, including all child item requirements
+    var size: Length { get }
+
+    /// Sizables that need to be accounted for when determining this elements total size
+    var childSizables: [Sizable] { get }
+    /// The direction in which child elements will be arranged
+    var childDirection: LayoutDirection { get }
+    /// Spacing for child elements
+    var childSpacing: CGFloat { get }
+}
+
+extension Sizable {
+    fileprivate func kern(into spacing: CGFloat) -> CGFloat {
+        guard let kern = kernableLeader else { return spacing }
+        return max(0, spacing - kern)
+    }
+
+    var totalChildSize: Length {
+        childSizables.enumerated().map { index, child in
+            child.size + (index == 0 ? .zero : .exact(child.kern(into: childSpacing)))
+        }.sum
+    }
+
+    func stretchChildren(in available: CGFloat) throws -> [(spaceBefore: CGFloat, size: CGFloat)] {
+        let stretchableCount = childSizables.count { if case .atLeast = $0.size { true } else { false } }
+
+        // make sure they fit, or error
+        let extra = available - totalChildSize.advance
+        guard extra >= 0 else {
+            // :TODO: Consider alternatives, such as rendering what can be fit.
+            // perhaps configuable, this is only desired on line layouts?
+            throw PdfError.insufficientSpace
+        }
+
+        // strech value per adjustable block if needed
+        let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
+
+        // distribute stretched amount equally into each box
+        return try childSizables.enumerated().map { index, item in
+            let space = index == 0 ? 0 : item.kern(into: childSpacing)
+            return switch item.size {
+            case .zero: (space, 0.0)
+            case let .exact(value): (space, value)
+            case let .atLeast(value): (space, value + stretch)
+            case .full:
+                throw PdfError.insufficientSpace
+            }
+        }
+    }
 }
 
 protocol Anchored {

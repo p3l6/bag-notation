@@ -7,33 +7,34 @@
 
 import CoreGraphics
 
-final class NoteRenderer: BaseRenderable, Renderable<Note> {
+struct NoteRenderer: Renderable {
+    let box: BoundingBox
     let note: Note
-    var drawsFlag = true
+    let flag: Flag
     let centerJustifyAdvance: CGFloat
     let stemX: CGFloat
-    var stemBottom: CGFloat
+    let stemBottom: CGFloat
     let pitchOffset: CGFloat
     let noteheadAdvance: CGFloat
     let embellishmentAdvance: CGFloat
     let accidentalAdvance: CGFloat
 
-    init(inside box: BoundingBox, rendering note: Note) {
+    init(box: BoundingBox, note: Note, flag: Flag) {
         self.note = note
-        embellishmentAdvance = note.embellishment?.width.advance ?? 0
+        self.box = box
+        self.flag = flag
+        embellishmentAdvance = note.embellishment?.size.advance ?? 0
         accidentalAdvance = note.accidental?.width ?? 0
-        centerJustifyAdvance = (box.width - note.width.advance) / 2
+        centerJustifyAdvance = (box.width - note.size.advance) / 2
         stemX = box.left + centerJustifyAdvance + embellishmentAdvance + accidentalAdvance
 
         pitchOffset = note.pitch.yOffset
-        stemBottom = box.bottom + pitchOffset - Layout.noteStemIdealHeight
-        if let chord = note.chord, chord < note.pitch {
-            stemBottom = box.bottom + chord.yOffset - Layout.noteStemIdealHeight
+        stemBottom = if let chord = note.chord, chord < note.pitch {
+            box.bottom + chord.yOffset - Layout.noteStemIdealHeight
+        } else {
+            box.bottom + pitchOffset - Layout.noteStemIdealHeight
         }
-
         noteheadAdvance = note.duration >= .whole ? Layout.Advance.noteHeadWhole : Layout.Advance.noteHead
-
-        super.init(inside: box)
     }
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
@@ -82,8 +83,8 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
                               width: Layout.noteStemLineWidth)
 
             // Flag
-            if drawsFlag, let flag = note.duration.flagSymbol {
-                graphics.drawSymbol(flag, at: stemEnd)
+            if case let .flag(flagSymbol) = flag {
+                graphics.drawSymbol(flagSymbol, at: stemEnd)
             }
         }
 
@@ -110,15 +111,21 @@ final class NoteRenderer: BaseRenderable, Renderable<Note> {
     func directChildren() throws -> [any Renderable] {
         guard let embellishment = note.embellishment else { return [] }
 
-        let embellishmentBox = BoundingBox(page: box.page, left: box.left + centerJustifyAdvance, bottom: box.bottom, width: embellishment.width.advance, height: box.height)
-        return [EmbellishmentRenderer(inside: embellishmentBox, rendering: embellishment)]
+        let embellishmentBox = BoundingBox(page: box.page, left: box.left + centerJustifyAdvance, bottom: box.bottom, width: embellishment.size.advance, height: box.height)
+        return [EmbellishmentRenderer(box: embellishmentBox, embellishment: embellishment)]
     }
 }
 
 extension Note: Sizable {
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (.zero, .zero) }
     var kernableLeader: CGFloat? { nil }
-    var height: Length { .full }
-    var width: Length {
+    var childDirection: LayoutDirection { .horizontal }
+    var childSpacing: CGFloat { .zero }
+    var childSizables: [any Sizable] {
+        if let embellishment { [embellishment] } else { [] }
+    }
+
+    var size: Length {
         var min = Layout.Advance.noteHead
         if duration >= .whole {
             min = Layout.Advance.noteHeadWhole
@@ -129,27 +136,33 @@ extension Note: Sizable {
         if let accidental {
             min += accidental.width
         }
-        return .atLeast(min) + (embellishment?.width ?? .zero)
+        return .atLeast(min) + totalChildSize
     }
 }
 
 extension Note: Anchored {
     var id: String { context.identifier }
-    typealias Anchors = Notenchors
-    struct Notenchors {
-        var noteheadLeft: CGFloat
-        var noteheadRight: CGFloat
-        var noteheadTop: CGFloat
+    typealias Anchors = NoteAnchors
+    struct NoteAnchors {
+        let noteheadLeft: CGFloat
+        let noteheadRight: CGFloat
+        let noteheadTop: CGFloat
+        let stemX: CGFloat
+        let stemBottom: CGFloat
+        let flagType: Flag
     }
 }
 
 extension NoteRenderer: Anchorable {
     typealias Anchor = Note
     var anchor: Note { note }
-    func anchors() -> Note.Notenchors {
+    func anchors() -> Note.NoteAnchors {
         .init(noteheadLeft: stemX,
               noteheadRight: stemX + noteheadAdvance,
-              noteheadTop: box.bottom + note.pitch.yOffset + Layout.noteStep)
+              noteheadTop: box.bottom + note.pitch.yOffset + Layout.noteStep,
+              stemX: stemX,
+              stemBottom: stemBottom,
+              flagType: flag)
     }
 }
 
@@ -183,24 +196,40 @@ extension Duration {
     var needsStem: Bool {
         self < .whole
     }
+}
 
-    var beamCount: Int {
-        switch self {
-        case .eighth, .eighthDotted: 1
-        case .sixteenth, .sixteenthDotted: 2
-        case .thirtysecond, .thirtysecondDotted: 3
-        case .sixtyfourth, .sixtyfourthDotted: 4
-        default: 0
+enum Flag: Equatable {
+    case none
+    case flag(BravuraSymbol)
+    case beam(Int)
+
+    static func fromDuration(_ duration: Duration) -> Flag {
+        switch duration {
+        case .eighth, .eighthDotted: .flag(.flag8th)
+        case .sixteenth, .sixteenthDotted: .flag(.flag16th)
+        case .thirtysecond, .thirtysecondDotted: .flag(.flag32nd)
+        case .sixtyfourth, .sixtyfourthDotted: .flag(.flag64th)
+        default: .none
         }
     }
 
-    var flagSymbol: BravuraSymbol? {
+    var asBeam: Flag {
         switch self {
-        case .eighth, .eighthDotted: .flag8th
-        case .sixteenth, .sixteenthDotted: .flag16th
-        case .thirtysecond, .thirtysecondDotted: .flag32nd
-        case .sixtyfourth, .sixtyfourthDotted: .flag64th
-        default: nil
+        case .flag(.flag8th): .beam(1)
+        case .flag(.flag16th): .beam(2)
+        case .flag(.flag32nd): .beam(3)
+        case .flag(.flag64th): .beam(4)
+        default: self
+        }
+    }
+
+    var asFlag: Flag {
+        switch self {
+        case .beam(1): .flag(.flag8th)
+        case .beam(2): .flag(.flag16th)
+        case .beam(3): .flag(.flag32nd)
+        case .beam(4): .flag(.flag64th)
+        default: self
         }
     }
 }

@@ -7,19 +7,15 @@
 
 import CoreGraphics
 
-final class ClusterRenderer: BaseRenderable, Renderable<Cluster> {
+struct ClusterRenderer: Renderable {
+    let box: BoundingBox
     let cluster: Cluster
-    private var beams = [Beam]()
 
-    init(inside box: BoundingBox, rendering cluster: Cluster) {
-        self.cluster = cluster
-        super.init(inside: box)
-    }
-
-    func render(in graphics: RenderCanvas, with _: AnchorSet) {
-        for beam in beams {
+    func render(in graphics: RenderCanvas, with anchors: AnchorSet) throws {
+        for notes in cluster.beamGroups {
+            let beam = try Beam(notes: notes, anchors: anchors)
             beam.segments.forEach { $0.draw(in: graphics) }
-            beam.flags.forEach { $0.draw(in: graphics) }
+            beam.stemExtensions.forEach { $0.draw(in: graphics) }
         }
 
         // Tempo change
@@ -32,26 +28,24 @@ final class ClusterRenderer: BaseRenderable, Renderable<Cluster> {
     }
 
     func directChildren() throws -> [any Renderable] {
-        let noteBoxes = try layout(.horizontal, cluster.notes).map(\.box)
-        let noteRenderers = cluster.notes.enumerated().map { index, note in
-            NoteRenderer(inside: noteBoxes[index], rendering: note)
+        let noteFlags = cluster.noteFlags
+        return try layout(cluster).enumerated().map { index, layoutItem in
+            switch layoutItem.sizable {
+            case let note as Note:
+                NoteRenderer(box: layoutItem.box, note: note, flag: noteFlags[index])
+            default: throw PdfError.unexpectedSizable
+            }
         }
-
-        beams = noteRenderers
-            .split { $0.note.duration.beamCount == 0 }
-            .filter { $0.count > 1 }
-            .map { Beam(noteRenderers: Array($0)) }
-
-        return noteRenderers
     }
 }
 
 extension Cluster: Sizable {
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (.zero, .zero) }
     var kernableLeader: CGFloat? { nil }
-    var height: Length { .full }
-    var width: Length {
-        notes.map(\.width).sum
-    }
+    var childDirection: LayoutDirection { .horizontal }
+    var childSpacing: CGFloat { .zero }
+    var childSizables: [any Sizable] { notes }
+    var size: Length { totalChildSize }
 }
 
 extension Cluster: Anchored {
@@ -68,6 +62,30 @@ extension ClusterRenderer: Anchorable {
     var anchor: Cluster { cluster }
     func anchors() -> Cluster.ClusterAnchors {
         .init(start: box.left, end: box.right)
+    }
+}
+
+extension Cluster {
+    var beamGroups: [[Note]] {
+        notes
+            .split { Flag.fromDuration($0.duration) == .none }
+            .filter { $0.count > 1 }
+            .map(Array.init)
+    }
+
+    var noteFlags: [Flag] {
+        var heights = notes.map { Flag.fromDuration($0.duration) }
+
+        guard heights.count != 1 else { return [.none] }
+
+        for index in 0 ..< heights.count {
+            let disconnectedLeft = index == 0 ? true : heights[index - 1] == .none
+            let disconnectedRight = index == heights.count - 1 ? true : heights[index + 1] == .none
+            if !disconnectedLeft || !disconnectedRight {
+                heights[index] = heights[index].asBeam
+            }
+        }
+        return heights
     }
 }
 
@@ -97,58 +115,55 @@ private struct Beam {
         }
     }
 
-    struct Flag {
-        let startX: CGFloat
-        let direction: CGFloat
-        let slope: Slope
-        let stackIndex: Int
+    struct StemExtension {
+        let start: CGPoint
+        let height: CGFloat
 
         func draw(in graphics: RenderCanvas) {
-            let offsetY = CGFloat(stackIndex) * (Layout.noteBeamLineWidth + Layout.noteBeamSeparation)
-            let xOffset = direction * Layout.noteBeamPartialExtension
-            let endX = startX + xOffset
-
-            graphics.drawLine(from: CGPoint(x: startX, y: slope.height(at: startX) + offsetY),
-                              to: CGPoint(x: endX, y: slope.height(at: endX) + offsetY),
-                              width: Layout.noteBeamLineWidth)
+            graphics.drawLineVert(from: start,
+                                  length: height,
+                                  width: Layout.noteStemLineWidth)
         }
     }
 
     let segments: [Segment]
-    let flags: [Flag]
+    let stemExtensions: [StemExtension]
     let slope: Slope
 
-    init(noteRenderers: [NoteRenderer]) {
-        // :TODO: each stem in the beam should have a minimum height?
-        // or, avoid gracing overlapping beams, somehow.
-        // the minimum height doesn't have to be the ideal, could be less. at least enough for the number of beams + padding
-
-        if noteRenderers.count > 1 {
-            let m = (noteRenderers.last!.stemBottom - noteRenderers.first!.stemBottom) /
-                (noteRenderers.last!.stemX - noteRenderers.first!.stemX)
-            slope = Slope(m: m, c: noteRenderers.first!.stemBottom - noteRenderers.first!.stemX * m)
+    init(notes: [Note], anchors anchorSet: AnchorSet) throws {
+        let anchors = try notes.map { try anchorSet.anchors(for: $0) }
+        if anchors.count > 1 {
+            let m = (anchors.last!.stemBottom - anchors.first!.stemBottom) /
+                (anchors.last!.stemX - anchors.first!.stemX)
+            let intercepts = anchors.map { $0.stemBottom - $0.stemX * m }
+            slope = Slope(m: m, c: intercepts.min { abs($0) < abs($1) }!)
         } else {
-            slope = Slope(m: 0, c: noteRenderers.first!.stemBottom)
+            throw PdfError.singleNoteBeam
         }
 
-        (segments, flags) = Self.beamSegments(for: noteRenderers, slope: slope)
-
-        for noteRenderer in noteRenderers {
-            noteRenderer.drawsFlag = false
-            noteRenderer.stemBottom = slope.height(at: noteRenderer.stemX)
+        segments = Self.beamSegments(for: anchors, slope: slope)
+        stemExtensions = anchors.compactMap { [slope] anchor in
+            let slopeY = slope.height(at: anchor.stemX)
+            let height = anchor.stemBottom - slopeY
+            guard height > 0.01 else { return nil }
+            return StemExtension(start: CGPoint(x: anchor.stemX, y: slopeY), height: height)
         }
     }
 
-    private static func beamSegments(for noteRenderers: [NoteRenderer], slope: Slope) -> ([Segment], [Flag]) {
+    private static func beamSegments(for noteAnchors: [Note.Anchors], slope: Slope) -> ([Segment]) {
         var segments: [Segment] = []
-        var flags: [Flag] = []
 
         var startStack: [Int] = []
 
-        var beamCounts: [Int] = noteRenderers.map(\.note.duration.beamCount)
-        beamCounts.append(0)
+        var flagTypes = noteAnchors.map(\.flagType)
+        flagTypes.append(.none)
 
-        for (index, targetBeamCount) in beamCounts.enumerated() {
+        for (index, flagType) in flagTypes.enumerated() {
+            let targetBeamCount = switch flagType {
+            case let .beam(count): count
+            case .flag, .none: 0
+            }
+
             while targetBeamCount > startStack.count {
                 startStack.append(index)
             }
@@ -158,19 +173,21 @@ private struct Beam {
                 let beamStackCount = startStack.count
 
                 if beamStartIndex == index - 1 {
-                    let startX = noteRenderers[beamStartIndex].stemX
+                    let startX = noteAnchors[beamStartIndex].stemX
                     // right by default (1), left whenever the beam below this is also ending (-1)
                     let direction: CGFloat = (targetBeamCount < startStack.count) ? -1 : 1
-                    flags.append(Flag(startX: startX, direction: direction, slope: slope, stackIndex: beamStackCount))
+                    let xOffset = direction * Layout.noteBeamPartialExtension
+                    let endX = startX + xOffset
+                    segments.append(Segment(startX: startX, endX: endX, slope: slope, stackIndex: beamStackCount))
                 } else {
-                    let startX = noteRenderers[beamStartIndex].stemX
-                    let endX = noteRenderers[index - 1].stemX
+                    let startX = noteAnchors[beamStartIndex].stemX
+                    let endX = noteAnchors[index - 1].stemX
                     segments.append(Segment(startX: startX, endX: endX, slope: slope, stackIndex: beamStackCount))
                 }
             }
         }
 
-        return (segments, flags)
+        return segments
     }
 }
 

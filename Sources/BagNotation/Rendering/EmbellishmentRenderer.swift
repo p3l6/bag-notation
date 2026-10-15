@@ -7,13 +7,9 @@
 
 import CoreGraphics
 
-final class EmbellishmentRenderer: BaseRenderable, Renderable<Embellishment> {
+struct EmbellishmentRenderer: Renderable {
+    let box: BoundingBox
     let embellishment: Embellishment
-
-    init(inside box: BoundingBox, rendering embellishment: Embellishment) {
-        self.embellishment = embellishment
-        super.init(inside: box)
-    }
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
         let maxPitch = embellishment.pitches.max()!
@@ -58,15 +54,16 @@ final class EmbellishmentRenderer: BaseRenderable, Renderable<Embellishment> {
         }
     }
 
-    func directChildren() throws -> [any Renderable] {
-        []
-    }
+    func directChildren() throws -> [any Renderable] { [] }
 }
 
 extension Embellishment: Sizable {
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (.zero, .zero) }
     var kernableLeader: CGFloat? { nil }
-    var height: Length { .full }
-    var width: Length {
+    var childDirection: LayoutDirection { .horizontal }
+    var childSpacing: CGFloat { .zero }
+    var childSizables: [any Sizable] { [] }
+    var size: Length {
         .exact(CGFloat(pitches.count) * Layout.Advance.gracenoteHead
             + CGFloat(pitches.count - 1) * Layout.gracenoteSeparation
             // :TODO: singlings that are lower than note need more padding

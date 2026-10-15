@@ -7,16 +7,11 @@
 
 import CoreGraphics
 
-final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
+struct VoiceRenderer: Renderable {
+    let box: BoundingBox
     let voice: Voice
-    var barlineExtraHeight: CGFloat = 0
-
-    init(inside box: BoundingBox, rendering voice: Voice) {
-        self.voice = voice
-        super.init(inside: box)
-
-        reservedLeading = Layout.Advance.gClef + Layout.baseScale
-    }
+    let barlineExtraHeight: CGFloat
+    var alignedWidths: [CGFloat]?
 
     func render(in graphics: RenderCanvas, with anchors: AnchorSet) throws {
         // Staff lines
@@ -76,33 +71,17 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
     }
 
     func directChildren() throws -> [any Renderable] {
-        var sizables = [any Sizable]()
-        if let firstBar = voice.bars.first, firstBar.context.isFirstBarOfTune {
-            sizables.append(firstBar.context.timeSignature)
-        }
-        if let leadingLine = voice.leadingBarline {
-            sizables.append(leadingLine)
-        }
-        sizables.append(contentsOf: voice.bars)
-
-        var renderables = [any Renderable]()
-        for layoutItem in try layout(.horizontal, sizables) {
+        try layout(voice, overrideSizes: alignedWidths).map { layoutItem in
             switch layoutItem.sizable {
             case let timeSignature as TimeSignature:
-                renderables.append(TimeSignatureRenderer(inside: layoutItem.box, rendering: timeSignature))
+                TimeSignatureRenderer(box: layoutItem.box, timeSignature: timeSignature)
             case let barline as Barline:
-                let barlineRenderer = BarlineRenderer(inside: layoutItem.box, rendering: barline)
-                barlineRenderer.extraHeight = barlineExtraHeight
-                renderables.append(barlineRenderer)
+                BarlineRenderer(box: layoutItem.box, barline: barline, extraHeight: barlineExtraHeight)
             case let bar as Bar:
-                let barRenderer = BarRenderer(inside: layoutItem.box, rendering: bar)
-                barRenderer.barlineExtraHeight = barlineExtraHeight
-                renderables.append(barRenderer)
+                BarRenderer(box: layoutItem.box, bar: bar, barlineExtraHeight: barlineExtraHeight)
             default: throw PdfError.unexpectedSizable
             }
         }
-
-        return renderables
     }
 
     func variationAnchors(set: AnchorSet) throws -> [VariationAnchor] {
@@ -132,14 +111,14 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
                 if let openConnection {
                     connections.append(Swoop(kind, from: openConnection.start, to: anchors))
                 } else {
-                    connections.append(Swoop(kind, wrappedFrom: box.left + reservedLeading, to: anchors))
+                    connections.append(Swoop(kind, wrappedFrom: box.left + voice.reserved.leading, to: anchors))
                 }
                 openConnection = nil
             case let .transition(ending: ending, starting: starting):
                 if let openConnection {
                     connections.append(Swoop(ending, from: openConnection.start, to: anchors))
                 } else {
-                    connections.append(Swoop(ending, wrappedFrom: box.left + reservedLeading, to: anchors))
+                    connections.append(Swoop(ending, wrappedFrom: box.left + voice.reserved.leading, to: anchors))
                 }
                 openConnection = (starting, anchors)
             default:
@@ -155,9 +134,23 @@ final class VoiceRenderer: BaseRenderable, Renderable<Voice> {
 }
 
 extension Voice: Sizable {
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (Layout.Advance.gClef + Layout.baseScale, .zero) }
     var kernableLeader: CGFloat? { hasAnyVariations ? Layout.variationBracketHeight : nil }
-    var width: Length { .full }
-    var height: Length {
+    var childDirection: LayoutDirection { .horizontal }
+    var childSpacing: CGFloat { .zero }
+    var childSizables: [any Sizable] {
+        var sizables = [any Sizable]()
+        if let firstBar = bars.first, firstBar.context.isFirstBarOfTune {
+            sizables.append(firstBar.context.timeSignature)
+        }
+        if let leadingLine = leadingBarline {
+            sizables.append(leadingLine)
+        }
+        sizables.append(contentsOf: bars)
+        return sizables
+    }
+
+    var size: Length {
         .exact(Layout.staffLineSpacing * 7) +
             (hasAnyVariations ? .exact(Layout.variationBracketHeight) : .zero)
     }
@@ -227,13 +220,9 @@ struct Swoop {
     }
 }
 
-final class TimeSignatureRenderer: BaseRenderable, Renderable<TimeSignature> {
+struct TimeSignatureRenderer: Renderable {
+    let box: BoundingBox
     let timeSignature: TimeSignature
-
-    init(inside box: BoundingBox, rendering timeSignature: TimeSignature) {
-        self.timeSignature = timeSignature
-        super.init(inside: box)
-    }
 
     func render(in graphics: RenderCanvas, with _: AnchorSet) {
         let (top, bottom) = symbols
@@ -262,9 +251,12 @@ final class TimeSignatureRenderer: BaseRenderable, Renderable<TimeSignature> {
 }
 
 extension TimeSignature: Sizable {
+    var reserved: (leading: CGFloat, trailing: CGFloat) { (.zero, .zero) }
     var kernableLeader: CGFloat? { nil }
-    var height: Length { .full }
-    var width: Length {
+    var childDirection: LayoutDirection { .horizontal }
+    var childSpacing: CGFloat { .zero }
+    var childSizables: [any Sizable] { [] }
+    var size: Length {
         .exact(self == .time128 ? 2 * Layout.Advance.timeSig : Layout.Advance.timeSig)
             + .exact(Layout.baseScale)
     }
