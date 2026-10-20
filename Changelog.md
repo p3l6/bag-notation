@@ -11,6 +11,10 @@ Types of changes: New, Improved, Fixed, Removed.
 
 
 
+## [1.1.1] - 20 Oct 2026
+
+- Fixed: Expanded package visibility levels for additional public types
+
 ## [1.1.0] - 16 Oct 2026
 
 - New: Native pdf rendering using CoreGraphics, replaces abcm2ps and ghostscript dependencies. (macos only)

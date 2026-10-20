@@ -7,7 +7,7 @@
 
 import CoreGraphics
 
-protocol Renderable {
+public protocol Renderable {
     var box: BoundingBox { get }
     func render(in graphics: RenderCanvas, with anchors: AnchorSet) throws
     func directChildren() throws -> [any Renderable]
@@ -19,7 +19,7 @@ extension Renderable {
     /// This is to be used at the top level of the rendering stack, and only
     /// called once. It should not be called by any renderable for making calculations
     /// or layouts.
-    func collectAllRenderables() throws -> ([any Renderable], AnchorSet) {
+    public func collectAllRenderables() throws -> ([any Renderable], AnchorSet) {
         var parents: [any Renderable] = [self]
         var renderables = parents
         var anchors = AnchorSet()
@@ -129,36 +129,44 @@ extension Renderable {
     }
 }
 
-struct BoundingBox {
-    let page: Int
-    let left: CGFloat
-    let bottom: CGFloat
-    let width: CGFloat
-    let height: CGFloat
+public struct BoundingBox {
+    public let page: Int
+    public let left: CGFloat
+    public let bottom: CGFloat
+    public let width: CGFloat
+    public let height: CGFloat
 
-    func inset(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
+    public init(page: Int, left: CGFloat, bottom: CGFloat, width: CGFloat, height: CGFloat) {
+        self.page = page
+        self.left = left
+        self.bottom = bottom
+        self.width = width
+        self.height = height
+    }
+
+    public func inset(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
         CGPoint(x: left + x, y: bottom + y)
     }
 
-    func insetFromTop(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
+    public func insetFromTop(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
         CGPoint(x: left + x, y: top - y)
     }
 
-    func insetFromRight(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
+    public func insetFromRight(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
         CGPoint(x: right - x, y: bottom + y)
     }
 
-    func insetFromTopRight(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
+    public func insetFromTopRight(x: CGFloat = 0, y: CGFloat = 0) -> CGPoint {
         CGPoint(x: right - x, y: top - y)
     }
 
-    var right: CGFloat { left + width }
-    var top: CGFloat { bottom + height }
+    public var right: CGFloat { left + width }
+    public var top: CGFloat { bottom + height }
 
-    var origin: CGPoint { .init(x: left, y: bottom) }
-    var topLeft: CGPoint { .init(x: left, y: top) }
-    var topRight: CGPoint { .init(x: right, y: top) }
-    var bottomRight: CGPoint { .init(x: right, y: bottom) }
+    public var origin: CGPoint { .init(x: left, y: bottom) }
+    public var topLeft: CGPoint { .init(x: left, y: top) }
+    public var topRight: CGPoint { .init(x: right, y: top) }
+    public var bottomRight: CGPoint { .init(x: right, y: bottom) }
 }
 
 enum Length {
@@ -274,7 +282,7 @@ protocol Anchorable {
     func anchors() -> Anchor.Anchors
 }
 
-struct AnchorSet {
+public struct AnchorSet {
     private var anchors = [String: Any]()
     mutating func add(_ anchorable: any Anchorable) {
         anchors[anchorable.anchor.id] = anchorable.anchors()

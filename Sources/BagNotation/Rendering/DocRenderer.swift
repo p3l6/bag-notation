@@ -7,14 +7,14 @@
 
 import CoreGraphics
 
-struct DocRenderer: Renderable {
+public struct DocRenderer: Renderable {
     let doc: Doc
-    let box: BoundingBox
+    public let box: BoundingBox
     let pageSize: CGSize
     let pageSafeArea: CGSize
 
     /// Unlike all other renderables, Doc expects the full pageSize as the bounding box.
-    init(inside box: BoundingBox, rendering doc: Doc) {
+    public init(inside box: BoundingBox, rendering doc: Doc) {
         self.doc = doc
         self.box = box
         pageSize = CGSize(width: box.width, height: box.height)
@@ -22,9 +22,9 @@ struct DocRenderer: Renderable {
                               height: box.height - Layout.pageMargin * 2)
     }
 
-    func render(in _: RenderCanvas, with _: AnchorSet) {}
+    public func render(in _: RenderCanvas, with _: AnchorSet) {}
 
-    func directChildren() throws -> [any Renderable] {
+    public func directChildren() throws -> [any Renderable] {
         let tunes = doc.tunes
         let pageContentHeight = pageSafeArea.height - Layout.pageFooterHeight
         var currentPage = 0

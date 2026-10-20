@@ -34,7 +34,7 @@ public class PdfWriter {
         let pages = Dictionary(grouping: renderables, by: { $0.box.page })
 
         for page in pages.keys.sorted() {
-            let pageRenderables = pages[page]!
+            guard let pageRenderables = pages[page] else { throw PdfError.missingPage }
 
             context.beginPDFPage(nil)
             try pageRenderables.forEach { try $0.render(in: canvas, with: anchors) }
@@ -54,6 +54,7 @@ public enum PdfError: Error {
     case unexpectedSizable
     case unexpectedVariationAnchor
     case missingAnchor
+    case missingPage
     case invalidLayoutParameters
     case inconsistentVoiceLayout
     case singleNoteBeam

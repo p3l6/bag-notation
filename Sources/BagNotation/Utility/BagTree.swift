@@ -81,12 +81,18 @@ public class BagTree: NodeSourceTextProvider {
 /// Like `Range<Point>`, except:
 /// - The range exists on a single line
 /// - The bounds are in reference to characters, not bytes
-struct InlineRange {
-    let line: Int
-    let lowerBound: Int
-    let upperBound: Int
+public struct InlineRange: Sendable {
+    public let line: Int
+    public let lowerBound: Int
+    public let upperBound: Int
 
-    var width: Int { upperBound - lowerBound }
+    public init(line: Int, lowerBound: Int, upperBound: Int) {
+        self.line = line
+        self.lowerBound = lowerBound
+        self.upperBound = upperBound
+    }
+
+    public var width: Int { upperBound - lowerBound }
 
     func rangeFor(relativeRange insideRange: Range<Int>) -> InlineRange {
         InlineRange(line: line, lowerBound: lowerBound + insideRange.lowerBound, upperBound: lowerBound + insideRange.upperBound)

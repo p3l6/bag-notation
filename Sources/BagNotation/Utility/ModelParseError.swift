@@ -64,8 +64,8 @@ public enum ModelParseError: Error, LocalizedError {
 }
 
 public struct LocatedModelParseError: Error, LocalizedError {
-    let base: ModelParseError
-    let location: InlineRange
+    public let base: ModelParseError
+    public let location: InlineRange
 
     public var errorDescription: String? {
         "\(location.line + 1)[\(location.lowerBound + 1)-\(location.upperBound)]: \(base.errorDescription!)"

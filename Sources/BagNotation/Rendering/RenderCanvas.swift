@@ -9,11 +9,14 @@ import AppKit
 import CoreGraphics
 import Foundation
 
-struct RenderCanvas {
+/// A canvas that uses CoreGraphics to draw lines and text.
+///
+/// Coordinate origin is in the lower left corner, with units in points.
+public struct RenderCanvas {
     let fonts: Fonts
     let graphics: CGContext
 
-    init(graphics: CGContext) throws {
+    public init(graphics: CGContext) throws {
         self.graphics = graphics
 
         fonts = try Fonts()
