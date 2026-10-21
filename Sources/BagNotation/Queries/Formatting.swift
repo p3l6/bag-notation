@@ -8,7 +8,7 @@
 // Keep in sync with tree-sitter-bag-notation/queries/formatting.scm
 
 extension BagTree {
-    static let formattingQuery = """
+    public static let formattingQuery = """
         (voice
           .
           (field)? @leadingField

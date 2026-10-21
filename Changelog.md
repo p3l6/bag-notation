@@ -10,6 +10,9 @@ Types of changes: New, Improved, Fixed, Removed.
 ## [Unreleased]
 
 
+## [1.1.2] - 21 Oct 2026
+
+- Fixed: Made highlight query available as a compiled string
 
 ## [1.1.1] - 20 Oct 2026
 

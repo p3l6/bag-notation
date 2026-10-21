@@ -3,17 +3,13 @@
 (comment) @comment
 (tail_comment) @comment
 
-(field_label) @label
-(shorthand_label) @label
+(field_label) @keyword
+(shorthand_label) @keyword
 (field_value) @string
 
-"---\n" @primary
-"(" @punctuation.bracket
-")" @punctuation.bracket
-(barline) @primary
+(barline) @operator
 
-(embellishment) @attribute
-(pitch) @keyword
+(embellishment) @variable
+(pitch) @type.builtin
 (duration) @number
 (connector) @operator
-
