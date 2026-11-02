@@ -76,8 +76,6 @@ extension Cluster {
     var noteFlags: [Flag] {
         var heights = notes.map { Flag.fromDuration($0.duration) }
 
-        guard heights.count != 1 else { return [.none] }
-
         for index in 0 ..< heights.count {
             let disconnectedLeft = index == 0 ? true : heights[index - 1] == .none
             let disconnectedRight = index == heights.count - 1 ? true : heights[index + 1] == .none

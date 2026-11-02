@@ -9,6 +9,7 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+- Fixed: Issue where single eigth (or smaller) notes were missing flags.
 
 ## [1.1.2] - 21 Oct 2026
 
