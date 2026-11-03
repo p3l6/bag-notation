@@ -63,6 +63,7 @@ extension Tune: Sizable {
     var childDirection: LayoutDirection { .vertical }
     var childSpacing: CGFloat { Layout.staffSeparation }
     var childSizables: [any Sizable] { lines }
+    var stretchWeight: CGFloat { 1 }
     var size: Length { .exact(Layout.tuneHeaderHeight) + totalChildSize }
 
     /// Measures line-aware pagination without splitting a staff line.

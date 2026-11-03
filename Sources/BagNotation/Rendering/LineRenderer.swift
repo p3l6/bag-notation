@@ -55,6 +55,7 @@ extension Line: Sizable {
     var childDirection: LayoutDirection { .vertical }
     var childSpacing: CGFloat { Layout.staffJoinedSeparation }
     var childSizables: [any Sizable] { voices }
+    var stretchWeight: CGFloat { 1 }
     var size: Length { totalChildSize }
 }
 
@@ -95,6 +96,7 @@ struct BarAlignment: Sizable {
         return sizeables
     }
 
+    var stretchWeight: CGFloat { 1 }
     var size: Length { totalChildSize }
 }
 

@@ -64,6 +64,7 @@ extension Bar: Sizable {
         return sizables
     }
 
+    var stretchWeight: CGFloat { size.advance }
     var size: Length { isPickup ? .exact(totalChildSize.advance) + .exact(2 * Layout.baseScale) : totalChildSize }
 }
 
@@ -79,6 +80,7 @@ private enum Rest: Sizable {
     var childDirection: LayoutDirection { .horizontal }
     var childSpacing: CGFloat { .zero }
     var childSizables: [any Sizable] { [] }
+    var stretchWeight: CGFloat { 1 }
     var size: Length {
         var advance = symbolAdvance
         if case let .duration(duration) = self, duration.isDotted {
@@ -198,6 +200,7 @@ extension Barline: Sizable {
     var childDirection: LayoutDirection { .horizontal }
     var childSpacing: CGFloat { .zero }
     var childSizables: [any Sizable] { [] }
+    var stretchWeight: CGFloat { 1 }
     var size: Length {
         switch self {
         case .plain:

@@ -46,55 +46,11 @@ public struct Bar {
         // Piob is too flexible with timing, and finds more false positives than correct.
         guard context.barNumber == 1, context.voice.line.tune.style != .piob else { return false }
 
-        struct TimeAmount {
-            let beatSize: Duration
-            var beats: Int = 0
-            var extra = 0
-
-            private func units(for duration: Duration) -> Int {
-                switch duration {
-                case .sixtyfourth: 2
-                case .sixtyfourthDotted: 3
-                case .thirtysecond: 4
-                case .thirtysecondDotted: 6
-                case .sixteenth: 8
-                case .sixteenthDotted: 12
-                case .eighth: 16
-                case .eighthDotted: 24
-                case .quarter: 32
-                case .quarterDotted: 48
-                case .half: 64
-                case .halfDotted: 96
-                case .whole: 128
-                case .wholeDotted: 192
-                }
-            }
-
-            mutating func add(_ other: TimeAmount) {
-                let beatUnits = units(for: beatSize)
-                let totalUnits = beats * beatUnits
-                    + extra
-                    + other.beats * units(for: other.beatSize)
-                    + other.extra
-
-                beats = totalUnits / beatUnits
-                extra = totalUnits % beatUnits
-            }
-
-            mutating func add(_ duration: Duration) {
-                let beatUnits = units(for: beatSize)
-                let totalUnits = extra + units(for: duration)
-
-                beats += totalUnits / beatUnits
-                extra = totalUnits % beatUnits
-            }
-        }
-
-        var time = TimeAmount(beatSize: context.timeSignature.beatLength)
+        var time = DurationSummation()
 
         for content in contents {
             switch content {
-            case let .cluster(cluster): cluster.notes.map(\.duration).forEach { time.add($0) }
+            case let .cluster(cluster): time.add(cluster.totalDuration)
             case let .rest(duration): time.add(duration)
             case .barRest: return false
             case let .spacer(duration): time.add(duration)
@@ -102,7 +58,9 @@ public struct Bar {
             }
         }
 
-        return time.beats <= context.timeSignature.beatsPerBar - (time.extra == 0 ? 1 : 2)
+        let (beats, extra) = time.beats(withSize: context.timeSignature.beatLength)
+
+        return beats <= context.timeSignature.beatsPerBar - (extra == nil ? 1 : 2)
     }
 }
 

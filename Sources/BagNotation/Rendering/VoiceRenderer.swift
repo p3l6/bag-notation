@@ -161,6 +161,7 @@ extension Voice: Sizable {
         return sizables
     }
 
+    var stretchWeight: CGFloat { 1 }
     var size: Length {
         .exact(Layout.staffLineSpacing * 7) +
             (hasAnyVariations ? .exact(Layout.variationBracketHeight) : .zero)
@@ -273,6 +274,7 @@ extension TimeSignature: Sizable {
     var childDirection: LayoutDirection { .horizontal }
     var childSpacing: CGFloat { .zero }
     var childSizables: [any Sizable] { [] }
+    var stretchWeight: CGFloat { 1 }
     var size: Length {
         .exact(self == .time128 ? 2 * Layout.Advance.timeSig : Layout.Advance.timeSig)
             + .exact(Layout.baseScale)

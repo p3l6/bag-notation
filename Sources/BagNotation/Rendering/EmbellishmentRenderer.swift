@@ -63,6 +63,7 @@ extension Embellishment: Sizable {
     var childDirection: LayoutDirection { .horizontal }
     var childSpacing: CGFloat { .zero }
     var childSizables: [any Sizable] { [] }
+    var stretchWeight: CGFloat { 1 }
     var size: Length {
         .exact(CGFloat(pitches.count) * Layout.Advance.gracenoteHead
             + CGFloat(pitches.count - 1) * Layout.gracenoteSeparation

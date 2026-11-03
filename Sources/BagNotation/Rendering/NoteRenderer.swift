@@ -25,8 +25,8 @@ struct NoteRenderer: Renderable {
         self.flag = flag
         embellishmentAdvance = note.embellishment?.size.advance ?? 0
         accidentalAdvance = note.accidental?.width ?? 0
-        // :TODO: Avoid centering when a bar has only a single note.
-        centerJustifyAdvance = (box.width - note.size.advance) / 2
+        // "centered" one third in front, two after
+        centerJustifyAdvance = (box.width - note.size.advance) / 3
         stemX = box.left + centerJustifyAdvance + embellishmentAdvance + accidentalAdvance
 
         pitchOffset = note.pitch.yOffset
@@ -127,6 +127,7 @@ extension Note: Sizable {
         if let embellishment { [embellishment] } else { [] }
     }
 
+    var stretchWeight: CGFloat { CGFloat(DurationSummation(duration).totalUnits) }
     var size: Length {
         var min = Layout.Advance.noteHead
         if duration >= .whole {

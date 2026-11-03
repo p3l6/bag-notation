@@ -45,6 +45,7 @@ extension Cluster: Sizable {
     var childDirection: LayoutDirection { .horizontal }
     var childSpacing: CGFloat { .zero }
     var childSizables: [any Sizable] { notes }
+    var stretchWeight: CGFloat { CGFloat(totalDuration.totalUnits) }
     var size: Length { totalChildSize }
 }
 

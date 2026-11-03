@@ -25,6 +25,10 @@ public struct Cluster {
     let context: Context
     let notes: [Note]
     let variation: Variation
+
+    var totalDuration: DurationSummation {
+        DurationSummation(notes.map(\.duration))
+    }
 }
 
 enum Variation: Equatable {

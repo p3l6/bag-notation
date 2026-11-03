@@ -114,6 +114,7 @@ extension Doc: Sizable {
     var childDirection: LayoutDirection { .vertical }
     var childSpacing: CGFloat { Layout.tuneSeparation }
     var childSizables: [any Sizable] { [] }
+    var stretchWeight: CGFloat { 1 }
     var size: Length { .full }
 }
 

@@ -220,6 +220,8 @@ protocol Sizable {
     var reserved: (leading: CGFloat, trailing: CGFloat) { get }
     /// The amount of space which may be ommited from the spacing between this and the previous item, if any spacing is present.
     var kernableLeader: CGFloat? { get }
+    /// Used to porportionally distribute remaining space among `.atLeast` sized siblings
+    var stretchWeight: CGFloat { get }
     /// The size of this item, including all child item requirements
     var size: Length { get }
 
@@ -244,7 +246,7 @@ extension Sizable {
     }
 
     func stretchChildren(in available: CGFloat) throws -> [(spaceBefore: CGFloat, size: CGFloat)] {
-        let stretchableCount = childSizables.count { if case .atLeast = $0.size { true } else { false } }
+        let totalWeight = childSizables.reduce(CGFloat.zero) { if case .atLeast = $1.size { $0 + $1.stretchWeight } else { $0 } }
 
         // make sure they fit, or error
         let extra = available - totalChildSize.advance
@@ -254,8 +256,6 @@ extension Sizable {
             throw PdfError.insufficientSpace
         }
 
-        // strech value per adjustable block if needed
-        let stretch = stretchableCount == 0 ? 0 : extra / CGFloat(stretchableCount)
 
         // distribute stretched amount equally into each box
         return try childSizables.enumerated().map { index, item in
@@ -263,7 +263,7 @@ extension Sizable {
             return switch item.size {
             case .zero: (space, 0.0)
             case let .exact(value): (space, value)
-            case let .atLeast(value): (space, value + stretch)
+            case let .atLeast(value): (space, value + ( item.stretchWeight / totalWeight * extra ))
             case .full:
                 throw PdfError.insufficientSpace
             }

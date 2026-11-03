@@ -9,6 +9,7 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+- Improved: Imbalanced notes and bars stretch a bit more naturally. 
 - Improved: Barlines at the end of the line are now optional (they will still be drawn - a plain barline is implied). 
 - Improved: More flexible whitespace handling, things such as `|ab|`, without spaces are now valid. 
 - Fixed: Issue where single eigth (or smaller) notes were missing flags.
