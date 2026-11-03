@@ -314,7 +314,8 @@ private final class BarModeler: Modeler {
 
         let children = try node.childrenVerifying(typeIs: .bar, childrenAre: [.cluster, .barline, .field])
 
-        barline = try children.unique(.barline).trimmedText(from: textSource).toBarline()
+        // Optional: missing trailing barlines are implied to be plain
+        barline = try children.optional(.barline)?.trimmedText(from: textSource).toBarline() ?? .plain
 
         for child in children.all {
             switch try child.type() {

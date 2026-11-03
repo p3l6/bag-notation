@@ -12,7 +12,6 @@ extension BagTree {
         ; highlights.scm
 
         (comment) @comment
-        (tail_comment) @comment
 
         (field_label) @keyword
         (shorthand_label) @keyword

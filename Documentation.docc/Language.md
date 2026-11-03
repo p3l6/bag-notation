@@ -36,7 +36,7 @@ Notes:
 * Fields can exist inline, in the body as well. These are called inline fields and are contained in parentheses.
 * Notes in bars are grouped into clusters, separated by spaces.
 * Some fields also have 'shorthand' representations, consisting of a single symbol. These can appear even between notes in a cluster.
-* The line must always end with a barline, but beginning a line with one is optional.
+* The barline at the beginning and end of a line are optional. However, the barline at the end is implied regardless, and should be specified.
 
 ## All Language Symbols
 
@@ -185,10 +185,10 @@ Every line should have at least one bar (unless it's completely blank), that mea
 
 Each bar consists of a series of note clusters or fields, and ends with a barline. 
 A bar may be empty, but this is an error in the legacy renderer.
-Whitespace is required between the final cluster in a bar and the barline; and between any cluster and a field parentheses.
 
 Canonical barlines are `|` or `||` or `:|` or `|:`. The beginning and end of parts should use the double barline.
 Alternatively, the letter `i` may be used in place of the pipe character, such as `i ii i: :i`. This is a shortcut due to the inconvenience of typing a pipe on many keyboards. While any of these alternate forms will parse as valid barlines, they are not preferred, and so they will be replaced by the canonical versions when auto-formatter command.
+Additionally, the final barline on a line may be ommitted. This is so that an in-progress line will parse as valid, however the final barline is standard, and will be inserted by the auto-formatter.
 
 ## Clusters and Notes
 

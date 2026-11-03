@@ -8,78 +8,41 @@ import SwiftTreeSitter
 
 public struct BagFormatter {
     let source: String
-    let tree: BagTree
+    let pipeline: [(BagTree) throws -> [ModifiedRange]]
 
     public init(_ source: String) {
         self.source = source
-        tree = BagTree(source)
+        pipeline = [canonicalModifications,
+                    openBarModifications,
+                    spaceInsertModifications,
+                    alignmentModifications]
     }
 
-    public func modifiedRanges() throws -> [ModifiedRange] {
-        let treeMatches = try tree.executeQuery(BagTree.formattingQuery)
+    public func needsFormatting() throws -> Bool {
+        let tree = BagTree(source)
 
-        var alignmentBlocks: [Block] = []
-        var barlineRanges: [InlineRange] = []
-
-        for x in treeMatches {
-            var column = 0
-            var barCount = 0
-            var pickupAlreadyFound = false
-            let markers = x.captures.sorted { a, b in
-                a.node.pointRange.lowerBound.column < b.node.pointRange.lowerBound.column
-            }
-
-            var pendingLeadingField: InlineRange?
-            for m in markers {
-                let markerRange = m.node.inlineRange
-                switch m.nameComponents.first! {
-                case "leadingField":
-                    pendingLeadingField = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
-                case "leadingBarline":
-                    let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
-                    alignmentBlocks.append(Block(type: .leading, range: range, textProvider: tree, paddingHint: pendingLeadingField == nil ? .absoluteStart : .lastFlex))
-                    barlineRanges.append(markerRange)
-                    column = markerRange.upperBound
-                    pendingLeadingField = nil
-                case "normalBarline":
-                    if let range = pendingLeadingField {
-                        // This is a leading field, but without a leading barline
-                        alignmentBlocks.append(Block(type: .leading, range: range, textProvider: tree, paddingHint: .absoluteEnd))
-                        column = range.upperBound
-                        pendingLeadingField = nil
-                    }
-                    let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
-                    let pickup = barCount == 0 && !pickupAlreadyFound && isLikelyPickup(node: m.node)
-                    let type: Block.BlockType = pickup ? .pickup : .bar(index: barCount)
-                    alignmentBlocks.append(Block(type: type, range: range, textProvider: tree, paddingHint: pickup ? .absoluteStart : .lastFlex))
-                    barlineRanges.append(markerRange)
-                    if !pickup { barCount += 1 } else { pickupAlreadyFound = true }
-                    column = markerRange.upperBound
-                default: throw FormattingError.unexpectedCaptureType
-                }
-            }
+        for step in pipeline {
+            let modRanges = try step(tree)
+            if !modRanges.isEmpty { return true }
         }
 
-        let canonicalModifications = try barlineRanges.compactMap { range in
-            switch tree.text(for: range) {
-            case "i": try ModifiedRange(range: range, replacement: .canonicalBarline(type: .plain))
-            case "i:": try ModifiedRange(range: range, replacement: .canonicalBarline(type: .repeatStart))
-            case ":i": try ModifiedRange(range: range, replacement: .canonicalBarline(type: .repeatEnd))
-            case "ii", "|i", "i|": try ModifiedRange(range: range, replacement: .canonicalBarline(type: .double))
-            default: nil
-            }
-        }
-
-        let groups = FormatGroup.groups(from: alignmentBlocks)
-        let alignmentModifications = try groups.flatMap { try $0.modifications() }
-
-        return (alignmentModifications + canonicalModifications).sorted()
+        return false
     }
 
     public func formattedSource() throws -> String {
-        let ranges = try modifiedRanges()
+        var string = source
 
-        return try ranges.reversed().reduce(source) { formatted, mod -> String in
+        for step in pipeline {
+            let tree = BagTree(string)
+            let modRanges = try step(tree)
+            string = try applyModifications(modRanges, to: string, with: tree)
+        }
+
+        return string
+    }
+
+    private func applyModifications(_ ranges: [ModifiedRange], to string: String, with tree: BagTree) throws -> String {
+        try ranges.sorted().reversed().reduce(string) { formatted, mod -> String in
             let indexes = tree.stringIndexes(for: mod.range)
             if case .spaces = mod.replacement, !formatted[indexes].trimmingCharacters(in: .whitespaces).isEmpty { throw FormattingError.rangeIsNotWhitespace }
             return formatted.replacingCharacters(in: indexes, with: mod.newText)
@@ -87,10 +50,138 @@ public struct BagFormatter {
     }
 }
 
+func openBarModifications(tree: BagTree) throws -> [ModifiedRange] {
+    let treeMatches = try tree.executeQuery(BagTree.allBarsQuery)
+
+    var openBarMods: [ModifiedRange] = []
+
+    for x in treeMatches {
+        let markers = x.captures.sorted { a, b in
+            a.node.pointRange.lowerBound.column < b.node.pointRange.lowerBound.column
+        }
+
+        if markers.count == 1,
+            let first = markers.first,
+            let name = first.nameComponents.first, name == "bar" {
+            let markerRange = first.node.inlineRange
+            let range = InlineRange(line: markerRange.line, lowerBound: markerRange.upperBound, upperBound: markerRange.upperBound)
+            if let modRange = try ModifiedRange(range: range, replacement: .canonicalBarline(type: .plain)) {
+                openBarMods.append(modRange)
+            }
+        }
+    }
+    return openBarMods
+}
+
+func spaceInsertModifications(tree: BagTree) throws -> [ModifiedRange] {
+    let treeMatches = try tree.executeQuery(BagTree.allBarsQuery)
+
+    var spaceMods: [ModifiedRange] = []
+
+    for x in treeMatches {
+        let markers = x.captures.sorted { a, b in
+            a.node.pointRange.lowerBound.column < b.node.pointRange.lowerBound.column
+        }
+
+        if let barline = markers.first(where: { $0.nameComponents.first == "barline" }) {
+            let markerRange = barline.node.inlineRange
+            let previousChar = tree.text(for: InlineRange(line: markerRange.line, lowerBound: markerRange.lowerBound-1, upperBound: markerRange.lowerBound))
+            if previousChar != " " {
+                let range = InlineRange(line: markerRange.line, lowerBound: markerRange.lowerBound, upperBound: markerRange.lowerBound)
+                if let modRange = try ModifiedRange(range: range, replacement: .spaces(count: 1)) {
+                    spaceMods.append(modRange)
+                }
+            }
+        }
+    }
+    return spaceMods
+}
+
+
+func alignmentModifications(tree: BagTree) throws -> [ModifiedRange] {
+    let treeMatches = try tree.executeQuery(BagTree.alignmentQuery)
+
+    var alignmentBlocks: [Block] = []
+    var barlineRanges: [InlineRange] = []
+
+    for x in treeMatches {
+        var column = 0
+        var barCount = 0
+        var pickupAlreadyFound = false
+        let markers = x.captures.sorted { a, b in
+            a.node.pointRange.lowerBound.column < b.node.pointRange.lowerBound.column
+        }
+
+        var pendingLeadingField: InlineRange?
+        for m in markers {
+            let markerRange = m.node.inlineRange
+            switch m.nameComponents.first {
+            case "leadingField":
+                pendingLeadingField = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
+            case "leadingBarline":
+                let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
+                alignmentBlocks.append(Block(type: .leading, range: range, textProvider: tree, paddingHint: pendingLeadingField == nil ? .absoluteStart : .lastFlex))
+                barlineRanges.append(markerRange)
+                column = markerRange.upperBound
+                pendingLeadingField = nil
+            case "normalBarline":
+                if let range = pendingLeadingField {
+                    // This is a leading field, but without a leading barline
+                    alignmentBlocks.append(Block(type: .leading, range: range, textProvider: tree, paddingHint: .absoluteEnd))
+                    column = range.upperBound
+                    pendingLeadingField = nil
+                }
+                let range = InlineRange(line: markerRange.line, lowerBound: column, upperBound: markerRange.upperBound)
+                let pickup = barCount == 0 && !pickupAlreadyFound && isLikelyPickup(node: m.node)
+                let type: Block.BlockType = pickup ? .pickup : .bar(index: barCount)
+                alignmentBlocks.append(Block(type: type, range: range, textProvider: tree, paddingHint: pickup ? .absoluteStart : .lastFlex))
+                barlineRanges.append(markerRange)
+                if !pickup { barCount += 1 } else { pickupAlreadyFound = true }
+                column = markerRange.upperBound
+            default: throw FormattingError.unexpectedCaptureType
+            }
+        }
+    }
+
+    let groups = FormatGroup.groups(from: alignmentBlocks)
+    let alignmentModifications = try groups.flatMap { try $0.modifications() }
+
+    return alignmentModifications
+}
+
+func canonicalModifications(tree: BagTree) throws -> [ModifiedRange] {
+    let treeMatches = try tree.executeQuery(BagTree.alignmentQuery)
+
+    var canonicalModifications: [ModifiedRange] = []
+
+    for x in treeMatches {
+        for m in x.captures {
+            let range = m.node.inlineRange
+            switch m.nameComponents.first {
+            case "leadingBarline", "normalBarline":
+                if let modification = switch tree.text(for: range) {
+                case "i": try ModifiedRange(range: range, replacement: .canonicalBarline(type: .plain))
+                case "i:": try ModifiedRange(range: range, replacement: .canonicalBarline(type: .repeatStart))
+                case ":i": try ModifiedRange(range: range, replacement: .canonicalBarline(type: .repeatEnd))
+                case "ii", "|i", "i|": try ModifiedRange(range: range, replacement: .canonicalBarline(type: .double))
+                default: nil
+                } {
+                    canonicalModifications.append(modification)
+                }
+            default:
+                break
+            }
+        }
+    }
+
+    return canonicalModifications
+}
+
+
 private func isLikelyPickup(node barlineNode: Node) -> Bool {
     // TODO: if it fully compiles, add hint for "voices with pickups"
-    let barNode = barlineNode.parent!
-    let voiceNode = barNode.parent!
+    guard let barNode = barlineNode.parent else { return false }
+    guard let voiceNode = barNode.parent else { return false }
     let clusters = (0 ..< barNode.childCount).count { barNode.child(at: $0)?.nodeType == NodeType.cluster.rawValue }
     let bars = (0 ..< voiceNode.childCount).count { voiceNode.child(at: $0)?.nodeType == NodeType.bar.rawValue }
     return clusters <= 1 && bars > 4
@@ -131,7 +222,7 @@ struct Block {
         let text = textProvider.text(for: range)
         self.text = text
 
-        let spaces = try! text.ranges(of: Regex(" +"))
+        let spaces = (try? text.ranges(of: Regex(" +"))) ?? []
         flexibleRanges = spaces
             .map { $0.lowerBound.utf16Offset(in: text) ..< $0.upperBound.utf16Offset(in: text) }
             .map { range.rangeFor(relativeRange: $0) }
@@ -312,6 +403,7 @@ public struct ModifiedRange: CustomStringConvertible, Comparable {
     enum Replacement {
         case spaces(count: Int)
         case canonicalBarline(type: Barline)
+        case insertBarline
     }
 
     let range: InlineRange
@@ -328,7 +420,7 @@ public struct ModifiedRange: CustomStringConvertible, Comparable {
     var newText: String {
         switch replacement {
         case let .spaces(count): String(Array(repeating: " ", count: count))
-        case .canonicalBarline(.plain): "|"
+        case .canonicalBarline(.plain), .insertBarline: "|"
         case .canonicalBarline(.repeatStart): "|:"
         case .canonicalBarline(.repeatEnd): ":|"
         case .canonicalBarline(.partStart),
@@ -340,6 +432,7 @@ public struct ModifiedRange: CustomStringConvertible, Comparable {
     var diff: Int {
         switch replacement {
         case let .spaces(count): count - Int(range.upperBound - range.lowerBound)
+        case .insertBarline: 1 - Int(range.upperBound - range.lowerBound)
         case .canonicalBarline: 0
         }
     }
@@ -363,7 +456,6 @@ public struct ModifiedRange: CustomStringConvertible, Comparable {
     }
 }
 
-// TODO: add spaces near barlines
 // TODO: remove spaces inside and touching field parens; leading label colons
 // TODO: consider and remove trailing whitespace, if any after the final barline
 // TODO: adjust newlines to be header, blank, body, blank, blank, header, blank, body, (trailing newline)

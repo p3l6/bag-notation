@@ -38,7 +38,7 @@ xa |
     (voice
       (bar
         (cluster (note (embellishment) (pitch))) (barline))
-      (tail_comment))
+      (comment))
     (voice
       (bar
         (cluster (note (embellishment) (pitch))) (barline)))))

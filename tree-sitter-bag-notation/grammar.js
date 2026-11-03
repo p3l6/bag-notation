@@ -1,19 +1,22 @@
 module.exports = grammar({
   name: 'BagNotation',
 
-  extras: $ => [ /[ \t]+/ ],
+  // no whitespace in extras - control specifically to enable cluster grouping
+  extras: $ => [],
 
   rules: {
     //// File structure
     file: $ => seq(optional(repeat($._blank_line)), repeat1($.tune)),
     tune: $ => seq($.header, optional($._body)),
     _body: $ => repeat1(choice($._blank_line, $.voice)),
-    voice: $ => seq(
-                 optional($.field),
-                 optional($.barline),
+    voice: $ => prec(2, seq(
+                 optional( $._whitespace),
+                 optional(seq($.field, optional($._whitespace))),
+                 optional(seq($.barline,  optional($._whitespace))),
                  repeat1($.bar),
-                 optional($.tail_comment),
-                 "\n"),
+                 optional($._open_bar),
+                 optional($.comment),
+                 "\n")),
 
     //// Header and fields
     header: $ => seq("---\n", repeat(seq($._header_field, "\n")), "---\n"),
@@ -26,11 +29,12 @@ module.exports = grammar({
 
     //// Bars
     bar: $ => seq(repeat($._bar_content), prec(-1, $.barline)),
+    _open_bar: $ => alias(prec(-1, repeat1($._bar_content)), $.bar),
     barline: $ => /:?[|i]+:?/,
-    _bar_content: $ => choice(prec(-1, $.field), $.cluster),
+    _bar_content: $ => choice(prec(-1, $.field), $.cluster, $._whitespace),
 
     //// Notes and clusters
-    cluster: $ => seq(repeat1($.note), /[ \t]/), // TODO: `note|` doesn't parse as valid. try to remove this hard whitespace for that case.
+    cluster: $ =>seq(prec(-1, repeat1($.note))),
     note: $ => seq(
                  optional($.shorthand_label),
                  optional($.embellishment),
@@ -43,8 +47,8 @@ module.exports = grammar({
     connector: $ => /[-_~]/,
 
     //// Other
-    _blank_line: $ => choice("\n", $.comment),
-    comment: $ => seq("#", /[^\n]*/, "\n"),
-    tail_comment: $ => seq("#", /[^\n]*/)
+    _whitespace: $ => /[ \t]+/,
+    _blank_line: $ => seq(optional($.comment), "\n"),
+    comment: $ => prec(1, seq(optional($._whitespace), "#", /[^\n]*/))
   }
 });

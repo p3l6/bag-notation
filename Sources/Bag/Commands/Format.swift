@@ -26,8 +26,7 @@ struct Format: AsyncParsableCommand {
 
         let formatter = BagFormatter(input)
         if dryRun {
-            let modifications = try formatter.modifiedRanges()
-            guard modifications.isEmpty else {
+            guard try formatter.needsFormatting() else {
                 throw ExitCode(1)
             }
             return

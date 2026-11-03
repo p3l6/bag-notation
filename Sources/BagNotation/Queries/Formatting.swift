@@ -8,7 +8,7 @@
 // Keep in sync with tree-sitter-bag-notation/queries/formatting.scm
 
 extension BagTree {
-    public static let formattingQuery = """
+    public static let alignmentQuery = """
         (voice
           .
           (field)? @leadingField
@@ -19,5 +19,11 @@ extension BagTree {
             (barline) @normalBarline
           )+
         )
+        """
+
+    public static let allBarsQuery = """
+        (bar
+          (barline)? @barline 
+        ) @bar
         """
 }

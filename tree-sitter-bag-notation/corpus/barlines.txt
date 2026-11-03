@@ -40,3 +40,55 @@ Alternate Barlines
       (bar (cluster (note (pitch))) (barline))
       (bar (cluster (note (pitch))) (barline))
       (bar (cluster (note (pitch))) (barline)))))
+
+
+=====>>
+Optional Ending Barlines
+=====>>
+
+---
+---
+
+|| a | b
+   c | d e
+   f ||
+
+----->>
+
+(file (tune
+  (header)
+    (voice
+      (barline)
+      (bar (cluster (note (pitch))) (barline))
+      (bar (cluster (note (pitch)))))
+    (voice
+      (bar (cluster (note (pitch))) (barline))
+      (bar (cluster (note (pitch))) (cluster (note (pitch)))))
+    (voice
+      (bar (cluster (note (pitch))) (barline)))))
+
+
+=====>>
+Leading Barlines
+=====>>
+
+---
+---
+
+|| a |
+| c |
+|: f ||
+
+----->>
+
+(file (tune
+  (header)
+    (voice
+      (barline)
+      (bar (cluster (note (pitch))) (barline)))
+    (voice
+      (barline)
+      (bar (cluster (note (pitch))) (barline)))
+    (voice
+      (barline)
+      (bar (cluster (note (pitch))) (barline)))))
