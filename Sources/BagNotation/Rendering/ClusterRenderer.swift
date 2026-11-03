@@ -134,9 +134,11 @@ private struct Beam {
     init(notes: [Note], anchors anchorSet: AnchorSet) throws {
         let anchors = try notes.map { try anchorSet.anchors(for: $0) }
         if anchors.count > 1 {
-            // :TODO: Have a maximum slope. going from a to high a is pretty steep
-            let m = (anchors.last!.stemBottom - anchors.first!.stemBottom) /
+            // Steeper than this and stacked beams get squished
+            let maxSlope = 0.75
+            let trueSlope = (anchors.last!.stemBottom - anchors.first!.stemBottom) /
                 (anchors.last!.stemX - anchors.first!.stemX)
+            let m = max(min(trueSlope, maxSlope), -maxSlope)
             let intercepts = anchors.map { $0.stemBottom - $0.stemX * m }
             slope = Slope(m: m, c: intercepts.min { abs($0) < abs($1) }!)
         } else {
