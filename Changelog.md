@@ -9,6 +9,9 @@ Types of changes: New, Improved, Fixed, Removed.
 
 ## [Unreleased]
 
+
+## [1.2.0] - 2 Nov 2026
+
 - Improved: Imbalanced notes and bars stretch a bit more naturally. 
 - Improved: Barlines at the end of the line are now optional (they will still be drawn - a plain barline is implied). 
 - Improved: More flexible whitespace handling, things such as `|ab|`, without spaces are now valid. 
