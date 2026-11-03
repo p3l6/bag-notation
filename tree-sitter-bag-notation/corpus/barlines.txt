@@ -51,6 +51,7 @@ Optional Ending Barlines
 
 || a | b
    c | d e
+   g
    f ||
 
 ----->>
@@ -64,6 +65,8 @@ Optional Ending Barlines
     (voice
       (bar (cluster (note (pitch))) (barline))
       (bar (cluster (note (pitch))) (cluster (note (pitch)))))
+    (voice
+      (bar (cluster (note (pitch)))))
     (voice
       (bar (cluster (note (pitch))) (barline)))))
 

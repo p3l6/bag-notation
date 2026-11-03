@@ -10,6 +10,10 @@ Types of changes: New, Improved, Fixed, Removed.
 ## [Unreleased]
 
 
+## [1.2.2] - 3 Nov 2026
+
+- Fixed: Final barline is optional even on the first bar 
+
 ## [1.2.1] - 2 Nov 2026
 
 - Fixed: Parsing of whitespace-only non-empty lines

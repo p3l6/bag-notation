@@ -14,8 +14,9 @@ module.exports = grammar({
                  optional( $._whitespace),
                  optional(seq($.field, optional($._whitespace))),
                  optional(seq($.barline,  optional($._whitespace))),
-                 repeat1($.bar),
-                 optional($._open_bar),
+                 choice(
+                   seq(repeat1($.bar), optional($._open_bar)),
+                   $._open_bar),
                  optional($.comment),
                  "\n")),
 
@@ -49,7 +50,7 @@ module.exports = grammar({
 
     //// Other
     _whitespace: $ => /[ \t]+/,
-    _blank_line: $ => seq(optional($._whitespace), optional($.comment), "\n"),
+    _blank_line: $ => prec(2,seq(optional($._whitespace), optional($.comment), "\n")),
     comment: $ => prec(1, seq(optional($._whitespace), "#", /[^\n]*/))
   }
 });
