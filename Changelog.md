@@ -10,6 +10,10 @@ Types of changes: New, Improved, Fixed, Removed.
 ## [Unreleased]
 
 
+## [1.2.1] - 2 Nov 2026
+
+- Fixed: Parsing of whitespace-only non-empty lines
+
 ## [1.2.0] - 2 Nov 2026
 
 - Improved: Imbalanced notes and bars stretch a bit more naturally. 

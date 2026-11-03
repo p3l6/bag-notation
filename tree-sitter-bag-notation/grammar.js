@@ -3,6 +3,7 @@ module.exports = grammar({
 
   // no whitespace in extras - control specifically to enable cluster grouping
   extras: $ => [],
+  conflicts: $ => [[$.comment]],
 
   rules: {
     //// File structure
@@ -48,7 +49,7 @@ module.exports = grammar({
 
     //// Other
     _whitespace: $ => /[ \t]+/,
-    _blank_line: $ => seq(optional($.comment), "\n"),
+    _blank_line: $ => seq(optional($._whitespace), optional($.comment), "\n"),
     comment: $ => prec(1, seq(optional($._whitespace), "#", /[^\n]*/))
   }
 });
