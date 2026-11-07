@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "TreeSitterBagNotation", targets: ["TreeSitterBagNotation"])
     ],
     dependencies: [
+        // :TODO: This has moved to /tree-sitter/swift-tree-sitter and v10 is available
         .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", "0.9.0" ..< "0.10.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0")
     ],

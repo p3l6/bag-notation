@@ -51,7 +51,9 @@ struct LineStructure {
     }
 
     @Test
-    func missingTrailingBarline() throws {
-        #expect(throws: LocatedModelParseError.self) { try makeLineVoice(from: "| abc def | abc def | abc def") }
+    func trailingBarline() throws {
+        let line = try makeLineVoice(from: "| abc def | abc def | abc def")
+        #expect(line.bars.count == 3)
+        #expect(line.bars.last!.trailingBarline == .plain)
     }
 }
