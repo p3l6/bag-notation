@@ -10,6 +10,11 @@ Types of changes: New, Improved, Fixed, Removed.
 ## [Unreleased]
 
 
+## [1.2.3] - 7 Nov 2026
+
+- Fixed: Model objects and properties now have public visibility
+- Improved: Some model objects (via context) are correlated to their original source positions
+
 ## [1.2.2] - 3 Nov 2026
 
 - Fixed: Final barline is optional even on the first bar 

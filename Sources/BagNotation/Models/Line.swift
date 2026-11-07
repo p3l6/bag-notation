@@ -5,17 +5,18 @@
 
 public struct Line {
     public struct Context {
-        let tune: Tune.Context
-        var identifier: String { "\(tune.identifier)l\(lineNumber)" }
+        public let tune: Tune.Context
+        public var identifier: String { "\(tune.identifier)l\(lineNumber)" }
+        public let sourceRange: SourceRange
 
         /// First line is 1
-        let lineNumber: Int
-        let voiceCount: Int
+        public let lineNumber: Int
+        public let voiceCount: Int
     }
 
-    let context: Context
-    let voices: [Voice]
-    var melody: Voice { voices[0] }
+    public let context: Context
+    public let voices: [Voice]
+    public var melody: Voice { voices[0] }
 }
 
 // TODO: bubble the leading barline up to the line
@@ -24,16 +25,17 @@ public struct Line {
 
 public struct Voice {
     public struct Context {
-        let line: Line.Context
-        var identifier: String { "\(line.identifier)v\(voiceNumber)" }
+        public let line: Line.Context
+        public var identifier: String { "\(line.identifier)v\(voiceNumber)" }
+        public let sourceRange: SourceRange
 
         /// Melody is voice 0
-        let voiceNumber: Int
-        let barCount: Int
+        public let voiceNumber: Int
+        public let barCount: Int
     }
 
-    let context: Voice.Context
-    let isHarmony: Bool
-    let bars: [Bar]
-    let leadingBarline: Barline?
+    public let context: Voice.Context
+    public let isHarmony: Bool
+    public let bars: [Bar]
+    public let leadingBarline: Barline?
 }

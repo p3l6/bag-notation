@@ -5,25 +5,26 @@
 
 public struct Note {
     public struct Context {
-        let cluster: Cluster.Context
-        var identifier: String { "\(cluster.identifier)n\(noteNumber)" }
+        public let cluster: Cluster.Context
+        public var identifier: String { "\(cluster.identifier)n\(noteNumber)" }
+        public let sourceRange: SourceRange
 
         /// First note is 1
-        let noteNumber: Int
+        public let noteNumber: Int
 
-        let tupletSize: Int
+        public let tupletSize: Int
     }
 
-    let context: Context
-    let pitch: Pitch
-    let embellishment: Embellishment?
-    let duration: Duration
-    let annotation: String?
-    let fermata: Bool
-    let accidental: Accidental?
-    let grouping: NoteGrouping
+    public let context: Context
+    public let pitch: Pitch
+    public let embellishment: Embellishment?
+    public let duration: Duration
+    public let annotation: String?
+    public let fermata: Bool
+    public let accidental: Accidental?
+    public let grouping: NoteGrouping
     /// A second pitch to display with the primary, as a chord
-    let chord: Pitch?
+    public let chord: Pitch?
 }
 
 public enum Pitch: Comparable {

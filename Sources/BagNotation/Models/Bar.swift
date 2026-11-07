@@ -5,25 +5,26 @@
 
 public struct Bar {
     public struct Context {
-        let voice: Voice.Context
-        var identifier: String { "\(voice.identifier)b\(barNumber)" }
+        public let voice: Voice.Context
+        public var identifier: String { "\(voice.identifier)b\(barNumber)" }
+        public let sourceRange: SourceRange
 
         /// First bar is 1
-        var barNumber: Int
-        let clusterCount: Int
+        public var barNumber: Int
+        public let clusterCount: Int
         /// Time signatures can only change on bar boundaries
-        let timeSignature: TimeSignature
+        public let timeSignature: TimeSignature
         /// True if the time signature has just changed for this bar, false if it continues from previous
-        let timeSignatureChanged: Bool
+        public let timeSignatureChanged: Bool
 
-        var isFirstBarOfTune: Bool {
+        public var isFirstBarOfTune: Bool {
             voice.line.lineNumber == 1 && barNumber == 1
         }
     }
 
-    let context: Context
+    public let context: Context
 
-    enum BarContent {
+    public enum BarContent {
         case cluster(cluster: Cluster)
         case rest(duration: Duration)
         case barRest
@@ -32,8 +33,8 @@ public struct Bar {
         case barSpacer
     }
 
-    let contents: [BarContent]
-    let trailingBarline: Barline
+    public let contents: [BarContent]
+    public let trailingBarline: Barline
 
     init(context: Context, contents: [BarContent], trailingBarline: Barline) {
         self.context = context
@@ -42,7 +43,7 @@ public struct Bar {
     }
 
     /// A bar is a pickup if it is missing at least one full beat
-    var isPickup: Bool {
+    public var isPickup: Bool {
         // Piob is too flexible with timing, and finds more false positives than correct.
         guard context.barNumber == 1, context.voice.line.tune.style != .piob else { return false }
 

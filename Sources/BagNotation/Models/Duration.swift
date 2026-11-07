@@ -125,7 +125,7 @@ extension String {
 
 // MARK: Summation and cumulative comparisons
 
-struct DurationSummation {
+public struct DurationSummation {
     /// Uses a private fixed point counter of 128 units per wholeNote
     private(set) var totalUnits = 0
 

@@ -5,15 +5,15 @@
 
 public struct Doc {
     public struct Context {
-        var identifier: String { "doc" }
+        public var identifier: String { "doc" }
 
-        let tuneCount: Int
+        public let tuneCount: Int
     }
 
-    let context: Context
-    let tunes: [Tune]
+    public let context: Context
+    public let tunes: [Tune]
 
-    var revision: String? {
+    public var revision: String? {
         tunes.compactMap(\.header.revision).first
     }
 }

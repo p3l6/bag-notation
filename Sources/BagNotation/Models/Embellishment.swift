@@ -6,11 +6,11 @@
 import Foundation
 
 public struct Embellishment {
-    let context: Note.Context
+    public let context: Note.Context
 
-    let type: EmbellishmentType
-    let playedOn: Pitch
-    let pitches: [Pitch]
+    public let type: EmbellishmentType
+    public let playedOn: Pitch
+    public let pitches: [Pitch]
 
     init(type: EmbellishmentType, from: Pitch, on pitch: Pitch, noteContext: Note.Context) throws {
         self.type = type
@@ -33,7 +33,7 @@ func parseLiteral(_ str: String) -> [Pitch]? {
     }
 }
 
-enum EmbellishmentType {
+public enum EmbellishmentType {
     case literal(pitches: [Pitch])
 
     case singling

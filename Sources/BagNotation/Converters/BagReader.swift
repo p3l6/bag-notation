@@ -87,7 +87,7 @@ private final class DocModeler: Modeler {
         var flow = head
 
         for (idx, tm) in tuneModelers.enumerated() {
-            let tuneContext = Tune.Context(style: tm.header.style, tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
+            let tuneContext = Tune.Context(style: tm.header.style, sourceRange: tm.node.sourceRange, tuneNumber: idx + 1, lineCount: tm.voiceModelersByLine.count)
             let headerFlow = FlowContext(timeSignature: tm.header.timeSignature,
                                          noteLength: tm.header.noteLength,
                                          tempo: tm.header.tempo)
@@ -144,10 +144,15 @@ private final class TuneModeler: Modeler {
         // TODO: split flow per voice
 
         for (lineIdx, lineVoices) in voiceModelersByLine.enumerated() {
-            let lineBody = Line.Context(tune: body, lineNumber: lineIdx + 1, voiceCount: lineVoices.count)
+            let lineSourceRange = SourceRange(
+                // fallback to a zero-length range at the beginning of tune
+                from: lineVoices.first?.node.sourceRange.utf16Offsets.lowerBound ?? node.sourceRange.utf16Offsets.lowerBound,
+                to: lineVoices.last?.node.sourceRange.utf16Offsets.upperBound ?? node.sourceRange.utf16Offsets.lowerBound)
+
+            let lineBody = Line.Context(tune: body, sourceRange: lineSourceRange, lineNumber: lineIdx + 1, voiceCount: lineVoices.count)
             let lineHead = flow
             for (voiceIdx, voiceModeler) in lineVoices.enumerated() {
-                let voiceBody = Voice.Context(line: lineBody, voiceNumber: voiceIdx, barCount: voiceModeler.barModelers.count)
+                let voiceBody = Voice.Context(line: lineBody, sourceRange: voiceModeler.node.sourceRange, voiceNumber: voiceIdx, barCount: voiceModeler.barModelers.count)
                 flow = try voiceModeler.provideContext(head: flow, body: voiceBody)
             }
             lineContexts.append((head: lineHead, body: lineBody, tail: flow))
@@ -271,7 +276,7 @@ private final class VoiceModeler: Modeler {
         }
 
         for (idx, barModeler) in barModelers.enumerated() {
-            let barBody = Bar.Context(voice: body, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count, timeSignature: flow.timeSignature, timeSignatureChanged: false)
+            let barBody = Bar.Context(voice: body, sourceRange: barModeler.node.sourceRange, barNumber: idx + 1, clusterCount: barModeler.clusterModelers.count, timeSignature: flow.timeSignature, timeSignatureChanged: false)
             flow = try barModeler.provideContext(head: flow, body: barBody)
         }
 
@@ -363,6 +368,7 @@ private final class BarModeler: Modeler {
                 // A time signature field applies to the whole bar
                 if field.label == .time {
                     barContext = Bar.Context(voice: barContext.voice,
+                                             sourceRange: barContext.sourceRange,
                                              barNumber: barContext.barNumber,
                                              clusterCount: barContext.clusterCount,
                                              timeSignature: flow.timeSignature,
@@ -374,6 +380,7 @@ private final class BarModeler: Modeler {
                 number += 1
                 let previousTempo = previousCluster?.context?.tail.tempo ?? head.tempo
                 let clusterBody = Cluster.Context(bar: barContext,
+                                                  sourceRange: modeler.node.sourceRange,
                                                   clusterNumber: number,
                                                   noteLength: flow.noteLength,
                                                   tempo: flow.tempo,
@@ -438,7 +445,7 @@ private final class ClusterModeler: Modeler {
                 tupletSize = endIndex - index + 1
             }
 
-            let noteBody = Note.Context(cluster: body, noteNumber: index + 1, tupletSize: tupletSize)
+            let noteBody = Note.Context(cluster: body, sourceRange: nm.node.sourceRange, noteNumber: index + 1, tupletSize: tupletSize)
             flow = try nm.provideContext(head: flow, body: noteBody)
 
             if !nm.continuesTuplet && tupletSize > 0 {

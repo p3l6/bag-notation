@@ -3,6 +3,7 @@
 //  Bag Notation
 //
 
+import Foundation
 import SwiftTreeSitter
 import TreeSitterBagNotation
 
@@ -99,6 +100,23 @@ public struct InlineRange: Sendable {
     }
 }
 
+/// For exposing the underlying ranges inside Model contexts
+public struct SourceRange: Hashable, Sendable {
+    public let utf16Offsets: Range<Int>
+
+    public init(utf16Offsets: Range<Int>) {
+        self.utf16Offsets = utf16Offsets
+    }
+
+    public init(from start: Int, to end: Int) {
+        self.utf16Offsets = start ..< end
+    }
+
+    public func contains(utf16Offset: Int) -> Bool {
+        utf16Offsets.contains(utf16Offset)
+    }
+}
+
 struct NodeChildren {
     let all: [Node]
     private let byType: [NodeType: [Node]]
@@ -184,6 +202,10 @@ extension Node {
         InlineRange(line: Int(pointRange.lowerBound.row),
                     lowerBound: Int(pointRange.lowerBound.column) / 2,
                     upperBound: Int(pointRange.upperBound.column) / 2)
+    }
+
+    var sourceRange: SourceRange {
+        SourceRange(utf16Offsets: range.location..<NSMaxRange(range))
     }
 
     func trimmedText(from source: NodeSourceTextProvider) -> String { source.text(of: self).trimmingCharacters(in: .whitespacesAndNewlines) }

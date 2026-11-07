@@ -5,15 +5,16 @@
 
 public struct Tune {
     public struct Context {
-        var identifier: String { "t\(tuneNumber)" }
-        let style: TuneStyle
+        public var identifier: String { "t\(tuneNumber)" }
+        public let style: TuneStyle
+        public let sourceRange: SourceRange
 
         /// First tune is 1
-        let tuneNumber: Int
-        let lineCount: Int
+        public let tuneNumber: Int
+        public let lineCount: Int
     }
 
-    let context: Context
-    let header: Header
-    let lines: [Line]
+    public let context: Context
+    public let header: Header
+    public let lines: [Line]
 }

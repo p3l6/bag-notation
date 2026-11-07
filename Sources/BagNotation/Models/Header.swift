@@ -4,19 +4,19 @@
 //
 
 public struct Header {
-    let title: String
-    let style: TuneStyle
-    let composer: String
-    let arranger: String?
-    let noteLength: Duration
-    let timeSignature: TimeSignature
-    let tempo: Int?
-    let revision: String?
+    public let title: String
+    public let style: TuneStyle
+    public let composer: String
+    public let arranger: String?
+    public let noteLength: Duration
+    public let timeSignature: TimeSignature
+    public let tempo: Int?
+    public let revision: String?
 
     // Hints for rendering to a page
 
-    let forceNewPage: Bool
-    let denseSpacing: Bool
+    public let forceNewPage: Bool
+    public let denseSpacing: Bool
 }
 
 public enum TuneStyle: Equatable {

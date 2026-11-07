@@ -6,10 +6,10 @@
 import Foundation
 
 public struct Field {
-    let label: FieldLabel
+    public let label: FieldLabel
     private let _value: String?
 
-    var value: String {
+    public var value: String {
         guard let _value else {
             // Don't want to have to mark this property as throws,
             // since that would complicate other code.

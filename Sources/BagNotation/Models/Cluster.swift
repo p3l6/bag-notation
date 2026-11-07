@@ -5,33 +5,34 @@
 
 public struct Cluster {
     public struct Context {
-        let bar: Bar.Context
-        var identifier: String { "\(bar.identifier)c\(clusterNumber)" }
+        public let bar: Bar.Context
+        public var identifier: String { "\(bar.identifier)c\(clusterNumber)" }
+        public let sourceRange: SourceRange
 
         /// First cluster is 1
-        let clusterNumber: Int
+        public let clusterNumber: Int
 
-        let noteLength: Duration
-        let tempo: Int?
+        public let noteLength: Duration
+        public let tempo: Int?
         /// True if the tempo has just changed for this cluster, false if it continues from previous
-        let tempoChanged: Bool
+        public let tempoChanged: Bool
 
-        var isFinalClusterOfVoice: Bool {
+        public var isFinalClusterOfVoice: Bool {
             bar.barNumber == bar.voice.barCount &&
                 clusterNumber == bar.clusterCount
         }
     }
 
-    let context: Context
-    let notes: [Note]
-    let variation: Variation
+    public let context: Context
+    public let notes: [Note]
+    public let variation: Variation
 
-    var totalDuration: DurationSummation {
+    public var totalDuration: DurationSummation {
         DurationSummation(notes.map(\.duration))
     }
 }
 
-enum Variation: Equatable {
+public enum Variation: Equatable {
     /// No variation is active
     case none
     /// Applies to the first cluster in a chain, or when the label changes (ie from "1" to "2")

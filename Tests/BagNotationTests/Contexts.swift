@@ -114,6 +114,13 @@ struct Contexts {
         #expect(doc.tunes[0].lines[0].voices[0].bars[2].clusters[1].variation == .end)
         #expect(doc.tunes[0].lines[1].voices[0].bars[0].clusters[0].variation == .none)
     }
+
+    @Test
+    func sourceRanges() throws {
+        let doc = try makeFile(from: source)
+        #expect(doc.tunes[0].lines[1].voices[0].context.sourceRange == .init(utf16Offsets: 88..<134))
+        #expect(doc.tunes[1].lines[0].voices[1].context.sourceRange == .init(utf16Offsets: 277..<314))
+    }
 }
 
 private extension Bar {
